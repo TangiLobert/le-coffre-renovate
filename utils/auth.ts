@@ -1,9 +1,17 @@
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/plugins";
-import Database from "better-sqlite3";
+import { db } from "../utils/database";
+import * as schema from '../server/database/schema';
 
 export const auth = betterAuth({
-  database: new Database("./database.sqlite"),
+  database: drizzleAdapter(db, {
+    provider: "sqlite", // or "pg" or "mysql"
+    schema: {
+      ...schema,
+      // user: schema.users,
+    },
+  }),
   baseURL: "http://localhost:3000",
   emailAndPassword: {
     enabled: true,

@@ -7,15 +7,16 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@nuxt/image": "^1.10.0",
     "@nuxt/ui": "^3.0.2",
-    "@types/better-sqlite3": "^7.6.13",
     "better-auth": "^1.2.6",
     "better-sqlite3": "^11.9.1",
-    "kysely": "^0.28.2",
+    "drizzle-orm": "^0.43.1",
     "nuxt": "^3.16.2",
     "shamir-secret-sharing": "^0.0.4",
     "sharp": "^0.34.1",
@@ -24,6 +25,8 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.35",
+    "@types/better-sqlite3": "^7.6.13",
+    "drizzle-kit": "^0.31.0",
     "node-gyp": "^11.2.0"
   }
 }
