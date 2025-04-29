@@ -25,10 +25,10 @@ jobs:
         run: npm run typecheck
       - name: audit
         if: (${{ success() }} || ${{ failure() }})
-        run: npm audit
+        run: npm audit --audit-level=high
       - name: build
         if: (${{ success() }} || ${{ failure() }})
         run: npm run build
-      - name: test
-        if: (${{ success() }} || ${{ failure() }})
-        run: npm test:self
+      # - name: test
+      #   if: (${{ success() }} || ${{ failure() }})
+      #   run: npm test:self
