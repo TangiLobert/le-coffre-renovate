@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { authClient } from "~/utils/auth-client";
-
-definePageMeta({
-  layout: 'centered'
-})
+import * as z from 'zod'
+import { authClient } from '~/utils/auth-client'
 
 const emit = defineEmits(['admin-created'])
+
+definePageMeta({
+  layout: 'centered',
+})
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
   name: z.string().min(2, 'Name is required'),
   password: z.string().min(8, 'Must be at least 8 characters'),
   passwordConfirmation: z.string().min(8, 'Must be at least 8 characters'),
-}).refine((data) => data.password === data.passwordConfirmation, {
+}).refine(data => data.password === data.passwordConfirmation, {
   message: 'Passwords do not match',
   path: ['passwordConfirmation'],
-});
+})
 
 type Schema = z.output<typeof schema>
 
@@ -25,7 +25,7 @@ const state = reactive<Schema>({
   email: '',
   name: 'admin',
   password: '',
-  passwordConfirmation: ''
+  passwordConfirmation: '',
 })
 
 const toast = useToast()
@@ -46,10 +46,10 @@ async function createAdminAccount() {
     const { data, error } = await authClient.signUp.email({
       email,
       password,
-      name
+      name,
     }, {
       onRequest: (ctx) => {
-        //show loading
+        // show loading
       },
       onSuccess: (ctx) => {
         console.log('Admin account created')
@@ -60,7 +60,7 @@ async function createAdminAccount() {
         console.error('Unexpected error:', error)
         toast.add({ title: 'Error', description: 'An unexpected error occurred. Please try again.', color: 'error' })
       },
-    });
+    })
   }
 }
 </script>
@@ -68,7 +68,9 @@ async function createAdminAccount() {
 <template>
   <div class="max-w-2xl w-full mx-auto space-y-6">
     <div class="space-y-4">
-      <h1 class="text-center text-3xl font-bold">Create your admin account</h1>
+      <h1 class="text-center text-3xl font-bold">
+        Create your admin account
+      </h1>
       <NuxtImg src="/img/intro/admin.png" alt="intro info" class="h-48 mx-auto" />
       <p>
         Now that the master key has been generated, we will need to create an admin account.
@@ -102,14 +104,13 @@ async function createAdminAccount() {
       </div>
 
       <StrengthIndicator v-model="state.password" />
-
     </UForm>
 
     <div class="flex justify-between items-center">
       <UButton variant="outline" leading-icon="i-lucide-arrow-left" :disabled="true">
         Previous
       </UButton>
-      <UButton trailing-icon="i-lucide-arrow-right" @click="createAdminAccount" :disabled="!isFormValid">
+      <UButton trailing-icon="i-lucide-arrow-right" :disabled="!isFormValid" @click="createAdminAccount">
         Next
       </UButton>
     </div>

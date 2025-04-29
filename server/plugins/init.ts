@@ -1,11 +1,11 @@
 // Init phase.
 
-import { applyMigrationsIfNeeded } from "~/server/utils/migration";
+import { applyMigrationsIfNeeded } from '~/server/utils/migration'
 
 export default defineNitroPlugin(async (nitroApp) => {
-  console.log("Initializing...")
+  console.log('Initializing...')
 
-  await applyMigrationsIfNeeded();
+  await applyMigrationsIfNeeded()
 
   console.log('Initialization completed.')
 })
