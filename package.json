@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "typecheck": "tsc",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
@@ -24,6 +25,7 @@
     "nuxt": "^3.16.2",
     "shamir-secret-sharing": "^0.0.4",
     "sharp": "^0.34.1",
+    "typecheck": "^0.1.2",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
