@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import { split } from 'shamir-secret-sharing'
 import { z } from 'zod'
 import { encryptKey } from '~/server/utils/encryption/encrypt-key'

@@ -27,7 +27,10 @@ export default antfu({
       'node/no-unsupported-features/node-builtins': [
         'error',
         {
-          ignores: ['crypto', 'localStorage', 'navigator'], // Add exceptions here
+          ignores: [
+            'navigator', // Not supported by node
+            'localStorage', // Experimental
+          ],
         },
       ],
     },
