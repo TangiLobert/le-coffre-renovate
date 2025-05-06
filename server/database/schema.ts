@@ -76,3 +76,9 @@ export const passwordMetadata = sqliteTable('password_metadata', {
   url: text('url').notNull(),
   description: text('description').notNull(),
 })
+
+export const globalConfig = sqliteTable('global_config', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  value: text('', { mode: 'json' }).notNull(),
+})
