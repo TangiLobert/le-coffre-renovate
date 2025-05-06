@@ -1,14 +1,4 @@
-import { eq } from 'drizzle-orm'
-import { useDatabase } from '~/composables/useDatabase'
-import { globalConfig } from './schema'
-
-async function isSetupCompleted() {
-  const existing = useDatabase()
-    .select()
-    .from(globalConfig)
-    .where(eq(globalConfig.name, 'setup_completed'))
-  return (await existing).length > 0
-}
+import { insertInitialData, isSetupCompleted } from './configuration'
 
 export async function insertInitialDataIfNeeded() {
   const setupCompleted = await isSetupCompleted()
@@ -17,11 +7,5 @@ export async function insertInitialDataIfNeeded() {
     return
   }
 
-  const initialData = [
-    { name: 'setup_completed', value: 'false' },
-  ]
-
-  await useDatabase()
-    .insert(globalConfig)
-    .values(initialData)
+  insertInitialData()
 }
