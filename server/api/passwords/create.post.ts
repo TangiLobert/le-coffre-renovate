@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { useDatabase } from '~/composables/useDatabase'
-import * as schema from '~/server/database/schema'
+import { password } from '~/server/database/schema'
 
 const createPasswordSchema = z.object({
   value: z.string().min(1, 'Le mot de passe ne peut pas être vide'),
@@ -12,7 +12,7 @@ async function createPassword(value: string) {
 
   const { encrypted, iv } = encrypt(value, encryptionKey)
 
-  return await useDatabase().insert(schema.password).values({
+  return await useDatabase().insert(password).values({
     value: encrypted,
     iv: JSON.stringify(iv),
   }).returning()
