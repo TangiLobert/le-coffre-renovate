@@ -13,11 +13,25 @@ useHead({
 
 const { data } = await useFetch<SetupStatus>('/api/admin/setup/status')
 const isSetupComplete = computed(() => data?.value?.setupComplete)
+onMounted(() => {
+  setTimeout(() => {
+    if (isSetupComplete.value) {
+      navigateTo('/')
+    }
+  }, 2000)
+})
 </script>
 
 <template>
   <SetupStepper v-if="!isSetupComplete" />
   <div v-else>
-    <p>Setup already completed.</p>
+    <p>Setup already completed. Redirecting...</p>
+    <p>
+      Click
+      <NuxtLink to="/">
+        here
+      </NuxtLink>
+      if you are not redirected.
+    </p>
   </div>
 </template>
