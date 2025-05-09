@@ -42,7 +42,12 @@ async function generateMasterKey() {
   })
   console.log('Master key from server:', result)
   showSSS.value = true
-  shares.value = result.shares
+  if ('shares' in result) {
+    shares.value = result.shares
+  }
+  else {
+    console.error('Error generating master key:', result.error)
+  }
   isGeneratingMasterKey.value = false
 }
 
