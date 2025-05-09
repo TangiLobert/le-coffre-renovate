@@ -1,3 +1,4 @@
+import { consola } from 'consola'
 import { eq } from 'drizzle-orm'
 import { useDatabase } from '~/composables/useDatabase'
 import { globalConfig } from '~/server/database/schema'
@@ -21,7 +22,7 @@ export async function getConfiguration(key: ConfigKey): Promise<ConfigValue> {
 export async function setConfiguration(key: ConfigKey, value: ConfigValue): Promise<void> {
   const db = useDatabase()
   const existing = await getConfiguration(key)
-  console.log(`Changing config entry '${key}' from ${existing} to ${value}`)
+  consola.debug(`Changing config entry '${key}' from ${existing} to ${value}`)
 
   if (existing != null) {
     await db.update(globalConfig).set({ value }).where(eq(globalConfig.name, key))
