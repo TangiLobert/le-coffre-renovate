@@ -89,8 +89,8 @@ const items = ref<DropdownMenuItem[][]>([
       label: 'Logout',
       icon: 'i-lucide-log-out',
       kbds: ['shift', 'meta', 'q'],
-      onClick: () => {
-        signOut()
+      onClick: async () => {
+        await signOut()
       },
     },
   ],

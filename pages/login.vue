@@ -73,7 +73,7 @@ onMounted(() => {
         </h1>
       </div>
     </template>
-    <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+    <UForm method="post" :schema="schema" :state="state" class="space-y-4" @submit.prevent="onSubmit">
       <UFormField label="Email" name="email">
         <UInput v-model="state.email" type="email" class="w-full" />
       </UFormField>
