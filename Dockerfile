@@ -43,7 +43,7 @@ USER lecoffreuser
 
 # Copy the built application from the builder stage
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/.output/ /app/
-COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/server/database /app/server/database
+COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/server/database/migrations /app/server/database/migrations
 
 # Copy the entrypoint script
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/entrypoint.sh /usr/local/bin/entrypoint.sh
