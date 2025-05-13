@@ -1,53 +1,56 @@
 ARG NODE_ENV=production
 ARG NODE_VERSION=20-bullseye-slim
 
-# Utiliser une image Node.js légère et optimisée pour la production
+# Use a lightweight and production-optimized Node.js image
 FROM node:${NODE_VERSION} AS builder
 
-# Installer uniquement les outils nécessaires
+# Install only the necessary tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+# Set the working directory
 WORKDIR /app
 
-# Copier uniquement les fichiers nécessaires pour l'installation des dépendances
+# Copy only the necessary files for dependency installation
 COPY package*.json /app/
 
-# Installer les dépendances Node.js en mode production
+# Install Node.js dependencies in production mode
 RUN npm install
 
-# Copier le reste des fichiers de l'application
+# Copy the rest of the application files
 COPY . /app/
 
-# Construire l'application
+# Build the application
 RUN npm run build
 
-# Étape de production
+# Production stage
 FROM node:${NODE_VERSION} AS runner
 
-# Installer uniquement les outils nécessaires
+# Install only the necessary tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Définir l'utilisateur non-root pour des raisons de sécurité
+# Create a non-root user for security reasons
 RUN useradd -m lecoffreuser
 
-# Définir le répertoire de travail
+# Create the working directory and set permissions
 RUN mkdir -p /app && \
     chown -R lecoffreuser:lecoffreuser /app
 WORKDIR /app
 
+# Switch to the non-root user
 USER lecoffreuser
 
+# Copy the built application from the builder stage
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/.output/ /app/
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/server/database /app/server/database
 
-# Copier le script d'entrée
+# Copy the entrypoint script
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Exposer le port utilisé par l'application
+# Expose the port used by the application
 EXPOSE 3000
 
-# Définir le point d'entrée
+# Define the entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
