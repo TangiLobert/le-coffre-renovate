@@ -40,6 +40,7 @@ WORKDIR /app
 USER lecoffreuser
 
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/.output/ /app/
+COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/server/database /app/server/database
 
 # Copier le script d'entrée
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/entrypoint.sh /usr/local/bin/entrypoint.sh
