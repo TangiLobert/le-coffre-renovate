@@ -38,7 +38,6 @@ USER lecoffreuser
 
 # Copy the built application from the builder stage
 COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/.output/ /app/
-COPY --from=builder --chown=lecoffreuser:lecoffreuser /app/server/database/migrations /app/server/database/migrations
 
 # Expose the port used by the application
 EXPOSE 3000
