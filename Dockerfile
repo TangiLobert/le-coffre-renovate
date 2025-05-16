@@ -1,5 +1,5 @@
 ARG NODE_ENV=production
-ARG NODE_VERSION=22.15-bullseye-slim
+ARG NODE_VERSION=22-bullseye-slim
 
 # Use a lightweight and production-optimized Node.js image
 FROM node:${NODE_VERSION} AS builder
