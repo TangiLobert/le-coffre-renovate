@@ -30,6 +30,7 @@ export interface EntryModel {
   label: string
   icon?: string
   children?: EntryModel[]
+  isActive?: boolean
 }
 
 const open = ref(true)
@@ -41,6 +42,12 @@ function toggle() {
   }
 }
 
+function goto() {
+  // Router push to /passwords/$label
+  const router = useRouter()
+  router.push({ path: `/passwords/${props.modelValue.label}` })
+}
+
 watch(() => open.value, (newValue) => {
   console.log('open', newValue)
 })
@@ -50,19 +57,21 @@ watch(() => open.value, (newValue) => {
   <UCollapsible v-model:open="open" class="ml-2">
     <template #default>
       <UContextMenu :items="menuItems">
-        <UButton
-          class="group justify-start my-1" :icon="modelValue.icon" :label="modelValue.label" color="neutral"
-          variant="ghost" block @click="toggle"
-        >
-          <template #trailing>
-            <UIcon
-              v-if="hasChildren" name="i-lucide-chevron-down" class="ml-auto" :class="{
+        <div class="flex items-center">
+          <UButton class="group justify-start my-1" :icon="modelValue.icon" :label="modelValue.label" color="neutral"
+            block :variant="modelValue.isActive ? 'solid' : 'ghost'" @click="goto">
+            <template #leading>
+              <UIcon v-if="open" name="i-lucide-folder-open" />
+              <UIcon v-else name="i-lucide-folder" />
+            </template>
+          </UButton>
+          <UButton v-if="hasChildren" variant="ghost">
+            <UIcon name="i-lucide-chevron-down" class="ml-auto" :class="{
                 'transition-transform duration-200': hasChildren,
                 'rotate-180': open && hasChildren,
-              }"
-            />
-          </template>
-        </UButton>
+              }" @click="toggle" />
+          </UButton>
+        </div>
       </UContextMenu>
     </template>
 

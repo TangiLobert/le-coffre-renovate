@@ -13,6 +13,7 @@ const items = ref<EntryModel[][]>([
         {
           label: 'Introduction',
           icon: 'i-lucide-house',
+          isActive: true,
           children: [
             { label: 'Overview', icon: 'i-lucide-book' },
             { label: 'Getting started', icon: 'i-lucide-rocket' },

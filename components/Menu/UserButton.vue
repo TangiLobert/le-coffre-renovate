@@ -8,7 +8,7 @@ const name = computed(() => {
   return session.value?.data?.user?.name
 })
 
-const items = ref<DropdownMenuItem[][]>([
+const items = computed<DropdownMenuItem[][]>(() => [
   [
     {
       label: name.value,
