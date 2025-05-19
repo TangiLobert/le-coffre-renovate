@@ -29,6 +29,8 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
+          registry: ${{ env.DOCKER_CONTAINER_REGISTRY }}
+          # Note: The registry is optional. If not provided, it defaults to Docker Hub.
 
       - name: Build and push image
         uses: docker/build-push-action@v6.17.0
