@@ -17,6 +17,16 @@ changelog:
     - title: 👒 Dependencies
       labels:
         - dependencies
+    - title: 📚 Documentation
+      labels:
+        - documentation
+    - title: 🧪 Tests
+      labels:
+        - test
+    - title: 🔧 CI/CD
+      labels:
+        - ci
+        - cd
   sort: DESC # Sort commits in descending order
   template: |
     ## Changes in this release
@@ -38,20 +48,11 @@ autolabeler:
     label: refactor
   - pattern: '^deps:'
     label: dependencies
-
-categories:
-  - title: 🚀 Features
-    labels:
-      - feature
-      - enhancement
-  - title: 🐛 Bug Fixes
-    labels:
-      - bug
-      - fix
-  - title: 🛠 Maintenance
-    labels:
-      - refactor
-      - chore
-  - title: 👒 Dependencies
-    labels:
-      - dependencies
+  - pattern: '^docs:'
+    label: documentation
+  - pattern: '^test:'
+    label: test
+  - pattern: '^ci:'
+    label: ci
+  - pattern: '^cd:'
+    label: cd
