@@ -1,13 +1,30 @@
-<script setup>
+<script setup lang="ts">
+import type { BreadcrumbItem } from '@nuxt/ui'
+
 const route = useRoute()
-// route.params.slug is an array of folder names
+
+const items = computed<BreadcrumbItem[]>(() => {
+  const slug = route.params.slug as string[]
+  return slug.map((segment, i) => ({
+    label: segment,
+    to: {
+      name: 'passwords-slug',
+      params: { slug: slug.slice(0, i + 1) },
+    },
+  }))
+})
 </script>
 
 <template>
-  <h1>Passwords path:</h1>
-  <ul>
-    <li v-for="(segment, i) in route.params.slug" :key="i">
-      {{ segment }}
-    </li>
-  </ul>
+  <UBreadcrumb :items="items">
+    <template #separator>
+      <span class="mx-2 text-muted">/</span>
+    </template>
+  </UBreadcrumb>
+  <!-- display last segment -->
+  <h1 class="text-3xl font-bold">
+    Folder '{{ route.params.slug[route.params.slug.length - 1] }}'
+  </h1>
+  <hr class="my-4 border-(--ui-border)">
+  <PasswordsList />
 </template>
