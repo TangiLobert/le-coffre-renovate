@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-screen">
     <!-- Menu Component -->
-    <div class="flex flex-col h-full p-4 shadow-lg bg-(--ui-bg-elevated) border-r border-(--ui-border)">
+    <div class="flex flex-col h-full p-4 shadow-lg border-r border-(--ui-border)">
       <!-- Logo -->
       <NuxtLink to="/" class="p-4">
         <div class="flex items-center space-x-2">
