@@ -1,27 +1,18 @@
 import createConfigForNuxt from '@nuxt/eslint-config'
+import stylistic from '@stylistic/eslint-plugin'
 
 export default createConfigForNuxt({
   features: {
-    stylistic: {
-      indent: 2,
-      quotes: 'single',
-      semi: false,
-      trailingComma: 'all',
-      bracketSpacing: true,
-      useTabs: false,
-      singleQuote: true,
-      endOfLine: 'auto',
-      printWidth: 80,
-    },
+    stylistic: stylistic.configs.recommended,
   },
-  overrides: [
+  ignores: [
+    'server/database/migrations/*',
+  ],
+})
+  .override('nuxt/javascript',
     {
-      extends: [
-        'plugin:@typescript-eslint/recommended',
-        'eslint:recommended',
-      ],
-      files: ['**/*.{js,mjs,cjs,ts,mts,jsx,tsx}'],
       rules: {
+        'quotes': ['warn', 'single', { avoidEscape: true }],
         'eqeqeq': ['warn', 'always', { null: 'never' }],
         'no-debugger': ['error'],
         'no-console': 'off',
@@ -42,40 +33,14 @@ export default createConfigForNuxt({
             ignoreRestSiblings: true,
           },
         ],
+        'vue/max-attributes-per-line': ['error', {
+          singleline: {
+            max: 3,
+          },
+          multiline: {
+            max: 1,
+          },
+        }],
       },
     },
-    {
-      extends: [
-        'plugin:vue/vue3-recommended',
-        'plugin:vue/strongly-recommended',
-        'plugin:vuejs-accessibility/recommended',
-      ],
-      files: ['**/*.vue'],
-      rules: {
-        'vue/no-multiple-template-root': 'off',
-        'vue/multi-word-component-names': 'off',
-        'vue/max-attributes-per-line': [
-          'warn',
-          {
-            singleline: 4,
-            multiline: {
-              max: 1,
-              allowFirstLine: false,
-            },
-          },
-        ],
-        'vue/no-v-html': 'off',
-        'vue/valid-v-slot': 'off',
-        'vue/no-unused-components': [
-          'warn',
-          {
-            ignoreWhenBindingPresent: true,
-          },
-        ],
-      },
-    },
-  ],
-  ignores: [
-    'server/database/migrations/*',
-  ],
-})
+  )
