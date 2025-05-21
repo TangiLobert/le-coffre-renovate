@@ -195,39 +195,68 @@ flowchart TD
 
 ### Process of encryption and decryption of a password
 
-In this process, we asume that the DB is unseal (Encryption key is stored in memory).
+In this process, we assume that the database is unsealed (Encryption key is stored in memory).
+
+When a user creates a password,
+the system generates a random Initialization Vector (IV) and
+uses it to encrypt the password with the Encryption Key using AES-256-GCM.
+The IV is stored in the database alongside the encrypted password.
+
+When a user wants to retrieve a password, the system:
+
+1. Authenticates the user's access permissions
+2. Fetches the encrypted password and IV from the database
+3. Decrypts the password using the Encryption Key stored in memory
+4. Presents the plaintext password to the user
+5. Securely clears the plaintext password from memory after use
+
+The IV is essential for ensuring that the same password encrypted multiple times will yield different ciphertexts, preventing pattern analysis and enhancing security.
 
 ```mermaid
 flowchart TD
- subgraph s1["Password encryption"]
-        B["IV"]
-        A(["Password"])
-        C["Encrypted Password"]
-        D["DB"]
-        E(["Encryption Key"])
-        n6["Memory"]
-  end
- subgraph s2["Password decryption"]
-        n1["DB"]
-        n2["Encrypted Password"]
-        n3["IV"]
-        n4["Encryption Key"]
-        n5["Deciphered password"]
-        n7["Memory"]
-  end
-    B -- Generation of random IV --> C
-    C -- Stored --> D
-    E --> C
-    n1 --> n2 & n3
-    n2 --> n5
-    n3 --> n5
-    n4 --> n5
-    n6 --> E
-    n7 --> n4
-    A -- "<span style=color:>Chosen by User</span>" --> C
-    B --> D
-    D@{ shape: cyl}
-    n6@{ shape: h-cyl}
-    n1@{ shape: cyl}
-    n7@{ shape: h-cyl}
+    %% Styles
+    classDef sensitive fill:#ffcccc,stroke:#ff0000
+    classDef encrypted fill:#ccffcc,stroke:#00aa00
+    classDef storage fill:#f9f9f9,stroke:#666
+    classDef memory fill:#e6f3ff,stroke:#0066cc
+
+    subgraph s1["Password Encryption Process"]
+        A(["Plaintext Password"]):::sensitive
+        B["Random IV Generator"]
+        C["AES-256-GCM Encryption"]
+        D[(Database)]:::storage
+        E(["Encryption Key in Memory"]):::memory
+
+        A --> C
+        B --> |"Generates unique IV"| C
+        E --> |"Used for encryption"| C
+        C --> |"Store encrypted password"| D
+        B --> |"Store IV"| D
+    end
+
+    subgraph s2["Password Decryption Process"]
+        F(["User Authentication"])
+        G[(Database)]:::storage
+        H["Encrypted Password"]:::encrypted
+        I["Initialization Vector"]
+        J(["Encryption Key in Memory"]):::memory
+        K["AES-256-GCM Decryption"]
+        L(["Plaintext Password"]):::sensitive
+        M["Memory Cleaning"]
+
+        F --> |"If authorized"| G
+        G --> H & I
+        H --> K
+        I --> K
+        J --> |"Used for decryption"| K
+        K --> L
+        L --> |"After use"| M
+        M --> |"Secure erasure"| N["Memory cleared"]
+    end
+
+    %% Legend
+    O(["Sensitive Data"]):::sensitive
+    P["Encrypted Data"]:::encrypted
+    Q[(Storage)]:::storage
+    R(["Memory"]):::memory
 ```
