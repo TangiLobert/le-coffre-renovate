@@ -31,6 +31,7 @@
     "sharp": "^0.34.1",
     "tailwindcss": "^4.1.4",
     "typecheck": "^0.1.2",
+    "typescript-eslint": "^8.32.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "zod": "^3.24.3"

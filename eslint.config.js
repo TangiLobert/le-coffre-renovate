@@ -9,7 +9,7 @@ export default createConfigForNuxt({
     'server/database/migrations/*',
   ],
 })
-  .override('nuxt/javascript',
+  .override('nuxt/rules',
     {
       rules: {
         'quotes': ['warn', 'single', { avoidEscape: true }],
@@ -19,18 +19,11 @@ export default createConfigForNuxt({
         'no-empty': ['warn', { allowEmptyCatch: true }],
         'no-process-exit': 'off',
         'no-useless-escape': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
         'prefer-const': [
           'warn',
           {
             destructuring: 'all',
-          },
-        ],
-        'no-unused-vars': [
-          'warn',
-          {
-            argsIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
-            ignoreRestSiblings: true,
           },
         ],
         'vue/max-attributes-per-line': ['error', {
@@ -41,6 +34,7 @@ export default createConfigForNuxt({
             max: 1,
           },
         }],
+        'vue/no-multiple-template-root': 'off',
       },
     },
   )
