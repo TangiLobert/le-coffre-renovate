@@ -34,6 +34,11 @@ function copyToClipboard() {
     description: 'The password has been copied in the clipboard',
   })
 }
+
+async function generateRandomPassword() {
+  const result = await $fetch('/api/passwords/generate')
+  inputValue.value = result
+}
 </script>
 
 <template>
@@ -69,6 +74,13 @@ function copyToClipboard() {
       size="sm"
       :icon="copied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
       @click="copyToClipboard"
+    />
+    <UButton
+      color="neutral"
+      variant="link"
+      size="sm"
+      icon="mdi:dice"
+      @click="generateRandomPassword"
     />
   </div>
 </template>
