@@ -2,7 +2,6 @@ import pytest
 
 
 from src.application.usecase.setup_master_password import SetupMasterPasswordUseCase
-from src.domain.setup_info import SetupInfo
 
 
 class MockSetupStore:
@@ -22,18 +21,43 @@ def setup_use_case():
     return SetupMasterPasswordUseCase(store)
 
 
-def test_given_a_master_password_when_setup_then_application_is_marked_as_setup(
+def test_given_shares_and_threshold_when_setup_then_application_is_marked_as_setup(
     setup_use_case,
 ):
-    password = "SuperSecret123!"
-    setup_status = setup_use_case.execute(password)
+    num_shares = 5
+    threshold = 3
+    setup_status = setup_use_case.execute(num_shares, threshold)
     assert setup_status == True
 
 
-def test_given_master_password_already_set_when_setup_called_again_then_should_fail(
+def test_given_setup_already_done_when_setup_called_again_then_should_fail(
     setup_use_case,
 ):
-    password = "SuperSecret123!"
-    setup_use_case.execute(password)
-    result = setup_use_case.execute("AnotherPassword!")
+    num_shares = 5
+    threshold = 3
+    setup_use_case.execute(num_shares, threshold)
+    result = setup_use_case.execute(7, 4)
     assert result == False
+
+
+def test_given_threshold_higher_than_num_shares_when_setup_then_should_fail(
+    setup_use_case,
+):
+    num_shares = 3
+    threshold = 5
+    setup_status = setup_use_case.execute(num_shares, threshold)
+    assert setup_status == False
+
+
+def test_given_num_shares_less_than_2_when_setup_then_should_fail(setup_use_case):
+    num_shares = 1
+    threshold = 2
+    setup_status = setup_use_case.execute(num_shares, threshold)
+    assert setup_status == False
+
+
+def test_given_threshold_less_than_2_when_setup_then_should_fail(setup_use_case):
+    num_shares = 2
+    threshold = 1
+    setup_status = setup_use_case.execute(num_shares, threshold)
+    assert setup_status == False
