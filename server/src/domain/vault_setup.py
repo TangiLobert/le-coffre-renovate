@@ -13,7 +13,5 @@ def setup_master_password(
     if threshold > nb_shared:
         raise Exception("Threshold cannot be greater than number of shares")
 
-    password_hash = (
-        f"hashed_{nb_shared}_{threshold}"  # Replace with shamir secret sharing logic
-    )
-    return SetupInfo(password_hash=password_hash)
+    shares = [f"share_{i+1}" for i in range(nb_shared)]
+    return SetupInfo(shares=shares)

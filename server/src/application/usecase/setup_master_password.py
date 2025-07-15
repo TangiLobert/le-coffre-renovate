@@ -9,14 +9,11 @@ class SetupMasterPasswordUseCase:
     def __init__(self, store: SetupStateStore):
         self.store = store
 
-    def execute(self, nb_shared: int, threshold: int) -> bool:
+    def execute(self, nb_shared: int, threshold: int) -> SetupInfo:
         setup_info: Optional[SetupInfo] = self.store.get_setup()
 
-        try:
-            new_setup_info = setup_master_password(setup_info, nb_shared, threshold)
-        except Exception:
-            return False
+        new_setup_info = setup_master_password(setup_info, nb_shared, threshold)
 
         self.store.mark_setup(new_setup_info)
 
-        return True
+        return new_setup_info
