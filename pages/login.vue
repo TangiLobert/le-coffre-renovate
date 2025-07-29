@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import type { SetupStatus } from '~/shared/types/setup'
 
 definePageMeta({
   layout: 'centered',
@@ -54,7 +53,7 @@ onMounted(async () => {
     const response = await $fetch.raw('/api/vault', { method: 'HEAD' })
     isSetupComplete.value = response.status === 200
   }
-  catch (_e) {
+  catch {
     isSetupComplete.value = false
   }
   if (!isSetupComplete.value) {
