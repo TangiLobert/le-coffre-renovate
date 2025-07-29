@@ -1,15 +1,13 @@
 from typing import Optional
 
-from src.vault_management_context.business_logic.models.value_objects.vault import (
+from src.vault_management_context.business_logic.models.value_objects import (
     Vault,
 )
-from src.vault_management_context.business_logic.gateways.vault_repository import (
+from src.vault_management_context.business_logic.gateways import (
     VaultRepository,
-)
-from src.vault_management_context.business_logic.gateways.shamir_gateway import (
     ShamirGateway,
 )
-from src.vault_management_context.business_logic.models.domain_services.vault_domain_service import (
+from src.vault_management_context.business_logic.models.domain_services import (
     VaultDomainService,
 )
 

@@ -2,8 +2,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.vault_management_context.business_logic.models.value_objects.vault import Vault
-from src.vault_management_context.adapters.primary.api.routes import (
+from src.vault_management_context.business_logic.models.value_objects import Vault
+from src.vault_management_context.adapters.primary.api.controllers import (
     vault_management_route,
 )
 from src.vault_management_context.adapters.primary.api.app_dependencies import (
@@ -28,7 +28,7 @@ def test_can_create_the_vault(client, vault_repository, shamir_gateway):
     client.app.dependency_overrides[get_shamir_gateway] = lambda: shamir_gateway
 
     response = client.post(
-        "/vault",
+        "/vault/setup",
         json={
             "nb_shares": nb_shares,
             "threshold": 3,

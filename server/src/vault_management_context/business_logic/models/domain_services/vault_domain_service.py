@@ -1,6 +1,6 @@
 from typing import Optional
 
-from src.vault_management_context.business_logic.models.value_objects.vault import Vault
+from src.vault_management_context.business_logic.models.value_objects import Vault
 
 
 class VaultDomainService:

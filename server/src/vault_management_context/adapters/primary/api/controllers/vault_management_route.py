@@ -4,11 +4,11 @@ from pydantic import BaseModel
 from src.vault_management_context.adapters.primary.api.app_dependencies import (
     get_create_vault_usecase,
 )
-from src.vault_management_context.business_logic.use_cases.create_vault_use_case import (
+from src.vault_management_context.business_logic.use_cases import (
     CreateVaultUseCase,
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/vault")
 
 
 class CreateVaultPostRequest(BaseModel):
@@ -20,7 +20,7 @@ class CreateVaultPostResponse(BaseModel):
     shares: list[str]
 
 
-@router.post("/vault", response_model=CreateVaultPostResponse, status_code=201)
+@router.post("/setup", response_model=CreateVaultPostResponse, status_code=201)
 def create_vault(
     request: CreateVaultPostRequest,
     usecase: CreateVaultUseCase = Depends(get_create_vault_usecase),

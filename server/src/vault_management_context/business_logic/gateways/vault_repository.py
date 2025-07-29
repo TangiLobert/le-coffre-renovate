@@ -1,6 +1,6 @@
 from typing import Optional, Protocol
 
-from src.vault_management_context.business_logic.models.value_objects.vault import (
+from src.vault_management_context.business_logic.models.value_objects import (
     Vault,
 )
 

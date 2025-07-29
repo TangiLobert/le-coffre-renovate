@@ -1,9 +1,9 @@
 import pytest
 
-from src.vault_management_context.business_logic.models.value_objects.vault import (
+from src.vault_management_context.business_logic.models.value_objects import (
     Vault,
 )
-from src.vault_management_context.business_logic.use_cases.create_vault_use_case import (
+from src.vault_management_context.business_logic.use_cases import (
     CreateVaultUseCase,
 )
 from tests.vault_management_context.fixtures import vault_repository, shamir_gateway
