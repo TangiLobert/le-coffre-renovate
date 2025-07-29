@@ -48,9 +48,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   })
 }
 
-const { data } = await useFetch<SetupStatus>('/api/admin/setup/status')
-const isSetupComplete = computed(() => data?.value?.setupComplete)
-onMounted(() => {
+const isSetupComplete = ref(false)
+onMounted(async () => {
+  try {
+    const response = await $fetch.raw('/api/vault', { method: 'HEAD' })
+    isSetupComplete.value = response.status === 200
+  }
+  catch (_e) {
+    isSetupComplete.value = false
+  }
   if (!isSetupComplete.value) {
     const toast = useToast()
     toast.add({

@@ -3,6 +3,7 @@ from starlette.requests import Request
 
 from src.vault_management_context.business_logic.use_cases import (
     CreateVaultUseCase,
+    VaultStatusUseCase,
 )
 from src.vault_management_context.business_logic.gateways import (
     VaultRepository,
@@ -19,7 +20,13 @@ def get_shamir_gateway(request: Request) -> ShamirGateway:
 
 
 def get_create_vault_usecase(
-    vault_repository=Depends(get_vault_repository),
-    shamir_gateway=Depends(get_shamir_gateway),
+    vault_repository: VaultRepository = Depends(get_vault_repository),
+    shamir_gateway: ShamirGateway = Depends(get_shamir_gateway),
 ):
     return CreateVaultUseCase(vault_repository, shamir_gateway)
+
+
+def get_vault_status_usecase(
+    vault_repository: VaultRepository = Depends(get_vault_repository),
+):
+    return VaultStatusUseCase(vault_repository)
