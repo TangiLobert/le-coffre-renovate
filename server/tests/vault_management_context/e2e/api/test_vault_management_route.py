@@ -28,7 +28,7 @@ def test_can_create_the_vault(client, vault_repository, shamir_gateway):
     client.app.dependency_overrides[get_shamir_gateway] = lambda: shamir_gateway
 
     response = client.post(
-        "/vault/setup",
+        "/api/vault/setup",
         json={
             "nb_shares": nb_shares,
             "threshold": 3,

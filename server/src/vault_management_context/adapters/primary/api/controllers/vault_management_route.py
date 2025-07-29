@@ -8,7 +8,7 @@ from src.vault_management_context.business_logic.use_cases import (
     CreateVaultUseCase,
 )
 
-router = APIRouter(prefix="/vault")
+router = APIRouter(prefix="/api/vault")
 
 
 class CreateVaultPostRequest(BaseModel):
