@@ -1,11 +1,11 @@
 from fastapi import Depends
 from starlette.requests import Request
 
-from src.vault_management_context.application.use_cases import (
+from vault_management_context.application.use_cases import (
     CreateVaultUseCase,
     GetVaultStatusUseCase,
 )
-from src.vault_management_context.application.gateways import (
+from vault_management_context.application.gateways import (
     VaultRepository,
     ShamirGateway,
 )

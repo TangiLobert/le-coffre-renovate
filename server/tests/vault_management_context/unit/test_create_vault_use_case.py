@@ -1,9 +1,9 @@
 import pytest
 
-from src.vault_management_context.domain.models import (
+from vault_management_context.domain.models import (
     Vault,
 )
-from src.vault_management_context.application.use_cases import (
+from vault_management_context.application.use_cases import (
     CreateVaultUseCase,
 )
 

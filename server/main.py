@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from src.vault_management_context.adapters.secondary.gateways import (
+from vault_management_context.adapters.secondary.gateways import (
     FakeVaultRepository,
     CryptoShamirGateway,
 )
 
-from src.vault_management_context.adapters.primary.api.routes import (
+from vault_management_context.adapters.primary.api.routes import (
     vault_management_route,
 )
 

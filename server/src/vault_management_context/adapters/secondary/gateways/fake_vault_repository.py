@@ -1,9 +1,9 @@
 from typing import Optional
 
-from src.vault_management_context.domain.models import (
+from vault_management_context.domain.models import (
     Vault,
 )
-from src.vault_management_context.application.gateways.vault_repository import (
+from vault_management_context.application.gateways.vault_repository import (
     VaultRepository,
 )
 

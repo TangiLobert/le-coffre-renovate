@@ -1,6 +1,6 @@
 from typing import Optional, Protocol
 
-from src.vault_management_context.domain.models import (
+from vault_management_context.domain.models import (
     Vault,
 )
 

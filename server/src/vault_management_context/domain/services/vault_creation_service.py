@@ -1,6 +1,6 @@
 from typing import Optional
 
-from src.vault_management_context.domain.models import Vault
+from vault_management_context.domain.models import Vault
 
 
 class VaultCreationService:

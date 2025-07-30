@@ -1,13 +1,13 @@
 from typing import Optional
 
-from src.vault_management_context.domain.models import (
+from vault_management_context.domain.models import (
     Vault,
 )
-from src.vault_management_context.application.gateways import (
+from vault_management_context.application.gateways import (
     VaultRepository,
     ShamirGateway,
 )
-from src.vault_management_context.domain.services import (
+from vault_management_context.domain.services import (
     VaultCreationService,
 )
 

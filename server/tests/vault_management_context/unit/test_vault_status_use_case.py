@@ -1,10 +1,10 @@
 import pytest
 
-from src.vault_management_context.application.gateways import (
+from vault_management_context.application.gateways import (
     VaultRepository,
 )
-from src.vault_management_context.application.use_cases import GetVaultStatusUseCase
-from src.vault_management_context.domain.models import Vault
+from vault_management_context.application.use_cases import GetVaultStatusUseCase
+from vault_management_context.domain.models import Vault
 
 
 @pytest.fixture()

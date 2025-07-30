@@ -1,6 +1,6 @@
 import pytest
 
-from src.vault_management_context.adapters.secondary.gateways import (
+from vault_management_context.adapters.secondary.gateways import (
     CryptoShamirGateway,
     FakeVaultRepository,
 )

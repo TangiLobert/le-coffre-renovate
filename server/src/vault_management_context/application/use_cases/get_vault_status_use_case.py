@@ -1,4 +1,4 @@
-from src.vault_management_context.application.gateways import VaultRepository
+from vault_management_context.application.gateways import VaultRepository
 
 
 class GetVaultStatusUseCase:
