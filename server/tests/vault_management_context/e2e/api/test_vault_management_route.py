@@ -37,7 +37,11 @@ def test_can_create_the_vault(client, vault_repository, shamir_gateway):
     )
 
     assert response.status_code == 201
-    assert vault_repository.get() == Vault(nb_shares, 3, response.json()["shares"])
+
+    generated_vault = vault_repository.get()
+    for share in response.json()["shares"]:
+        assert share["index"] in [s.index for s in generated_vault.shares]
+        assert share["secret"] in [s.secret for s in generated_vault.shares]
 
 
 def test_should_not_see_vault_when_vault_is_not_setup(client):

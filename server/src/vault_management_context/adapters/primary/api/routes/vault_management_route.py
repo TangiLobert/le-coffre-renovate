@@ -9,6 +9,7 @@ from vault_management_context.application.use_cases import (
     CreateVaultUseCase,
     GetVaultStatusUseCase,
 )
+from vault_management_context.domain.models.share import Share
 
 router = APIRouter(prefix="/api/vault")
 
@@ -19,7 +20,7 @@ class CreateVaultPostRequest(BaseModel):
 
 
 class CreateVaultPostResponse(BaseModel):
-    shares: list[str]
+    shares: list[Share]
 
 
 @router.post("/setup", response_model=CreateVaultPostResponse, status_code=201)
@@ -28,7 +29,7 @@ def create_vault(
     usecase: CreateVaultUseCase = Depends(get_create_vault_usecase),
 ):
     try:
-        shares: list[str] = usecase.execute(request.nb_shares, request.threshold)
+        shares: list[Share] = usecase.execute(request.nb_shares, request.threshold)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"shares": shares}

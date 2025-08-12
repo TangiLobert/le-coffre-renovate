@@ -1,8 +1,6 @@
 from typing import Optional
 
-from vault_management_context.domain.models import (
-    Vault,
-)
+from vault_management_context.domain.models import Vault, Share
 from vault_management_context.application.gateways import (
     VaultRepository,
     ShamirGateway,
@@ -19,7 +17,7 @@ class CreateVaultUseCase:
         self.vault_repo = vault_repo
         self.shamir_gateway = shamir_gateway
 
-    def execute(self, nb_shares: int, threshold: int) -> list[str]:
+    def execute(self, nb_shares: int, threshold: int) -> list[Share]:
         existing_vault: Optional[Vault] = self.vault_repo.get()
 
         vault = self.__create_vault(existing_vault, nb_shares, threshold)

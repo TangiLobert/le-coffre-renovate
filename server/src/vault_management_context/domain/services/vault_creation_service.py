@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import List, Optional
 
-from vault_management_context.domain.models import Vault
+from vault_management_context.domain.models import Vault, Share
 
 
 class VaultCreationService:
@@ -10,7 +10,7 @@ class VaultCreationService:
             raise ValueError("Already setup")
 
     @staticmethod
-    def create_vault(nb_shares: int, threshold: int, shares: list[str]) -> Vault:
+    def create_vault(nb_shares: int, threshold: int, shares: List[Share]) -> Vault:
         if nb_shares < 2:
             raise ValueError("Number of shares must be at least 2")
         if threshold < 2:
