@@ -21,7 +21,7 @@ def test_should_fail_when_no_status_exists(use_case: GetVaultStatusUseCase):
 def test_should_succeed_when_status_exists(
     vault_repository: VaultRepository, use_case: GetVaultStatusUseCase
 ):
-    vault_repository.save(Vault(3, 2, []))
+    vault_repository.save(Vault(nb_shares=3, threshold=2))
     status_existing = use_case.execute()
 
     assert status_existing is True

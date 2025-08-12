@@ -1,8 +1,9 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from typing import List
 
-from vault_management_context.domain.entities import Vault
+from vault_management_context.domain.entities import Vault, Share
 from vault_management_context.adapters.primary.api.routes.vault_management_route import (
     router as vault_management_route,
 )
@@ -26,7 +27,9 @@ def client(vault_repository, shamir_gateway):
 
 
 def test_can_create_the_vault(client, vault_repository, shamir_gateway):
-    nb_shares = 5
+    nb_shares = 3
+    expected_shares: List[Share] = [Share(0, "1"), Share(1, "2"), Share(2, "3")]
+    shamir_gateway.set(expected_shares)
 
     response = client.post(
         "/api/vault/setup",
@@ -38,10 +41,12 @@ def test_can_create_the_vault(client, vault_repository, shamir_gateway):
 
     assert response.status_code == 201
 
+    response_data = response.json()
+    assert response_data["shares"] == [share.to_dict() for share in expected_shares]
+
     generated_vault = vault_repository.get()
-    for share in response.json()["shares"]:
-        assert share["index"] in [s.index for s in generated_vault.shares]
-        assert share["secret"] in [s.secret for s in generated_vault.shares]
+    assert generated_vault.nb_shares == nb_shares
+    assert generated_vault.threshold == 3
 
 
 def test_should_not_see_vault_when_vault_is_not_setup(client):
@@ -51,7 +56,7 @@ def test_should_not_see_vault_when_vault_is_not_setup(client):
 
 
 def test_should_see_vault_when_vault_is_setup(client, vault_repository):
-    vault_repository.save(Vault(5, 3, []))
+    vault_repository.save(Vault(nb_shares=5, threshold=3))
 
     response = client.head("/api/vault")
 

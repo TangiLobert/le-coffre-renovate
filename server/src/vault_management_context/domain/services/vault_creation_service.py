@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import Optional
 
-from vault_management_context.domain.entities import Vault, Share
+from vault_management_context.domain.entities import Vault
 from vault_management_context.domain.value_objects import VaultConfiguration
 from vault_management_context.domain.exceptions import VaultAlreadyExistsError
 
@@ -20,20 +20,16 @@ class VaultCreationService:
             raise VaultAlreadyExistsError()
 
     @staticmethod
-    def create_vault_entity(
-        configuration: VaultConfiguration, shares: List[Share]
-    ) -> Vault:
-        """Create a vault entity with the given configuration and shares
+    def create_vault_entity(configuration: VaultConfiguration) -> Vault:
+        """Create a vault entity with the given configuration
 
         Args:
             configuration: The validated vault configuration
-            shares: The cryptographically generated shares
 
         Returns:
-            The created vault entity
+            The created vault entity containing only configuration data
         """
         return Vault(
             nb_shares=configuration.share_count.value,
             threshold=configuration.threshold.value,
-            shares=shares,
         )

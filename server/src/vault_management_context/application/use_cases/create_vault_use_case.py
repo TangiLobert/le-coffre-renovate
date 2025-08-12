@@ -22,16 +22,19 @@ class CreateVaultUseCase:
         existing_vault: Optional[Vault] = self.vault_repo.get()
         configuration = VaultConfiguration.create(nb_shares, threshold)
 
-        vault = self._create_vault(existing_vault, configuration)
+        shares, vault = self._create_vault(existing_vault, configuration)
 
         self.vault_repo.save(vault)
-        return vault.shares
+        return shares
 
     def _create_vault(
         self, existing_vault: Optional[Vault], configuration: VaultConfiguration
-    ) -> Vault:
+    ) -> tuple[list[Share], Vault]:
+        """Create vault and return both shares (for user) and vault (for storage)"""
         VaultCreationService.ensure_creation_allowed(existing_vault)
 
         shares = self.shamir_gateway.split_secret(configuration)
 
-        return VaultCreationService.create_vault_entity(configuration, shares)
+        vault = VaultCreationService.create_vault_entity(configuration)
+
+        return shares, vault

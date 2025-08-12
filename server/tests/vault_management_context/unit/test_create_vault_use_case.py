@@ -1,8 +1,6 @@
 import pytest
 
-from vault_management_context.domain.entities import (
-    Vault,
-)
+from vault_management_context.domain.entities import Vault, Share
 from vault_management_context.domain.exceptions import (
     VaultAlreadyExistsError,
     InvalidShareCountError,
@@ -19,14 +17,26 @@ def use_case(vault_repository, shamir_gateway):
     return CreateVaultUseCase(vault_repository, shamir_gateway)
 
 
-def test_should_create_shares(use_case, vault_repository):
+def test_should_create_shares(use_case, vault_repository, shamir_gateway):
+    expected_shares = [
+        Share(0, "1"),
+        Share(1, "2"),
+        Share(2, "3"),
+        Share(3, "4"),
+        Share(4, "5"),
+    ]
+    shamir_gateway.set(expected_shares)
+
     shares = use_case.execute(5, 3)
 
-    assert vault_repository.get().shares == shares
+    assert shares == expected_shares
+    stored_vault = vault_repository.get()
+    assert stored_vault.nb_shares == 5
+    assert stored_vault.threshold == 3
 
 
 def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
-    vault_repository.save(Vault(5, 3, []))
+    vault_repository.save(Vault(nb_shares=5, threshold=3))
 
     with pytest.raises(VaultAlreadyExistsError) as exc_info:
         use_case.execute(5, 3)
