@@ -1,0 +1,11 @@
+from fastapi import APIRouter
+from . import vault_setup_routes, vault_unlock_routes
+
+
+def get_vault_management_router():
+    vault_management_router = APIRouter()
+
+    vault_management_router.include_router(vault_setup_routes.router)
+    vault_management_router.include_router(vault_unlock_routes.router)
+
+    return vault_management_router

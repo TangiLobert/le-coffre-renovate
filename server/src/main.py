@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from vault_management_context.adapters.secondary.gateways import (
+from vault_management_context.adapters.secondary.gateways.in_memory_vault_repository import (
     InMemoryVaultRepository,
+)
+from vault_management_context.adapters.secondary.gateways import (
     CryptoShamirGateway,
 )
 
 from vault_management_context.adapters.primary.api.routes import (
-    vault_management_route,
+    get_vault_management_router,
 )
 
 
@@ -22,4 +24,4 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(vault_management_route.router)
+app.include_router(get_vault_management_router())

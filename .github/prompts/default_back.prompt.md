@@ -35,5 +35,6 @@ Rules:
 - Never run a single folder, file or test when executing unit test. Always run all the unit tests
 - At the end of your developments steps, run all the tests (e2e and unit)
 - Use uv to run tests
+- Each API endpoint should be in a dedicated file, with their request / response BaseModels
 
 Wait for any instructions
