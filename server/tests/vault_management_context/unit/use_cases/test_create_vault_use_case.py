@@ -10,14 +10,25 @@ from vault_management_context.domain.exceptions import (
 from vault_management_context.application.use_cases import (
     CreateVaultUseCase,
 )
+from vault_management_context.domain.value_objects.shamir_result import ShamirResult
 
 
 @pytest.fixture()
-def use_case(vault_repository, shamir_gateway):
-    return CreateVaultUseCase(vault_repository, shamir_gateway)
+def use_case(
+    vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
+):
+    return CreateVaultUseCase(
+        vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
+    )
 
 
-def test_should_create_shares(use_case, vault_repository, shamir_gateway):
+def test_should_create_shares_and_store_encrypted_key(
+    use_case,
+    vault_repository,
+    shamir_gateway,
+    encryption_gateway,
+    vault_session_gateway,
+):
     expected_shares = [
         Share(0, "1"),
         Share(1, "2"),
@@ -25,7 +36,15 @@ def test_should_create_shares(use_case, vault_repository, shamir_gateway):
         Share(3, "4"),
         Share(4, "5"),
     ]
-    shamir_gateway.set(expected_shares)
+    master_key = "master_secret_from_shamir"
+    encrypted_key = "encrypted_vault_key_123"
+    decrypted_key = "generated_vault_key"
+
+    # Setup mocks
+    shamir_result = ShamirResult(shares=expected_shares, master_key=master_key)
+    shamir_gateway.set_shamir_result(shamir_result)
+    encryption_gateway.set_encrypted_key(encrypted_key)
+    encryption_gateway.set_decrypted_key(decrypted_key)
 
     shares = use_case.execute(5, 3)
 
@@ -33,10 +52,14 @@ def test_should_create_shares(use_case, vault_repository, shamir_gateway):
     stored_vault = vault_repository.get()
     assert stored_vault.nb_shares == 5
     assert stored_vault.threshold == 3
+    assert stored_vault.encrypted_key == encrypted_key
+
+    # Verify the decrypted key is stored in the session
+    assert vault_session_gateway.get_decrypted_key() == decrypted_key
 
 
 def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
-    vault_repository.save(Vault(nb_shares=5, threshold=3))
+    vault_repository.save(Vault(nb_shares=5, threshold=3, encrypted_key="test"))
 
     with pytest.raises(VaultAlreadyExistsError) as exc_info:
         use_case.execute(5, 3)

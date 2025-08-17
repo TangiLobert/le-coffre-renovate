@@ -20,16 +20,20 @@ class VaultCreationService:
             raise VaultAlreadyExistsError()
 
     @staticmethod
-    def create_vault_entity(configuration: VaultConfiguration) -> Vault:
-        """Create a vault entity with the given configuration
+    def create_vault_entity(
+        configuration: VaultConfiguration, encrypted_key: str
+    ) -> Vault:
+        """Create a vault entity with the given configuration and encrypted key
 
         Args:
             configuration: The validated vault configuration
+            encrypted_key: The encrypted vault key
 
         Returns:
-            The created vault entity containing only configuration data
+            The created vault entity
         """
         return Vault(
             nb_shares=configuration.share_count.value,
             threshold=configuration.threshold.value,
+            encrypted_key=encrypted_key,
         )

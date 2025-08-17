@@ -1,2 +1,4 @@
 from .in_memory_vault_repository import InMemoryVaultRepository
 from .crypto_shamir_gateway import CryptoShamirGateway
+from .aes_encryption_gateway import AesEncryptionGateway
+from .in_memory_vault_session_gateway import InMemoryVaultSessionGateway

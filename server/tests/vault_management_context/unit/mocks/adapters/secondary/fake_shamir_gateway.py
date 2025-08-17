@@ -2,6 +2,7 @@ from typing import List
 
 from vault_management_context.domain.entities.share import Share
 from vault_management_context.domain.value_objects import VaultConfiguration
+from vault_management_context.domain.value_objects.shamir_result import ShamirResult
 from vault_management_context.application.gateways import (
     ShamirGateway,
 )
@@ -9,15 +10,17 @@ from vault_management_context.application.gateways import (
 
 class FakeShamirGateway(ShamirGateway):
     def __init__(self):
-        self.shares = []
+        self._shamir_result = None
         self._reconstructed_secret = None
         self._reconstruction_failure = False
 
-    def set(self, shares: List[Share]) -> None:
-        self.shares = shares
+    def set_shamir_result(self, result: ShamirResult) -> None:
+        self._shamir_result = result
 
-    def split_secret(self, configuration: VaultConfiguration) -> List[Share]:
-        return self.shares
+    def create_shares(self, configuration: VaultConfiguration) -> ShamirResult:
+        if self._shamir_result is None:
+            raise ValueError("No shamir result configured")
+        return self._shamir_result
 
     def set_reconstructed_secret(self, secret: str) -> None:
         self._reconstructed_secret = secret

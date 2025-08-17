@@ -18,13 +18,6 @@ class VaultNotSetupException(VaultManagementDomainError):
         super().__init__("Vault has not been setup yet")
 
 
-class InsufficientSharesError(VaultManagementDomainError):
-    def __init__(self, provided: int, required: int):
-        super().__init__(
-            f"Not enough shares provided. Need at least {required}, got {provided}"
-        )
-
-
 class ShareReconstructionError(VaultManagementDomainError):
     def __init__(
         self, message: str = "Failed to reconstruct secret from provided shares"

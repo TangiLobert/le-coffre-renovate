@@ -2,39 +2,52 @@ from typing import Optional
 
 from vault_management_context.domain.entities import Vault, Share
 from vault_management_context.domain.value_objects import VaultConfiguration
-from vault_management_context.application.gateways import (
-    VaultRepository,
-    ShamirGateway,
-)
 from vault_management_context.domain.services import (
     VaultCreationService,
 )
+from vault_management_context.application.gateways import (
+    VaultRepository,
+    ShamirGateway,
+    EncryptionGateway,
+    VaultSessionGateway,
+)
+from vault_management_context.application.services import KeySessionManager
 
 
 class CreateVaultUseCase:
     def __init__(
-        self, vault_repo: VaultRepository, shamir_gateway: ShamirGateway
+        self,
+        vault_repo: VaultRepository,
+        shamir_gateway: ShamirGateway,
+        encryption_gateway: EncryptionGateway,
+        vault_session_gateway: VaultSessionGateway,
     ) -> None:
         self.vault_repo = vault_repo
         self.shamir_gateway = shamir_gateway
+        self.encryption_gateway = encryption_gateway
+        self.vault_session_gateway = vault_session_gateway
 
     def execute(self, nb_shares: int, threshold: int) -> list[Share]:
         existing_vault: Optional[Vault] = self.vault_repo.get()
         configuration = VaultConfiguration.create(nb_shares, threshold)
 
-        shares, vault = self._create_vault(existing_vault, configuration)
-
-        self.vault_repo.save(vault)
-        return shares
-
-    def _create_vault(
-        self, existing_vault: Optional[Vault], configuration: VaultConfiguration
-    ) -> tuple[list[Share], Vault]:
-        """Create vault and return both shares (for user) and vault (for storage)"""
         VaultCreationService.ensure_creation_allowed(existing_vault)
 
-        shares = self.shamir_gateway.split_secret(configuration)
+        shamir_result = self.shamir_gateway.create_shares(configuration)
 
-        vault = VaultCreationService.create_vault_entity(configuration)
+        encrypted_key = self.encryption_gateway.generate_encrypted_key(
+            shamir_result.master_key
+        )
 
-        return shares, vault
+        vault = VaultCreationService.create_vault_entity(configuration, encrypted_key)
+
+        KeySessionManager.decrypt_and_store_key(
+            self.encryption_gateway,
+            self.vault_session_gateway,
+            vault.encrypted_key,
+            shamir_result.master_key,
+        )
+
+        self.vault_repo.save(vault)
+
+        return shamir_result.shares

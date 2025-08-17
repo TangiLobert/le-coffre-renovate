@@ -3,14 +3,17 @@ from Crypto.Protocol.SecretSharing import Shamir
 from typing import List
 
 from vault_management_context.domain.entities.share import Share
-from vault_management_context.domain.value_objects import VaultConfiguration
+from vault_management_context.domain.value_objects import (
+    VaultConfiguration,
+    ShamirResult,
+)
 from vault_management_context.application.gateways import (
     ShamirGateway,
 )
 
 
 class CryptoShamirGateway(ShamirGateway):
-    def split_secret(self, configuration: VaultConfiguration) -> List[Share]:
+    def create_shares(self, configuration: VaultConfiguration) -> ShamirResult:
         secret = get_random_bytes(16)
 
         shares = Shamir.split(
@@ -20,7 +23,9 @@ class CryptoShamirGateway(ShamirGateway):
             False,
         )
 
-        return [Share(share[0], share[1].hex()) for share in shares]
+        return ShamirResult(
+            [Share(share[0], share[1].hex()) for share in shares], secret.hex()
+        )
 
     def reconstruct_secret(self, shares: List[Share]) -> str:
         try:
