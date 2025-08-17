@@ -11,6 +11,27 @@ class VaultAlreadyExistsError(VaultManagementDomainError):
         super().__init__("A vault has already been created for this organization")
 
 
+class VaultNotSetupException(VaultManagementDomainError):
+    """Raised when attempting to access a vault that has not been setup yet"""
+
+    def __init__(self):
+        super().__init__("Vault has not been setup yet")
+
+
+class InsufficientSharesError(VaultManagementDomainError):
+    def __init__(self, provided: int, required: int):
+        super().__init__(
+            f"Not enough shares provided. Need at least {required}, got {provided}"
+        )
+
+
+class ShareReconstructionError(VaultManagementDomainError):
+    def __init__(
+        self, message: str = "Failed to reconstruct secret from provided shares"
+    ):
+        super().__init__(message)
+
+
 class InvalidShareCountError(VaultManagementDomainError):
     """Raised when share count doesn't meet security requirements"""
 

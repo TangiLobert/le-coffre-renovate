@@ -1,14 +1,12 @@
 from typing import Optional
 
-from vault_management_context.domain.entities import (
-    Vault,
-)
+from vault_management_context.domain.entities import Vault
 from vault_management_context.application.gateways.vault_repository import (
     VaultRepository,
 )
 
 
-class FakeVaultRepository(VaultRepository):
+class InMemoryVaultRepository(VaultRepository):
     def __init__(self):
         self._vault = None
 

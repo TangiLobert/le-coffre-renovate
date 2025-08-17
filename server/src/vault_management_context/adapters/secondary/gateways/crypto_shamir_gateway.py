@@ -21,3 +21,13 @@ class CryptoShamirGateway(ShamirGateway):
         )
 
         return [Share(share[0], share[1].hex()) for share in shares]
+
+    def reconstruct_secret(self, shares: List[Share]) -> str:
+        try:
+            crypto_shares = [
+                (share.index, bytes.fromhex(share.secret)) for share in shares
+            ]
+            secret_bytes = Shamir.combine(crypto_shares, False)
+            return secret_bytes.hex()
+        except Exception as e:
+            raise ValueError(f"Failed to reconstruct secret: {e}") from e

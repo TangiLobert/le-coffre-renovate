@@ -1,1 +1,2 @@
+from .in_memory_vault_repository import InMemoryVaultRepository
 from .crypto_shamir_gateway import CryptoShamirGateway

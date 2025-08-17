@@ -1,8 +1,6 @@
 import pytest
 
-from vault_management_context.adapters.secondary.gateways import (
-    FakeVaultRepository,
-)
+from mocks.adapters.secondary.fake_vault_repository import FakeVaultRepository
 from mocks.adapters.secondary.fake_shamir_gateway import FakeShamirGateway
 
 
