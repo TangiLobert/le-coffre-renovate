@@ -20,7 +20,7 @@ class AesEncryptionGateway(EncryptionGateway):
         cipher = self._get_cipher(master_key, salt)
 
         # Encrypt the data
-        bytes_decrypted_data = bytes.fromhex(decrypted_data)
+        bytes_decrypted_data = decrypted_data.encode("utf-8")
         ciphertext, auth_tag = cipher.encrypt_and_digest(bytes_decrypted_data)
 
         # Combine salt + nonce + auth_tag + ciphertext
@@ -41,7 +41,7 @@ class AesEncryptionGateway(EncryptionGateway):
 
         try:
             decrypted_data = cipher.decrypt_and_verify(ciphertext, auth_tag)
-            return decrypted_data.hex()
+            return decrypted_data.decode("utf-8")
         except ValueError as e:
             raise ValueError(f"Failed to decrypt vault key: {e}") from e
 
