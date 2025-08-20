@@ -42,8 +42,10 @@ def test_should_create_shares_and_store_encrypted_key(
 
     shamir_result = ShamirResult(shares=expected_shares, master_key=master_key)
     shamir_gateway.set_shamir_result(shamir_result)
-    encryption_gateway.set_encrypted_key(encrypted_key)
-    encryption_gateway.set_decrypted_key(decrypted_key)
+
+    encryption_gateway.set_encrypted_data(encrypted_key)
+    encryption_gateway.set_decrypted_data(decrypted_key)
+    encryption_gateway.set_master_key(master_key)
 
     shares = use_case.execute(5, 3)
 

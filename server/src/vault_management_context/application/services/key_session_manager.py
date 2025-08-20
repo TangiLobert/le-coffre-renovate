@@ -12,5 +12,5 @@ class KeySessionManager:
         encrypted_key: str,
         master_key: str,
     ):
-        decrypted_key = encryption_gateway.decrypt_key(encrypted_key, master_key)
+        decrypted_key = encryption_gateway.decrypt(encrypted_key, master_key)
         vault_session_gateway.store_decrypted_key(decrypted_key)

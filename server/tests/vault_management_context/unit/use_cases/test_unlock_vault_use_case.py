@@ -29,14 +29,16 @@ def test_should_unlock_vault_with_valid_shares_and_decrypt_key(
     vault_session_gateway,
 ):
     vault_key = "test_vault_key_12345678"
-    master_secret = "master_secret"
+    master_key = "master_key"
     encrypted_key = "encrypted_vault_key_hex"
     shares = [Share(0, "share0"), Share(1, "share1")]
 
     vault_repository.save(Vault(3, 2, encrypted_key))
 
-    shamir_gateway.set_shamir_result(ShamirResult(shares, master_secret))
-    encryption_gateway.set_decrypted_key(vault_key)
+    shamir_gateway.set_shamir_result(ShamirResult(shares, master_key))
+    encryption_gateway.set_decrypted_data(vault_key)
+    encryption_gateway.set_encrypted_data(encrypted_key)
+    encryption_gateway.set_master_key(master_key)
 
     use_case.execute(shares)
 
@@ -83,11 +85,13 @@ def test_should_fail_when_vault_is_already_unlock(
     vault_repository.save(Vault(3, 2, encrypted_key))
 
     shares = [Share(0, "share0"), Share(1, "share1")]
-    master_secret = "master_secret"
-    shamir_gateway.set_shamir_result(ShamirResult(shares, master_secret))
+    master_key = "master_key"
+    shamir_gateway.set_shamir_result(ShamirResult(shares, master_key))
 
     vault_key = "test_vault_key_12345678"
-    encryption_gateway.set_decrypted_key(vault_key)
+    encryption_gateway.set_decrypted_data(vault_key)
+    encryption_gateway.set_encrypted_data(encrypted_key)
+    encryption_gateway.set_master_key(master_key)
 
     use_case.execute(shares)
 

@@ -35,7 +35,7 @@ class CreateVaultUseCase:
 
         shamir_result = self.shamir_gateway.create_shares(configuration)
 
-        encrypted_key = self.encryption_gateway.generate_encrypted_key(
+        encrypted_key = self.encryption_gateway.generate_vault_key(
             shamir_result.master_key
         )
 
