@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+import logging
 
 from vault_management_context.adapters.primary.api.app_dependencies import (
     get_create_vault_usecase,
@@ -41,6 +42,7 @@ def create_vault(
     except VaultManagementDomainError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
     return {"shares": shares}
