@@ -1,6 +1,6 @@
 import pytest
 
-from mocks.adapters.secondary import (
+from mocks import (
     FakeVaultRepository,
     FakeShamirGateway,
     FakeEncryptionGateway,
