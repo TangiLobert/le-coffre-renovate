@@ -3,7 +3,7 @@ import pytest
 from vault_management_context.adapters.secondary.gateways import (
     InMemoryVaultSessionGateway,
 )
-from mocks import (
+from .mocks import (
     FakeVaultRepository,
     FakeShamirGateway,
     FakeEncryptionGateway,
