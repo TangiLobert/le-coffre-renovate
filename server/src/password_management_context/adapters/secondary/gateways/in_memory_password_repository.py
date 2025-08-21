@@ -1,8 +1,9 @@
-from typing import Optional, Dict
+from typing import Dict
 from uuid import UUID
 
 from password_management_context.application.gateways import PasswordRepository
 from password_management_context.domain.entities import Password
+from password_management_context.domain.exceptions import PasswordNotFoundError
 
 
 class InMemoryPasswordRepository(PasswordRepository):
@@ -14,9 +15,5 @@ class InMemoryPasswordRepository(PasswordRepository):
 
     def get_by_id(self, id: UUID) -> Password:
         if id not in self.storage:
-            raise PasswordNotFoundError(f"Password with ID {id} not found")
+            raise PasswordNotFoundError(id)
         return self.storage[id]
-
-
-class PasswordNotFoundError(Exception):
-    pass
