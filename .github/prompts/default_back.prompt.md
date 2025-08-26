@@ -13,8 +13,9 @@ Contexts:
 
 Folders architecture:
 server/tests/ : Tests, regrouped by bonded context.
-server/tests/context_1/unit: Tests done with TDD
-server/test/contest_1/e2e: Tests with fastapi and real secondary adapters
+server/tests/context/unit: Tests done with TDD
+server/tests/context/integration: Test only secondary adapters
+server/tests/context/e2e: Tests with fastapi and real secondary adapters
 
 server/src/ : Code about the whole application, regrouped by bonded context
 
@@ -31,11 +32,17 @@ domain/services : Domain Services
 
 Rules:
 - Never update PYTHONPATH, use UV to run pytest and fastapi
-- Unit Test should setup the repositories, execute the use case and check that the repositories are correct. With FakeRepositories for simplicity
-- E2E tests should use fastapi and real secondary adapters (databases, randoms, not controlled env)
-- Tests should use pytest (not unitest, no classes), fixtures. No python patches
+- Use strict TDD. RED, GREEN, Refactor, one test at a time.
+- Unit tests should:
+  - Receive the tested use case and fake secondary adapters as pytest fixtures
+  - ARRANGE should create in the fake repositories the needed data
+  - ACT should execute the use case
+  - ASSERT should check that the returned data is correct, and that the repositories are in the expected state
 - Don't write comments if they repeat exactly what the code is doing
 - Don't write comments of a refactoring process, it can be seen inside the git history
-- Each API endpoint should be in a dedicated file, with their request / response BaseModels
+
+
+Examples unit tests:
+[Example: test_create_password_use_case.py](../../server/tests/password_management_context/unit/use_cases/test_create_password_use_case.py)
 
 Wait for any instructions
