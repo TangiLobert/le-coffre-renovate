@@ -18,7 +18,7 @@ def test_when_sharing_owned_resource_should_grant_access(use_case: ShareAccessUs
     user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
 
     # Act
-    rights_repository.add_ownership(owner_id, resource_id)
+    rights_repository.grant_access(owner_id, resource_id)
     use_case.execute(ShareResourceCommand(owner_id, user_id, resource_id))
 
     # Assert
