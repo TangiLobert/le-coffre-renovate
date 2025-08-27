@@ -20,3 +20,7 @@ class PasswordRepository(Protocol):
     def delete(self, id: UUID) -> None:
         """Delete password by UUID"""
         ...
+
+    def update(self, password: Password) -> None:
+        """Update password"""
+        ...

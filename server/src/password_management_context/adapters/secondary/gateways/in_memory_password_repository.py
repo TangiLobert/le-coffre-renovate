@@ -25,3 +25,8 @@ class InMemoryPasswordRepository(PasswordRepository):
         if id not in self.storage:
             raise PasswordNotFoundError(id)
         del self.storage[id]
+
+    def update(self, password: Password) -> None:
+        if password.id not in self.storage:
+            raise PasswordNotFoundError(password.id)
+        self.storage[password.id] = password
