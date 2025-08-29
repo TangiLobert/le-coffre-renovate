@@ -18,20 +18,20 @@ class GetPasswordUseCase:
         self.encryption_service = encryption_service
         self.access_controller = access_controller
 
-    def execute(self, user_id: UUID, password_id: UUID) -> PasswordResponse:
-        password_entity = self.password_repository.get_by_id(password_id)
-
-        authorized_password = PasswordAccessService.ensure_access_and_get_password(
-            self.access_controller, user_id, password_entity
+    def execute(self, requester_id: UUID, password_id: UUID) -> PasswordResponse:
+        PasswordAccessService.ensure_access(
+            self.access_controller, requester_id, password_id
         )
 
+        password_entity = self.password_repository.get_by_id(password_id)
+
         decrypted_password = self.encryption_service.decrypt(
-            authorized_password.encrypted_value
+            password_entity.encrypted_value
         )
 
         return PasswordResponse(
-            id=authorized_password.id,
-            name=authorized_password.name,
+            id=password_entity.id,
+            name=password_entity.name,
             password=decrypted_password,
-            folder=authorized_password.folder,
+            folder=password_entity.folder,
         )

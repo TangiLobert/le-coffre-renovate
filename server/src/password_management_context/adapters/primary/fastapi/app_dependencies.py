@@ -4,6 +4,7 @@ from starlette.requests import Request
 from password_management_context.application.use_cases import (
     CreatePasswordUseCase,
     GetPasswordUseCase,
+    UpdatePasswordUseCase,
 )
 from password_management_context.application.gateways import PasswordRepository
 from shared_kernel.encryption import EncryptionService
@@ -40,3 +41,10 @@ def get_get_password_usecase(
     return GetPasswordUseCase(
         password_repository, encryption_service, access_controller
     )
+
+
+def get_update_password_usecase(
+    password_repository: PasswordRepository = Depends(get_password_repository),
+    encryption_service: EncryptionService = Depends(get_encryption_service),
+):
+    return UpdatePasswordUseCase(password_repository, encryption_service)

@@ -8,14 +8,12 @@ class PasswordAccessService:
     """Domain service that encapsulates password access control logic"""
 
     @staticmethod
-    def ensure_access_and_get_password(
-        access_controller: AccessController, user_id: UUID, password: Password
-    ) -> Password:
+    def ensure_access(
+        access_controller: AccessController, user_id: UUID, password_id: UUID
+    ) -> None:
         """
-        Domain logic: Ensure user has access to password and return it.
+        Domain logic: Ensure user has access to password
         Raises AccessDeniedError if access is denied.
         """
-        if not access_controller.check_access(user_id, password.id):
-            raise AccessDeniedError(user_id, password.id)
-
-        return password
+        if not access_controller.check_access(user_id, password_id):
+            raise AccessDeniedError(user_id, password_id)
