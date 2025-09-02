@@ -18,3 +18,11 @@ class AccessController(Protocol):
     def grant_update_access(self, user_id: UUID, resource_id: UUID) -> None:
         """Grant update access to a resource for a specific user"""
         ...
+
+    def check_delete_access(self, user_id: UUID, resource_id: UUID) -> bool:
+        """Check if user has delete access to resource"""
+        ...
+
+    def grant_delete_access(self, user_id: UUID, resource_id: UUID) -> None:
+        """Grant delete access to a resource for a specific user"""
+        ...
