@@ -3,6 +3,8 @@ from tests.authentication_context.unit.mocks import (
     FakeSSOProviderGateway,
     FakeJWTTokenGateway,
     FakeStateGenerationGateway,
+    FakeAdminRepository,
+    FakePasswordHashingGateway,
 )
 
 
@@ -19,3 +21,13 @@ def sso_provider_gateway():
 @pytest.fixture
 def state_generation_gateway():
     return FakeStateGenerationGateway()
+
+
+@pytest.fixture
+def admin_repository():
+    return FakeAdminRepository()
+
+
+@pytest.fixture
+def password_hashing_gateway():
+    return FakePasswordHashingGateway()

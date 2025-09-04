@@ -1,6 +1,14 @@
-class InvalidSSOTokenException(Exception):
+class AuthenticationDomainError(Exception):
     pass
 
 
-class UnsupportedSSOProviderException(Exception):
+class InvalidSSOTokenException(AuthenticationDomainError):
+    pass
+
+
+class UnsupportedSSOProviderException(AuthenticationDomainError):
+    pass
+
+
+class AdminAlreadyExistsException(AuthenticationDomainError):
     pass
