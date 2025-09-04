@@ -3,12 +3,11 @@ from uuid import UUID
 
 from password_management_context.application.use_cases import DeletePasswordUseCase
 from password_management_context.adapters.secondary.gateways import (
-    InMemoryPasswordRepository
+    InMemoryPasswordRepository,
 )
 from password_management_context.domain.exceptions import PasswordNotFoundError
 from password_management_context.domain.entities import Password
 from shared_kernel.access_control.access_controller import AccessController
-from shared_kernel.access_control.exceptions import AccessDeniedError
 
 
 @pytest.fixture
@@ -19,7 +18,7 @@ def use_case(password_repository, access_controller: AccessController):
 def test_given_delete_access_when_deleting_should_success(
     use_case: DeletePasswordUseCase,
     password_repository: InMemoryPasswordRepository,
-    access_controller: AccessController
+    access_controller: AccessController,
 ):
     requester_user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
     uuid = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
@@ -52,8 +51,7 @@ def test_sould_raise_error_when_password_does_not_exist(
 
 
 def test_given_no_access_when_deleting_should_fail(
-    use_case: DeletePasswordUseCase,
-    password_repository: InMemoryPasswordRepository
+    use_case: DeletePasswordUseCase, password_repository: InMemoryPasswordRepository
 ):
     requester_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
     resource = Password(
@@ -63,6 +61,6 @@ def test_given_no_access_when_deleting_should_fail(
         folder="folder",
     )
     password_repository.save(resource)
-    
-    with pytest.raises(AccessDeniedError):
+
+    with pytest.raises(PasswordNotFoundError):
         use_case.execute(requester_id, resource.id)

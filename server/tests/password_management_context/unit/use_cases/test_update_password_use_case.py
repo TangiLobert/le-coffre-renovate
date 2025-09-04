@@ -7,8 +7,8 @@ from password_management_context.adapters.secondary.gateways import (
 from password_management_context.application.use_cases import UpdatePasswordUseCase
 from password_management_context.domain.entities import Password
 from password_management_context.application.commands import UpdatePasswordCommand
+from password_management_context.domain.exceptions import PasswordNotFoundError
 from shared_kernel.access_control.access_controller import AccessController
-from shared_kernel.access_control.exceptions import AccessDeniedError
 
 
 @pytest.fixture
@@ -52,8 +52,8 @@ def test_should_update_password(
     )
 
 
-# For security purpose, AccessDenied and not PasswordNotFound
-def test_when_requesting_a_non_existing_password_should_raise_access_denied(
+# For security purpose, PasswordNotFound and AccessDenied are indistinguishable
+def test_when_requesting_a_non_existing_password_should_raise_password_not_found(
     use_case: UpdatePasswordUseCase,
 ):
     requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e5")
@@ -66,7 +66,7 @@ def test_when_requesting_a_non_existing_password_should_raise_access_denied(
         folder="folder",
     )
 
-    with pytest.raises(AccessDeniedError):
+    with pytest.raises(PasswordNotFoundError):
         use_case.execute(password_data)
 
 
@@ -91,5 +91,5 @@ def test_update_password_without_access(
         folder="folder",
     )
 
-    with pytest.raises(AccessDeniedError):
+    with pytest.raises(PasswordNotFoundError):
         use_case.execute(new_password=updated_password)
