@@ -17,8 +17,8 @@ class SessionRepository(Protocol):
         """Get a session by JWT token"""
         ...
 
-    def get_sessions_by_user_id(self, user_id: UUID) -> List[AuthenticationSession]:
-        """Get all sessions for a user"""
+    def get_user_last_session(self, user_id: UUID) -> Optional[AuthenticationSession]:
+        """Get the last session for a user"""
         ...
 
     def delete(self, session_id: UUID) -> None:

@@ -11,6 +11,9 @@ class FakeJWTTokenGateway(JWTTokenGateway):
     def set_unique_jwt_part(self, unique_part: str):
         self.unique_part = unique_part
 
+    def set_valid_token(self, token: str, claims: Dict[str, Any]) -> None:
+        self.generated_tokens[token] = claims
+
     async def generate_token(self, user_id: str, claims: Dict[str, Any]) -> str:
         self.generation_calls.append((user_id, claims))
         token = f"jwt_token_for_{user_id}_{self.unique_part}"

@@ -20,3 +20,7 @@ class InvalidCredentialsException(AuthenticationDomainError):
 
 class AdminNotFoundException(AuthenticationDomainError):
     pass
+
+
+class InvalidSessionException(AuthenticationDomainError):
+    pass

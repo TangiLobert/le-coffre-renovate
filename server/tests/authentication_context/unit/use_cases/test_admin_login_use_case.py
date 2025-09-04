@@ -46,10 +46,9 @@ async def test_should_authenticate_admin_and_return_jwt_token(
     assert response.email == email
 
     # Check that session was created with the JWT token
-    sessions = session_repository.get_sessions_by_user_id_ordered_by_creation(admin_id)
-    assert len(sessions) == 1
-    assert sessions[0].user_id == admin_id
-    assert sessions[0].jwt_token == response.jwt_token
+    sessions = session_repository.get_user_last_session(admin_id)
+    assert sessions.user_id == admin_id
+    assert sessions.jwt_token == response.jwt_token
 
 
 @pytest.mark.asyncio
@@ -71,8 +70,7 @@ async def test_should_raise_exception_for_wrong_password(
         await use_case.execute(command)
 
     # No session should be created
-    sessions = session_repository.get_sessions_by_user_id_ordered_by_creation(admin_id)
-    assert len(sessions) == 0
+    assert session_repository.get_user_last_session(admin_id) is None
 
 
 @pytest.mark.asyncio
@@ -113,13 +111,13 @@ async def test_should_store_new_session_on_successful_login(
 
     jwt_token_gateway.set_unique_jwt_part("other_uniqueness")
 
+    old_session = session_repository.get_user_last_session(admin_id)
+
     command = AdminLoginCommand(email=email, password="secure123!")
 
     response = await use_case.execute(command)
 
-    admin_session = session_repository.get_sessions_by_user_id_ordered_by_creation(
-        admin_id
-    )
+    admin_session = session_repository.get_user_last_session(admin_id)
     assert response.jwt_token == "jwt_token_for_admin@lecoffre.com_other_uniqueness"
-    assert admin_session[-1].jwt_token == response.jwt_token
-    assert admin_session[0].jwt_token == old_jwt_token
+    assert admin_session.jwt_token == response.jwt_token
+    assert admin_session.created_at > old_session.created_at
