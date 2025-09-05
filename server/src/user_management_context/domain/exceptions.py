@@ -3,6 +3,7 @@ from uuid import UUID
 
 class UserManagementDomainError(Exception):
     """Base exception for all user management domain errors"""
+
     pass
 
 
