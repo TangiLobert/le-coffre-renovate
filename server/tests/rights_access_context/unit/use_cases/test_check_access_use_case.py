@@ -27,7 +27,7 @@ def test_given_owned_resource_when_reading_should_grant_access(
     rights_repository.add_permission(user_id, resource_id, Permission.READ)
 
     result = use_case.execute(user_id, resource_id, Permission.READ)
-    print("test-result", result)
+
     assert result.granted is Granted.ACCESS
 
 

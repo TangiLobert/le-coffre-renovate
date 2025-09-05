@@ -14,23 +14,17 @@ class CheckAccessUseCase:
     def execute(
         self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
     ) -> AccessResult:
-        # Récupère toutes les permissions du user sur la ressource
         all_permissions = self.rights_repository.get_all_permissions(
             user_id, resource_id
         )
-        print("all_permissions", all_permissions)
 
         if not all_permissions:
-            # Aucune permission trouvée → NotFound
             return AccessResult(granted=Granted.NOT_FOUND)
 
         if permission in all_permissions:
-            # Permission demandée accordée
             return AccessResult(granted=Granted.ACCESS)
 
         if Permission.READ in all_permissions:
-            # Pas la permission demandée, mais au moins la lecture → ViewOnly
             return AccessResult(granted=Granted.VIEW_ONLY)
 
-        # Cas de fallback si aucune condition match
         return AccessResult(granted=Granted.NOT_FOUND)

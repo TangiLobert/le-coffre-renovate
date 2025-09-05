@@ -25,7 +25,6 @@ class GetPasswordUseCase:
         check_permission = self.access_controller.check_access(
             requester_id, password_id
         )
-        print("checked_permission", check_permission)
         if check_permission.granted == Granted.VIEW_ONLY:
             raise AccessDeniedError(requester_id, password_id)
         if check_permission.granted == Granted.NOT_FOUND:
