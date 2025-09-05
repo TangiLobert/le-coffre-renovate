@@ -7,4 +7,4 @@ class User:
     id: UUID
     username: str
     email: str
-    password_hashed: str
+    name: str

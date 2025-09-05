@@ -5,9 +5,9 @@ from .list_user_use_case import ListUserUseCase
 from .update_user_use_case import UpdateUserUseCase
 
 __all__ = [
-  "CreateUserUseCase",
-  "DeleteUserUseCase",
-  "GetUserUseCase",
-  "ListUserUseCase",
-  "UpdateUserUseCase",
+    "CreateUserUseCase",
+    "DeleteUserUseCase",
+    "GetUserUseCase",
+    "ListUserUseCase",
+    "UpdateUserUseCase",
 ]

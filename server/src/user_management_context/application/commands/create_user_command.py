@@ -7,7 +7,7 @@ class CreateUserCommand:
     id: UUID
     username: str
     email: str
-    password: str
+    name: str
 
     @staticmethod
     def from_dict(data: dict) -> "CreateUserCommand":
@@ -15,5 +15,5 @@ class CreateUserCommand:
             id=UUID(data["id"]) if "id" in data else uuid4(),
             username=data["username"],
             email=data["email"],
-            password=data["password"],
+            name=data["name"],
         )
