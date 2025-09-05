@@ -6,6 +6,8 @@ from tests.authentication_context.unit.mocks import (
     FakeAdminRepository,
     FakePasswordHashingGateway,
     FakeSessionRepository,
+    FakeUserPasswordRepository,
+    FakeUserManagementGateway,
 )
 
 
@@ -37,3 +39,13 @@ def password_hashing_gateway():
 @pytest.fixture
 def session_repository():
     return FakeSessionRepository()
+
+
+@pytest.fixture
+def user_password_repository():
+    return FakeUserPasswordRepository()
+
+
+@pytest.fixture
+def user_management_gateway():
+    return FakeUserManagementGateway()

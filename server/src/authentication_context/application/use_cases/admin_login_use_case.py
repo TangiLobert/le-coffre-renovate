@@ -1,7 +1,7 @@
 from authentication_context.application.commands import AdminLoginCommand
 from authentication_context.application.responses import AdminLoginResponse
 from authentication_context.application.gateways import (
-    AdminRepository,
+    UserPasswordRepository,
     PasswordHashingGateway,
     JWTTokenGateway,
     SessionRepository,
@@ -16,34 +16,34 @@ from authentication_context.domain.exceptions import (
 class AdminLoginUseCase:
     def __init__(
         self,
-        admin_repository: AdminRepository,
+        user_password_repository: UserPasswordRepository,
         password_hashing_gateway: PasswordHashingGateway,
         jwt_token_gateway: JWTTokenGateway,
         session_repository: SessionRepository,
     ):
-        self._admin_repository = admin_repository
+        self._user_password_repository = user_password_repository
         self._password_hashing_gateway = password_hashing_gateway
         self._jwt_token_gateway = jwt_token_gateway
         self._session_repository = session_repository
 
     async def execute(self, command: AdminLoginCommand) -> AdminLoginResponse:
-        admin = self._admin_repository.get_by_email(command.email)
-        if not admin:
-            raise AdminNotFoundException("Admin not found")
+        user_password = self._user_password_repository.get_by_email(command.email)
+        if not user_password:
+            raise AdminNotFoundException("User not found")
 
         if not self._password_hashing_gateway.verify_password(
-            command.password, admin.password_hash
+            command.password, user_password.password_hash
         ):
             raise InvalidCredentialsException("Invalid credentials")
 
         jwt_token = await self._jwt_token_gateway.generate_token(
             user_id=command.email,
-            claims={"admin_id": str(admin.id), "email": admin.email},
+            claims={"user_id": str(user_password.id), "email": user_password.email},
         )
 
-        session = AuthenticationSession(user_id=admin.id, jwt_token=jwt_token)
+        session = AuthenticationSession(user_id=user_password.id, jwt_token=jwt_token)
         self._session_repository.save(session)
 
         return AdminLoginResponse(
-            jwt_token=jwt_token, admin_id=admin.id, email=admin.email
+            jwt_token=jwt_token, admin_id=user_password.id, email=user_password.email
         )

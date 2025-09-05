@@ -3,7 +3,7 @@ from uuid import UUID
 
 from authentication_context.application.use_cases import AdminLoginUseCase
 from authentication_context.application.commands import AdminLoginCommand
-from authentication_context.domain.entities import AdminAccount, AuthenticationSession
+from authentication_context.domain.entities import UserPassword, AuthenticationSession
 from authentication_context.domain.exceptions import (
     InvalidCredentialsException,
     AdminNotFoundException,
@@ -12,10 +12,13 @@ from authentication_context.domain.exceptions import (
 
 @pytest.fixture
 def use_case(
-    admin_repository, password_hashing_gateway, jwt_token_gateway, session_repository
+    user_password_repository,
+    password_hashing_gateway,
+    jwt_token_gateway,
+    session_repository,
 ):
     return AdminLoginUseCase(
-        admin_repository,
+        user_password_repository,
         password_hashing_gateway,
         jwt_token_gateway,
         session_repository,
@@ -24,16 +27,19 @@ def use_case(
 
 @pytest.mark.asyncio
 async def test_should_authenticate_admin_and_return_jwt_token(
-    use_case: AdminLoginUseCase, admin_repository, session_repository, jwt_token_gateway
+    use_case: AdminLoginUseCase,
+    user_password_repository,
+    session_repository,
+    jwt_token_gateway,
 ):
-    admin_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     email = "admin@lecoffre.com"
     password_hash = "hashed(secure123!)"
 
-    admin = AdminAccount(
-        id=admin_id, email=email, password_hash=password_hash, display_name="Admin User"
+    user_password = UserPassword(
+        id=user_id, email=email, password_hash=password_hash, display_name="Admin User"
     )
-    admin_repository.save(admin)
+    user_password_repository.save(user_password)
 
     jwt_token_gateway.set_unique_jwt_part("uniqueness")
 
@@ -42,27 +48,27 @@ async def test_should_authenticate_admin_and_return_jwt_token(
     response = await use_case.execute(command)
 
     assert response.jwt_token == "jwt_token_for_admin@lecoffre.com_uniqueness"
-    assert response.admin_id == admin_id
+    assert response.admin_id == user_id
     assert response.email == email
 
     # Check that session was created with the JWT token
-    sessions = session_repository.get_user_last_session(admin_id)
-    assert sessions.user_id == admin_id
+    sessions = session_repository.get_user_last_session(user_id)
+    assert sessions.user_id == user_id
     assert sessions.jwt_token == response.jwt_token
 
 
 @pytest.mark.asyncio
 async def test_should_raise_exception_for_wrong_password(
-    use_case: AdminLoginUseCase, admin_repository, session_repository
+    use_case: AdminLoginUseCase, user_password_repository, session_repository
 ):
-    admin_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     email = "admin@lecoffre.com"
     password_hash = "hashed(secure123!)"
 
-    admin = AdminAccount(
-        id=admin_id, email=email, password_hash=password_hash, display_name="Admin User"
+    user_password = UserPassword(
+        id=user_id, email=email, password_hash=password_hash, display_name="Admin User"
     )
-    admin_repository.save(admin)
+    user_password_repository.save(user_password)
 
     command = AdminLoginCommand(email=email, password="wrong_password")
 
@@ -70,7 +76,7 @@ async def test_should_raise_exception_for_wrong_password(
         await use_case.execute(command)
 
     # No session should be created
-    assert session_repository.get_user_last_session(admin_id) is None
+    assert session_repository.get_user_last_session(user_id) is None
 
 
 @pytest.mark.asyncio
@@ -90,34 +96,37 @@ async def test_should_raise_exception_for_non_existent_admin(
 
 @pytest.mark.asyncio
 async def test_should_store_new_session_on_successful_login(
-    use_case: AdminLoginUseCase, admin_repository, jwt_token_gateway, session_repository
+    use_case: AdminLoginUseCase,
+    user_password_repository,
+    jwt_token_gateway,
+    session_repository,
 ):
-    admin_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     email = "admin@lecoffre.com"
     password_hash = "hashed(secure123!)"
     old_jwt_token = "jwt_token_for_admin@lecoffre.com_uniqueness"
 
-    admin = AdminAccount(
-        id=admin_id, email=email, password_hash=password_hash, display_name="Admin User"
+    user_password = UserPassword(
+        id=user_id, email=email, password_hash=password_hash, display_name="Admin User"
     )
-    admin_repository.save(admin)
+    user_password_repository.save(user_password)
 
     session_repository.save(
         AuthenticationSession(
-            user_id=admin_id,
+            user_id=user_id,
             jwt_token=old_jwt_token,
         )
     )
 
     jwt_token_gateway.set_unique_jwt_part("other_uniqueness")
 
-    old_session = session_repository.get_user_last_session(admin_id)
+    old_session = session_repository.get_user_last_session(user_id)
 
     command = AdminLoginCommand(email=email, password="secure123!")
 
     response = await use_case.execute(command)
 
-    admin_session = session_repository.get_user_last_session(admin_id)
+    admin_session = session_repository.get_user_last_session(user_id)
     assert response.jwt_token == "jwt_token_for_admin@lecoffre.com_other_uniqueness"
     assert admin_session.jwt_token == response.jwt_token
     assert admin_session.created_at > old_session.created_at

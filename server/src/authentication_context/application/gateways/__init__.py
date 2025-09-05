@@ -4,3 +4,5 @@ from .state_generation_gateway import StateGenerationGateway
 from .admin_repository import AdminRepository
 from .password_hashing_gateway import PasswordHashingGateway
 from .session_repository import SessionRepository
+from .user_password_repository import UserPasswordRepository
+from .user_management_gateway import UserManagementGateway

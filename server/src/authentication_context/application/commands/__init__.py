@@ -1,3 +1,3 @@
 from .authenticate_with_sso_command import AuthenticateWithSSOCommand
-from .create_admin_account_command import CreateAdminAccountCommand
 from .admin_login_command import AdminLoginCommand
+from .register_admin_with_password_command import RegisterAdminWithPasswordCommand
