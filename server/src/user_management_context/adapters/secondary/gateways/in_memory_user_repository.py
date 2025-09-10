@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import UUID
 from user_management_context.application.gateways import UserRepository
 from user_management_context.domain.entities import User
-from user_management_context.domain.exceptions import UserNotFoundError
+from user_management_context.domain.exceptions import UserNotFoundError, UserAlreadyExistsError
 
 
 class InMemoryUserRepository(UserRepository):
@@ -15,4 +15,6 @@ class InMemoryUserRepository(UserRepository):
         return self.storage.get(user_id)
 
     def save(self, user: User) -> None:
+        if any(u.username == user.username for u in self.storage.values()):
+            raise UserAlreadyExistsError(user.username)
         self.storage[user.id] = user

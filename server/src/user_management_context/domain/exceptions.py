@@ -11,3 +11,10 @@ class UserNotFoundError(UserManagementDomainError):
 
     def __init__(self, uuid: UUID):
         super().__init__(f"The requested user with ID {uuid} was not found")
+
+
+class UserAlreadyExistsError(UserManagementDomainError):
+    """Raised when attempting to create a user that already exists"""
+
+    def __init__(self, username: str):
+        super().__init__(f"The user with username '{username}' already exists")

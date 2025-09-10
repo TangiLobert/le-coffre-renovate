@@ -6,6 +6,11 @@ from user_management_context.application.commands import CreateUserCommand
 from user_management_context.application.use_cases import (
   CreateUserUseCase
 )
+from user_management_context.domain.exceptions import (
+  UserNotFoundError,
+  UserAlreadyExistsError
+)
+
 from user_management_context.application.gateways.haching_gateway import (
   HashingGateway
 )
@@ -41,3 +46,31 @@ def test_should_create_user(
     assert created_user.username == username
     assert created_user.email == email
     assert created_user.password_hashed == expected_hashed_password
+
+    assert use_case.hash_password_service.compare(
+        password, created_user.password_hashed
+    ) is True
+
+
+def test_should_raise_not_existing_username(
+  user_repository: UserRepository,
+):
+    with pytest.raises(UserNotFoundError) as _:
+        user_repository.get_by_id(
+            UUID("123e4567-e89b-12d3-a456-426614174000")
+        )
+
+
+def test_should_raise_when_user_already_exists(
+  use_case: CreateUserUseCase,
+):
+    uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
+    username = "testuser"
+    email = "testuser@example.com"
+    password = "securepassword123"
+    command = CreateUserCommand(
+        id=uuid, username=username, email=email, password=password
+    )
+    use_case.execute(command)
+    with pytest.raises(UserAlreadyExistsError) as _:
+        use_case.execute(command)
