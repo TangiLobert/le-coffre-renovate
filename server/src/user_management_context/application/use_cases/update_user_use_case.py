@@ -1,5 +1,5 @@
-from user_management_context.application.gateways import UserRepository
-from user_management_context.application.gateways.haching_gateway import (
+from user_management_context.application.interfaces import UserRepository
+from user_management_context.application.interfaces.haching_gateway import (
   HashingGateway
 )
 from user_management_context.application.commands import UpdateUserCommand

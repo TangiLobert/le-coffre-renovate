@@ -1,5 +1,5 @@
 from uuid import UUID
-from user_management_context.application.gateways import UserRepository
+from user_management_context.application.interfaces import UserRepository
 
 
 class DeleteUserUseCase:

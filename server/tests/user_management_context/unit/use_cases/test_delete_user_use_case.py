@@ -1,7 +1,7 @@
 from uuid import UUID
 import pytest
 from user_management_context.application.commands import CreateUserCommand
-from user_management_context.application.gateways import UserRepository
+from user_management_context.application.interfaces import UserRepository
 from user_management_context.adapters.secondary.gateways import (
   InMemoryUserRepository
 )
