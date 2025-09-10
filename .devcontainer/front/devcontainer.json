@@ -1,10 +1,9 @@
 {
-  "name": "Le Coffre devcontainer",
-  "dockerComposeFile": "../docker-compose.dev.yml",
-  "service": "backend",
+  "name": "Frontend - Le Coffre",
+  "dockerComposeFile": "../../docker-compose.dev.yml",
+  "service": "frontend",
   "workspaceFolder": "/app",
-  "forwardPorts": [5173, 8000],
-  "postCreateCommand": "uv run pre-commit install",
+  "forwardPorts": [5173],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,7 +12,8 @@
         "Nuxtr.nuxt-vscode-extentions",
         "qwtel.sqlite-viewer",
         "Gruntfuggly.todo-tree",
-        "vitest.explorer"
+        "vitest.explorer",
+        "Vue.volar"
       ]
     },
     "settings": {
