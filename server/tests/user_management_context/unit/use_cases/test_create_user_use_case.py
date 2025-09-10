@@ -3,30 +3,29 @@ from uuid import UUID
 
 from user_management_context.application.interfaces import UserRepository
 from user_management_context.application.commands import CreateUserCommand
-from user_management_context.application.use_cases import (
-  CreateUserUseCase
-)
+from user_management_context.application.use_cases import CreateUserUseCase
 from user_management_context.domain.exceptions import (
-  UserNotFoundError,
-  UserAlreadyExistsError
+    UserNotFoundError,
+    UserAlreadyExistsError,
 )
 
 from user_management_context.application.interfaces.haching_gateway import (
-  HashingGateway
+    HashingGateway,
 )
 
 
 @pytest.fixture
 def use_case(
-  user_repository: UserRepository,
-  hash_gateway: HashingGateway,
+    user_repository: UserRepository,
+    hash_gateway: HashingGateway,
 ):
     return CreateUserUseCase(user_repository, hash_gateway)
 
 
 def test_should_create_user(
-  use_case: CreateUserUseCase,
-  user_repository: UserRepository,
+    use_case: CreateUserUseCase,
+    user_repository: UserRepository,
+    hash_gateway: HashingGateway,
 ):
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
@@ -47,22 +46,18 @@ def test_should_create_user(
     assert created_user.email == email
     assert created_user.password_hashed == expected_hashed_password
 
-    assert use_case.hash_password_service.compare(
-        password, created_user.password_hashed
-    ) is True
+    assert hash_gateway.compare(password, created_user.password_hashed) is True
 
 
 def test_should_raise_not_existing_username(
-  user_repository: UserRepository,
+    user_repository: UserRepository,
 ):
     with pytest.raises(UserNotFoundError) as _:
-        user_repository.get_by_id(
-            UUID("123e4567-e89b-12d3-a456-426614174000")
-        )
+        user_repository.get_by_id(UUID("123e4567-e89b-12d3-a456-426614174000"))
 
 
 def test_should_raise_when_user_already_exists(
-  use_case: CreateUserUseCase,
+    use_case: CreateUserUseCase,
 ):
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
