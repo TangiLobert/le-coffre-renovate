@@ -1,3 +1,3 @@
-from .fake_hash_password_service import FakeHashPasswordService
+from .fake_hash_gateway import FakeHashingGateway
 
-__all__ = ["FakeHashPasswordService"]
+__all__ = ["FakeHashingGateway"]

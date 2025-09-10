@@ -4,17 +4,19 @@ from uuid import UUID
 from user_management_context.application.gateways import UserRepository
 from user_management_context.application.commands import CreateUserCommand
 from user_management_context.application.use_cases import (
-  CreateUserUseCase,
-  HashingService
+  CreateUserUseCase
+)
+from user_management_context.application.gateways.haching_gateway import (
+  HashingGateway
 )
 
 
 @pytest.fixture
 def use_case(
   user_repository: UserRepository,
-  hash_password_service: HashingService
+  hash_gateway: HashingGateway,
 ):
-    return CreateUserUseCase(user_repository, hash_password_service)
+    return CreateUserUseCase(user_repository, hash_gateway)
 
 
 def test_should_create_user(
