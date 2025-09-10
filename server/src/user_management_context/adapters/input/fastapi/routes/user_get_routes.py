@@ -37,7 +37,7 @@ def get_user(
     - **user_id**: The ID of the user to retrieve
     """
     try:
-        user_response = usecase.execute(user_id)
+        user_response = usecase.execute(user_id=user_id)
 
         return GetUserResponse(
             id=user_response.id,
