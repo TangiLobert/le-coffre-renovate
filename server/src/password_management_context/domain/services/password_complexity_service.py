@@ -1,7 +1,6 @@
 import re
 
 from password_management_context.domain.exceptions import (
-    PasswordComplexityError,
     PasswordTooShortError,
     PasswordMissingUppercaseError,
     PasswordMissingLowercaseError,
@@ -65,12 +64,3 @@ class PasswordComplexityService:
                 raise violations[0]
             else:
                 raise PasswordMultipleComplexityError(violations)
-
-    @staticmethod
-    def is_valid(password: str) -> bool:
-        """Check if password is valid without raising exceptions"""
-        try:
-            PasswordComplexityService.validate(password)
-            return True
-        except PasswordComplexityError:
-            return False
