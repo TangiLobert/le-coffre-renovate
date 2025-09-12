@@ -37,6 +37,21 @@ from rights_access_context.application.use_cases import (
 )
 from rights_access_context.adapters.secondary import InMemoryRightsRepository
 
+from user_management_context.adapters.output.interfaces import (
+    InMemoryUserRepository,
+    BcryptHashingGateway,
+)
+from user_management_context.application.use_cases import (
+    CreateUserUseCase,
+    GetUserUseCase,
+    UpdateUserUseCase,
+    DeleteUserUseCase,
+    ListUserUseCase,
+)
+from user_management_context.adapters.input.fastapi.routes import (
+    get_user_management_router,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -73,6 +88,23 @@ async def lifespan(app: FastAPI):
         app.state.rights_repository = rights_repository
         app.state.access_controller = access_controller
 
+        # User management dependencies
+        user_repository = InMemoryUserRepository()
+        hash_gateway = BcryptHashingGateway()
+        get_user_use_case = GetUserUseCase(user_repository)
+        create_user_use_case = CreateUserUseCase(user_repository, hash_gateway)
+        update_user_use_case = UpdateUserUseCase(user_repository, hash_gateway)
+        delete_user_use_case = DeleteUserUseCase(user_repository)
+        list_user_use_case = ListUserUseCase(user_repository)
+
+        app.state.user_repository = user_repository
+        app.state.hash_gateway = hash_gateway
+        app.state.get_user_use_case = get_user_use_case
+        app.state.create_user_use_case = create_user_use_case
+        app.state.update_user_use_case = update_user_use_case
+        app.state.delete_user_use_case = delete_user_use_case
+        app.state.list_user_use_case = list_user_use_case
+
         yield
 
 
@@ -80,3 +112,4 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(get_vault_management_router())
 app.include_router(get_password_management_router())
 app.include_router(get_rights_access_router())
+app.include_router(get_user_management_router())
