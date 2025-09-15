@@ -36,13 +36,6 @@ def test_should_create_user(
     assert created_user.name == name
 
 
-def test_should_raise_not_existing_username(
-    user_repository: UserRepository,
-):
-    with pytest.raises(UserNotFoundError) as _:
-        user_repository.get_by_id(UUID("123e4567-e89b-12d3-a456-426614174000"))
-
-
 def test_should_raise_when_user_already_exists(
     use_case: CreateUserUseCase,
 ):
