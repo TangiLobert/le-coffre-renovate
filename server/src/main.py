@@ -42,6 +42,17 @@ from user_management_context.adapters.input.fastapi.routes import (
     get_user_management_router,
 )
 
+from authentication_context.adapters.primary.fastapi.routes import (
+    get_authentication_router,
+)
+from authentication_context.adapters.secondary import (
+    BcryptHashingGateway,
+    InMemoryUserPasswordRepository,
+    InMemorySessionRepository,
+    JwtTokenGateway,
+    InMemoryUserManagementGateway,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,6 +96,19 @@ async def lifespan(app: FastAPI):
 
         app.state.user_repository = user_repository
 
+        # Authentication dependencies
+        user_password_repository = InMemoryUserPasswordRepository()
+        password_hashing_gateway = BcryptHashingGateway()
+        token_gateway = JwtTokenGateway()
+        session_repository = InMemorySessionRepository()
+        user_management_gateway = InMemoryUserManagementGateway()
+
+        app.state.user_password_repository = user_password_repository
+        app.state.password_hashing_gateway = password_hashing_gateway
+        app.state.token_gateway = token_gateway
+        app.state.session_repository = session_repository
+        app.state.user_management_gateway = user_management_gateway
+
         yield
 
 
@@ -93,3 +117,4 @@ app.include_router(get_vault_management_router())
 app.include_router(get_password_management_router())
 app.include_router(get_rights_access_router())
 app.include_router(get_user_management_router())
+app.include_router(get_authentication_router())
