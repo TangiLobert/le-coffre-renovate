@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List, Optional
 from uuid import UUID
 import jwt
 from datetime import datetime, timedelta, UTC
@@ -13,7 +13,7 @@ class JwtTokenGateway(TokenGateway):
 
     async def generate_token(
         self,
-        user_id: Union[UUID, str],
+        user_id: UUID,
         email: str,
         roles: List[str],
         claims: Dict[str, Any] | None = None,
@@ -43,16 +43,11 @@ class JwtTokenGateway(TokenGateway):
             claims=claims,
         )
 
-    async def validate_token(self, token: str) -> Token | None:
+    async def validate_token(self, token: str) -> Optional[Token]:
         try:
             payload = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
 
-            # Convert user_id back to UUID if it's a valid UUID string
-            user_id = payload.get("user_id")
-            try:
-                user_id = UUID(user_id)
-            except (ValueError, TypeError):
-                pass  # Keep as string if not a valid UUID
+            user_id = UUID(payload.get("user_id"))
 
             # Extract claims (everything except standard fields)
             standard_fields = {"user_id", "email", "roles", "exp", "iat"}
