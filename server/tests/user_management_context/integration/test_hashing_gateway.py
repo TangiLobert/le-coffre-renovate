@@ -28,4 +28,3 @@ def test_bcrypt_hashing_gateway_hash_different(bcrypt_hashing_gateways: BcryptHa
     hashed1 = bcrypt_hashing_gateways.hash(password)
     hashed2 = bcrypt_hashing_gateways.hash(password)
     assert hashed1 != hashed2
-    
