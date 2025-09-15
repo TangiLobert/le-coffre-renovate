@@ -14,13 +14,13 @@ from authentication_context.domain.exceptions import (
 def use_case(
     user_password_repository,
     password_hashing_gateway,
-    jwt_token_gateway,
+    token_gateway,
     session_repository,
 ):
     return AdminLoginUseCase(
         user_password_repository,
         password_hashing_gateway,
-        jwt_token_gateway,
+        token_gateway,
         session_repository,
     )
 
@@ -30,7 +30,7 @@ async def test_should_authenticate_admin_and_return_jwt_token(
     use_case: AdminLoginUseCase,
     user_password_repository,
     session_repository,
-    jwt_token_gateway,
+    token_gateway,
 ):
     user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     email = "admin@lecoffre.com"
@@ -41,13 +41,13 @@ async def test_should_authenticate_admin_and_return_jwt_token(
     )
     user_password_repository.save(user_password)
 
-    jwt_token_gateway.set_unique_jwt_part("uniqueness")
+    token_gateway.set_unique_jwt_part("uniqueness")
 
     command = AdminLoginCommand(email=email, password="secure123!")
 
     response = await use_case.execute(command)
 
-    assert response.jwt_token == "jwt_token_for_admin@lecoffre.com_uniqueness"
+    assert response.jwt_token == f"jwt_token_for_{user_id}_uniqueness"
     assert response.admin_id == user_id
     assert response.email == email
 
@@ -98,13 +98,13 @@ async def test_should_raise_exception_for_non_existent_admin(
 async def test_should_store_new_session_on_successful_login(
     use_case: AdminLoginUseCase,
     user_password_repository,
-    jwt_token_gateway,
+    token_gateway,
     session_repository,
 ):
     user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     email = "admin@lecoffre.com"
     password_hash = "hashed(secure123!)"
-    old_jwt_token = "jwt_token_for_admin@lecoffre.com_uniqueness"
+    old_jwt_token = f"jwt_token_for_{user_id}_uniqueness"
 
     user_password = UserPassword(
         id=user_id, email=email, password_hash=password_hash, display_name="Admin User"
@@ -118,7 +118,7 @@ async def test_should_store_new_session_on_successful_login(
         )
     )
 
-    jwt_token_gateway.set_unique_jwt_part("other_uniqueness")
+    token_gateway.set_unique_jwt_part("other_uniqueness")
 
     old_session = session_repository.get_user_last_session(user_id)
 
@@ -127,6 +127,6 @@ async def test_should_store_new_session_on_successful_login(
     response = await use_case.execute(command)
 
     admin_session = session_repository.get_user_last_session(user_id)
-    assert response.jwt_token == "jwt_token_for_admin@lecoffre.com_other_uniqueness"
+    assert response.jwt_token == f"jwt_token_for_{user_id}_other_uniqueness"
     assert admin_session.jwt_token == response.jwt_token
     assert admin_session.created_at > old_session.created_at

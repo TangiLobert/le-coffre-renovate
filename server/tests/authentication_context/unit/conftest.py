@@ -1,9 +1,7 @@
 import pytest
 from tests.authentication_context.unit.mocks import (
-    FakeSSOProviderGateway,
-    FakeJWTTokenGateway,
+    FakeTokenGateway,
     FakeStateGenerationGateway,
-    FakeAdminRepository,
     FakePasswordHashingGateway,
     FakeSessionRepository,
     FakeUserPasswordRepository,
@@ -12,23 +10,13 @@ from tests.authentication_context.unit.mocks import (
 
 
 @pytest.fixture
-def jwt_token_gateway():
-    return FakeJWTTokenGateway()
-
-
-@pytest.fixture
-def sso_provider_gateway():
-    return FakeSSOProviderGateway()
+def token_gateway():
+    return FakeTokenGateway()
 
 
 @pytest.fixture
 def state_generation_gateway():
     return FakeStateGenerationGateway()
-
-
-@pytest.fixture
-def admin_repository():
-    return FakeAdminRepository()
 
 
 @pytest.fixture

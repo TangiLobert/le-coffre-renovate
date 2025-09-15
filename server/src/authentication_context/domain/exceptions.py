@@ -2,14 +2,6 @@ class AuthenticationDomainError(Exception):
     pass
 
 
-class InvalidSSOTokenException(AuthenticationDomainError):
-    pass
-
-
-class UnsupportedSSOProviderException(AuthenticationDomainError):
-    pass
-
-
 class AdminAlreadyExistsException(AuthenticationDomainError):
     pass
 
@@ -23,4 +15,20 @@ class AdminNotFoundException(AuthenticationDomainError):
 
 
 class InvalidSessionException(AuthenticationDomainError):
+    pass
+
+
+class InvalidTokenException(InvalidSessionException):
+    pass
+
+
+class SessionNotFoundException(InvalidSessionException):
+    pass
+
+
+class UserNotFoundException(InvalidSessionException):
+    pass
+
+
+class InsufficientRoleException(InvalidSessionException):
     pass
