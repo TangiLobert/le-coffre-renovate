@@ -4,6 +4,7 @@ import { client } from '@/client/client.gen';
 
 async function setupVault() {
     console.log('Setting up vault...');
+    // TODO: ugly: reverse proxy to avoid CORS issues or else?
     client.setConfig({
         baseUrl: "http://127.0.0.1:8000",
     });
