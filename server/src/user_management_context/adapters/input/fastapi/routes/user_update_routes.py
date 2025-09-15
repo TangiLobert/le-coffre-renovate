@@ -43,12 +43,13 @@ def update_user(
     """
     try:
         command = UpdateUserCommand(
+            id=user_id,
             username=request.username,
             email=request.email,
             password=request.password,
         )
 
-        updated_user_id = usecase.execute(user_id, command)
+        updated_user_id = usecase.execute(command)
         return {"id": updated_user_id, "message": "User updated successfully"}
 
     except UserNotFoundError as e:

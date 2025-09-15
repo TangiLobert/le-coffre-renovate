@@ -38,12 +38,13 @@ def test_should_update_user(
     expected_hashed_password = "hashed(newsecurepassword456)"
 
     command = UpdateUserCommand(
+        id=uuid,
         username=new_username,
         email=new_email,
         password=new_password,
     )
 
-    use_case.execute(uuid, command)
+    use_case.execute(command)
     updated_user = user_repository.get_by_id(uuid)
     assert updated_user is not None
     assert updated_user.id == uuid
