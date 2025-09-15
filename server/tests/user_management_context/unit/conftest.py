@@ -1,9 +1,9 @@
 import pytest
 
-from user_management_context.adapters.secondary.gateways import (
+from user_management_context.adapters.output.interfaces import (
     InMemoryUserRepository,
 )
-from .mocks.fake_hash_password_service import FakeHashPasswordService
+from .mocks import FakeHashingGateway
 
 
 @pytest.fixture
@@ -12,5 +12,5 @@ def user_repository():
 
 
 @pytest.fixture
-def hash_password_service():
-    return FakeHashPasswordService()
+def hash_gateway():
+    return FakeHashingGateway()

@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from uuid import UUID, uuid4
+from uuid import UUID
 
 
 @dataclass
-class User:
+class UpdateUserCommand:
     id: UUID
     username: str
     email: str
-    password_hashed: str
+    password: str

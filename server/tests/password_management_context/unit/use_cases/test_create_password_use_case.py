@@ -5,6 +5,7 @@ from uuid import UUID
 from password_management_context.application.gateways import PasswordRepository
 from password_management_context.application.commands import CreatePasswordCommand
 from password_management_context.application.use_cases import CreatePasswordUseCase
+
 from password_management_context.domain.exceptions import (
     PasswordMultipleComplexityError,
     PasswordTooShortError,
@@ -16,8 +17,10 @@ from password_management_context.domain.exceptions import (
 from password_management_context.domain.services.password_complexity_service import (
     PasswordComplexityService,
 )
-from ..mocks import FakeAccessController
 
+from tests.mocks.fake_access_controller import (
+    FakeAccessController,
+)
 
 @pytest.fixture
 def use_case(password_repository, encryption_service, access_controller):
