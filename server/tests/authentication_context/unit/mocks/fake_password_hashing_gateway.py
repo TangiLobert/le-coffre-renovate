@@ -1,6 +1,9 @@
-class FakePasswordHashingGateway:
-    def hash_password(self, password: str) -> str:
+from authentication_context.application.gateways import PasswordHashingGateway
+
+
+class FakePasswordHashingGateway(PasswordHashingGateway):
+    def hash(self, password: str) -> str:
         return f"hashed({password})"
 
-    def verify_password(self, password: str, hashed_password: str) -> bool:
+    def verify(self, password: str, hashed_password: str) -> bool:
         return f"hashed({password})" == hashed_password

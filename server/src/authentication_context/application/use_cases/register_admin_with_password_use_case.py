@@ -25,7 +25,7 @@ class RegisterAdminWithPasswordUseCase:
         if not await self._user_management_gateway.can_create_admin():
             raise AdminAlreadyExistsException("An admin account already exists")
 
-        password_hash = self._password_hashing_gateway.hash_password(command.password)
+        password_hash = self._password_hashing_gateway.hash(command.password)
 
         user_password = UserPassword(
             id=command.id,

@@ -31,7 +31,7 @@ class AdminLoginUseCase:
         if not user_password:
             raise AdminNotFoundException("User not found")
 
-        if not self._password_hashing_gateway.verify_password(
+        if not self._password_hashing_gateway.verify(
             command.password, user_password.password_hash
         ):
             raise InvalidCredentialsException("Invalid credentials")
