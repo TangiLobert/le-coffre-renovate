@@ -4,7 +4,7 @@ from user_management_context.application.use_cases import UpdateUserUseCase
 from user_management_context.application.interfaces import UserRepository
 from user_management_context.domain.entities import User
 from user_management_context.application.commands import UpdateUserCommand
-from user_management_context.application.interfaces.haching_gateway import (
+from user_management_context.application.interfaces.hashing_gateway import (
   HashingGateway
 )
 

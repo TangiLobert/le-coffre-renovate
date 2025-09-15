@@ -9,7 +9,7 @@ from user_management_context.application.use_cases import (
     ListUserUseCase,
 )
 from user_management_context.application.interfaces import UserRepository
-from user_management_context.application.interfaces.haching_gateway import (
+from user_management_context.application.interfaces.hashing_gateway import (
     HashingGateway,
 )
 

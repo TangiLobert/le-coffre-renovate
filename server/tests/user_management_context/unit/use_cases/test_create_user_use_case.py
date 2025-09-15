@@ -9,7 +9,7 @@ from user_management_context.domain.exceptions import (
     UserAlreadyExistsError,
 )
 
-from user_management_context.application.interfaces.haching_gateway import (
+from user_management_context.application.interfaces.hashing_gateway import (
     HashingGateway,
 )
 from shared_kernel.access_control import AccessController
