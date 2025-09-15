@@ -1,8 +1,8 @@
 import pytest
 from uuid import UUID
 
-from user_management_context.application.gateways import UserRepository
-from user_management_context.application.commands import CreateAdminCommand
+from user_management_context.application.interfaces import UserRepository
+from user_management_context.application.commands import CreateUserCommand
 from user_management_context.application.use_cases import (
     CreateAdminUseCase,
 )
@@ -24,7 +24,7 @@ def test_should_create_admin(
     email = "testuser@example.com"
     name = "Test User"
 
-    command = CreateAdminCommand(id=uuid, username=username, email=email, name=name)
+    command = CreateUserCommand(id=uuid, username=username, email=email, name=name)
 
     user_id = use_case.execute(command)
 
@@ -54,7 +54,7 @@ def test_when_admin_exist_should_not_create_a_second_one(
     email = "testuser@example.com"
     name = "Test User"
 
-    command = CreateAdminCommand(id=uuid, username=username, email=email, name=name)
+    command = CreateUserCommand(id=uuid, username=username, email=email, name=name)
 
     with pytest.raises(AdminAlreadyExistsError):
         use_case.execute(command)

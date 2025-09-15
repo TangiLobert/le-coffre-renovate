@@ -1,10 +1,10 @@
 from uuid import UUID
 import pytest
-from user_management_context.application.commands import CreateUserCommand
 from user_management_context.application.interfaces import UserRepository
 from user_management_context.adapters.output.interfaces import InMemoryUserRepository
 from user_management_context.application.use_cases import DeleteUserUseCase
 from user_management_context.domain.exceptions import UserNotFoundError
+from user_management_context.domain.entities import User
 
 
 @pytest.fixture
@@ -20,12 +20,10 @@ def test_should_delete_user(
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
+    name = "User"
 
-    command = CreateUserCommand(
-        id=uuid, username=username, email=email, password=password
-    )
-    user_repository.save(command)
+    user = User(id=uuid, username=username, email=email, name=name)
+    user_repository.save(user)
 
     use_case.execute(uuid)
 

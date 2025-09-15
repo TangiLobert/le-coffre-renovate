@@ -17,9 +17,9 @@ def test_should_get_user_by_id(
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
+    name = "User"
 
-    user = User(id=uuid, username=username, email=email, password_hashed=password)
+    user = User(id=uuid, username=username, email=email, name=name)
     user_repository.save(user)
 
     retrieved_user = use_case.execute(user_id=uuid)
@@ -28,7 +28,7 @@ def test_should_get_user_by_id(
     assert retrieved_user.id == uuid
     assert retrieved_user.username == username
     assert retrieved_user.email == email
-    assert retrieved_user.password_hashed == "securepassword123"
+    assert retrieved_user.name == name
 
 
 def test_should_get_user_by_email(
@@ -37,9 +37,9 @@ def test_should_get_user_by_email(
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
+    name = "User"
 
-    user = User(id=uuid, username=username, email=email, password_hashed=password)
+    user = User(id=uuid, username=username, email=email, name=name)
     user_repository.save(user)
 
     retrieved_user = use_case.execute(user_email=email)
@@ -47,7 +47,7 @@ def test_should_get_user_by_email(
     assert retrieved_user.id == uuid
     assert retrieved_user.username == username
     assert retrieved_user.email == email
-    assert retrieved_user.password_hashed == "securepassword123"
+    assert retrieved_user.name == name
 
 
 def test_should_raise_not_args_to_get_user(

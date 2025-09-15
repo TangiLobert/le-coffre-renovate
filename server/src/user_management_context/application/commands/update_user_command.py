@@ -7,4 +7,4 @@ class UpdateUserCommand:
     id: UUID
     username: str
     email: str
-    password: str
+    name: str

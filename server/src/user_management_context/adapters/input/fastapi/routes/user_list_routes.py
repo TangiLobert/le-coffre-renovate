@@ -15,7 +15,7 @@ class ListUserResponse(BaseModel):
     id: UUID
     username: str
     email: str
-    password_hashed: str
+    name: str
 
 
 @router.get(
@@ -40,7 +40,7 @@ def list_users(
                 id=user.id,
                 username=user.username,
                 email=user.email,
-                password_hashed=user.password_hashed,
+                name=user.name,
             )
             for user in users
         ]

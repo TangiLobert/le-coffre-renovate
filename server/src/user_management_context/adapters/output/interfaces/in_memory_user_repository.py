@@ -40,3 +40,10 @@ class InMemoryUserRepository(UserRepository):
         if user.id not in self.storage:
             raise UserNotFoundError(user.id)
         self.storage[user.id] = user
+
+    def get_admin(self) -> Optional[User]:
+        for user in self.storage.values():
+            if "admin" in user.roles:
+                return user
+
+        return None

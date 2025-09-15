@@ -18,7 +18,7 @@ class GetUserResponse(BaseModel):
     id: UUID
     username: str
     email: str
-    password_hashed: str
+    name: str
 
 
 @router.get(
@@ -43,7 +43,7 @@ def get_user(
             id=user_response.id,
             username=user_response.username,
             email=user_response.email,
-            password_hashed=user_response.password_hashed,
+            name=user_response.name,
         )
     except UserNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))

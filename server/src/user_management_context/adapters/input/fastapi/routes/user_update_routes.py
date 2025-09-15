@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/users", tags=["User Management"])
 class UpdateUserRequest(BaseModel):
     username: str
     email: str
-    password: str
+    name: str
 
 
 @router.put(
@@ -46,7 +46,7 @@ def update_user(
             id=user_id,
             username=request.username,
             email=request.email,
-            password=request.password,
+            name=request.name,
         )
 
         updated_user_id = usecase.execute(command)

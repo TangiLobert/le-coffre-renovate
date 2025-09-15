@@ -8,12 +8,3 @@ class CreateUserCommand:
     username: str
     email: str
     name: str
-
-    @staticmethod
-    def from_dict(data: dict) -> "CreateUserCommand":
-        return CreateUserCommand(
-            id=UUID(data["id"]) if "id" in data else uuid4(),
-            username=data["username"],
-            email=data["email"],
-            name=data["name"],
-        )
