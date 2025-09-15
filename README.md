@@ -119,6 +119,7 @@ Front : http://127.0.0.1:5173
 Back : http://127.0.0.1:8000
 Swagger: http://127.0.0.1:8000/openapi.json
 
+Within each front/ or back/ folder you will find a README.md with more details.
 
 ## Production
 
