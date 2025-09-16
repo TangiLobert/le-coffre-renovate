@@ -5,6 +5,8 @@ from password_management_context.application.use_cases import (
     CreatePasswordUseCase,
     GetPasswordUseCase,
     UpdatePasswordUseCase,
+    ListPasswordsUseCase,
+    DeletePasswordUseCase,
 )
 from password_management_context.application.gateways import PasswordRepository
 from shared_kernel.encryption import EncryptionService
@@ -51,3 +53,20 @@ def get_update_password_usecase(
     return UpdatePasswordUseCase(
         password_repository, encryption_service, access_controller
     )
+
+
+def get_list_passwords_usecase(
+    password_repository: PasswordRepository = Depends(get_password_repository),
+    encryption_service: EncryptionService = Depends(get_encryption_service),
+    access_controller: AccessController = Depends(get_access_controller),
+):
+    return ListPasswordsUseCase(
+        password_repository, encryption_service, access_controller
+    )
+
+
+def get_delete_password_usecase(
+    password_repository: PasswordRepository = Depends(get_password_repository),
+    access_controller: AccessController = Depends(get_access_controller),
+):
+    return DeletePasswordUseCase(password_repository, access_controller)
