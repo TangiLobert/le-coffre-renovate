@@ -4,44 +4,36 @@ from user_management_context.application.use_cases import UpdateUserUseCase
 from user_management_context.application.interfaces import UserRepository
 from user_management_context.domain.entities import User
 from user_management_context.application.commands import UpdateUserCommand
-from user_management_context.application.interfaces.hashing_gateway import (
-  HashingGateway
-)
 
 
 @pytest.fixture
 def use_case(
-  user_repository: UserRepository,
-  hash_gateway: HashingGateway,
+    user_repository: UserRepository,
 ):
-    return UpdateUserUseCase(user_repository, hash_gateway)
+    return UpdateUserUseCase(user_repository)
 
 
 def test_should_update_user(
-  use_case: UpdateUserUseCase,
-  user_repository: UserRepository,
-  hash_gateway: HashingGateway,
+    use_case: UpdateUserUseCase,
+    user_repository: UserRepository,
 ):
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
+    name = "User"
 
-    user = User(
-        id=uuid, username=username, email=email, password_hashed=password
-    )
+    user = User(id=uuid, username=username, email=email, name=name)
     user_repository.save(user)
 
     new_username = "updateduser"
     new_email = "updateduser@example.com"
-    new_password = "newsecurepassword456"
-    expected_hashed_password = "hashed(newsecurepassword456)"
+    new_name = "New User"
 
     command = UpdateUserCommand(
         id=uuid,
         username=new_username,
         email=new_email,
-        password=new_password,
+        name=new_name,
     )
 
     use_case.execute(command)
@@ -50,4 +42,4 @@ def test_should_update_user(
     assert updated_user.id == uuid
     assert updated_user.username == new_username
     assert updated_user.email == new_email
-    assert updated_user.password_hashed == expected_hashed_password
+    assert updated_user.name == new_name

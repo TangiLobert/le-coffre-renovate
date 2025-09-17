@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/users", tags=["User Management"])
 class CreateUserRequest(BaseModel):
     username: str
     email: str
-    password: str
+    name: str
 
 
 class CreateUserResponse(BaseModel):
@@ -54,7 +54,7 @@ def create_user(
             id=user_id,
             username=request.username,
             email=request.email,
-            password=request.password,
+            name=request.name,
         )
 
         created_user_id = usecase.execute(command)

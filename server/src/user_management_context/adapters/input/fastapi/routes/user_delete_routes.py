@@ -6,9 +6,11 @@ from user_management_context.adapters.input.fastapi.app_dependencies import (
     get_delete_user_usecase,
 )
 from user_management_context.application.use_cases import DeleteUserUseCase
+from user_management_context.application.commands import DeleteUserCommand
 from user_management_context.domain.exceptions import (
     UserNotFoundError,
 )
+from shared_kernel.authentication import get_current_user, ValidatedUser, NotAdminError
 
 router = APIRouter(prefix="/api/users", tags=["User Management"])
 
@@ -20,19 +22,26 @@ router = APIRouter(prefix="/api/users", tags=["User Management"])
 )
 def delete_user(
     user_id: UUID,
+    current_user: ValidatedUser = Depends(get_current_user),
     usecase: DeleteUserUseCase = Depends(get_delete_user_usecase),
 ):
     """
     Delete a user by its ID.
 
-    - **user_id**: The ID of the user to delete
+    - **Authorization**: Bearer token
 
     Returns status code 204 (No Content) on successful deletion.
     """
     try:
-        usecase.execute(user_id)
+        command = DeleteUserCommand(
+            requesting_user=current_user.to_authenticated_user(),
+            user_id=user_id,
+        )
+        usecase.execute(command)
     except UserNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except NotAdminError as e:
+        raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")

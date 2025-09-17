@@ -6,6 +6,7 @@ from user_management_context.domain.exceptions import (
     UserNotFoundError,
     UserAlreadyExistsError,
 )
+from shared_kernel.authentication.constants import ADMIN_ROLE
 
 
 class InMemoryUserRepository(UserRepository):
@@ -13,15 +14,13 @@ class InMemoryUserRepository(UserRepository):
         self.storage: dict[UUID, User] = {}
 
     def get_by_id(self, user_id: UUID) -> Optional[User]:
-        if user_id not in self.storage:
-            raise UserNotFoundError(user_id)
         return self.storage.get(user_id)
 
     def get_by_email(self, email: str) -> Optional[User]:
         for user in self.storage.values():
             if user.email == email:
                 return user
-        raise UserNotFoundError(email)
+        return None
 
     def list_all(self) -> list[User]:
         return list(self.storage.values())
@@ -40,3 +39,10 @@ class InMemoryUserRepository(UserRepository):
         if user.id not in self.storage:
             raise UserNotFoundError(user.id)
         self.storage[user.id] = user
+
+    def get_admin(self) -> Optional[User]:
+        for user in self.storage.values():
+            if ADMIN_ROLE in user.roles:
+                return user
+
+        return None

@@ -9,17 +9,10 @@ from user_management_context.application.use_cases import (
     ListUserUseCase,
 )
 from user_management_context.application.interfaces import UserRepository
-from user_management_context.application.interfaces.hashing_gateway import (
-    HashingGateway,
-)
 
 
 def get_user_repository(request: Request) -> UserRepository:
     return request.app.state.user_repository
-
-
-def get_hashing_gateway(request: Request) -> HashingGateway:
-    return request.app.state.hashing_gateway
 
 
 def get_get_user_usecase(
@@ -36,16 +29,14 @@ def get_delete_user_usecase(
 
 def get_update_user_usecase(
     user_repository: UserRepository = Depends(get_user_repository),
-    hash_gateway: HashingGateway = Depends(get_hashing_gateway),
 ):
-    return UpdateUserUseCase(user_repository, hash_gateway)
+    return UpdateUserUseCase(user_repository)
 
 
 def get_create_user_usecase(
     user_repository: UserRepository = Depends(get_user_repository),
-    hash_gateway: HashingGateway = Depends(get_hashing_gateway),
 ):
-    return CreateUserUseCase(user_repository, hash_gateway)
+    return CreateUserUseCase(user_repository)
 
 
 def get_list_user_usecase(

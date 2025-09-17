@@ -10,21 +10,18 @@ def use_case(user_repository: UserRepository):
     return ListUserUseCase(user_repository)
 
 
-def test_should_list_users(
-  use_case: ListUserUseCase,
-  user_repository: UserRepository
-):
+def test_should_list_users(use_case: ListUserUseCase, user_repository: UserRepository):
     user1 = User(
         id=UUID("123e4567-e89b-12d3-a456-426614174000"),
         username="user1",
         email="user1@example.com",
-        password_hashed="password1"
+        name="User",
     )
     user2 = User(
         id=UUID("223e4567-e89b-12d3-a456-426614174001"),
         username="user2",
         email="user2@example.com",
-        password_hashed="password2"
+        name="Other User",
     )
 
     user_repository.save(user1)

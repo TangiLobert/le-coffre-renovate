@@ -9,33 +9,22 @@ from user_management_context.domain.exceptions import (
     UserAlreadyExistsError,
 )
 
-from user_management_context.application.interfaces.hashing_gateway import (
-    HashingGateway,
-)
-
 
 @pytest.fixture
-def use_case(
-    user_repository: UserRepository,
-    hash_gateway: HashingGateway,
-):
-    return CreateUserUseCase(user_repository, hash_gateway)
+def use_case(user_repository: UserRepository):
+    return CreateUserUseCase(user_repository)
 
 
 def test_should_create_user(
     use_case: CreateUserUseCase,
     user_repository: UserRepository,
-    hash_gateway: HashingGateway,
 ):
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
-    expected_hashed_password = "hashed(securepassword123)"
+    name = "Test User"
 
-    command = CreateUserCommand(
-        id=uuid, username=username, email=email, password=password
-    )
+    command = CreateUserCommand(id=uuid, username=username, email=email, name=name)
 
     user_id = use_case.execute(command)
 
@@ -44,29 +33,19 @@ def test_should_create_user(
     assert created_user.id == uuid
     assert created_user.username == username
     assert created_user.email == email
-    assert created_user.password_hashed == expected_hashed_password
-
-    assert hash_gateway.compare(password, created_user.password_hashed) is True
-
-
-def test_should_raise_not_existing_username(
-    user_repository: UserRepository,
-):
-    with pytest.raises(UserNotFoundError) as _:
-        user_repository.get_by_id(UUID("123e4567-e89b-12d3-a456-426614174000"))
+    assert created_user.name == name
 
 
 def test_should_raise_when_user_already_exists(
     use_case: CreateUserUseCase,
-    user_repository: UserRepository,
 ):
     uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
     username = "testuser"
     email = "testuser@example.com"
-    password = "securepassword123"
-    command = CreateUserCommand(
-        id=uuid, username=username, email=email, password=password
-    )
+    name = "Test User"
+
+    command = CreateUserCommand(id=uuid, username=username, email=email, name=name)
+
     use_case.execute(command)
     with pytest.raises(UserAlreadyExistsError) as _:
         use_case.execute(command)
