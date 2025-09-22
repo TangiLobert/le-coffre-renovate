@@ -37,5 +37,6 @@ class CreatePasswordUseCase:
         self.access_controller.grant_access(command.user_id, password.id)
         self.access_controller.grant_update_access(command.user_id, password.id)
         self.access_controller.grant_delete_access(command.user_id, password.id)
+        self.access_controller.set_owner(command.user_id, password.id)
 
         return password.id
