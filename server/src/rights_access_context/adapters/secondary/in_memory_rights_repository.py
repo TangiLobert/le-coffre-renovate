@@ -23,6 +23,8 @@ class InMemoryRightsRepository(RightsRepository):
     def has_permission(
         self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
     ) -> bool:
+        if self.is_owner(user_id, resource_id):
+            return True
         key = (user_id, resource_id)
         return key in self.permissions and permission in self.permissions[key]
 
