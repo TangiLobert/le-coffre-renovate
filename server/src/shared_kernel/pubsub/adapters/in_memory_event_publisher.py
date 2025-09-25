@@ -1,8 +1,6 @@
-from typing import Callable, Dict, List, Type, TypeVar
+from typing import Callable, Dict, List, Type
 
 from shared_kernel.pubsub import DomainEvent
-
-T = TypeVar("T", bound=DomainEvent)
 
 
 class InMemoryDomainEventPublisher:
@@ -11,11 +9,12 @@ class InMemoryDomainEventPublisher:
             Type[DomainEvent], List[Callable[[DomainEvent], None]]
         ] = {}
 
-    def subscribe(self, event_type: Type[T], handler: Callable[[T], None]) -> None:
+    def subscribe(
+        self, event_type: Type[DomainEvent], handler: Callable[[DomainEvent], None]
+    ) -> None:
         if event_type not in self._subscribers:
             self._subscribers[event_type] = []
-        # Type: ignore needed because we know at runtime the handler matches the event_type
-        self._subscribers[event_type].append(handler)  # type: ignore
+        self._subscribers[event_type].append(handler)
 
     def publish(self, event: DomainEvent) -> None:
         for handler in self._subscribers.get(type(event), []):
