@@ -5,7 +5,6 @@ from uuid import UUID
 from password_management_context.application.gateways import PasswordRepository
 from password_management_context.application.commands import CreatePasswordCommand
 from password_management_context.application.use_cases import CreatePasswordUseCase
-from password_management_context.domain.events import PasswordCreatedEvent
 
 from password_management_context.domain.exceptions import (
     PasswordMultipleComplexityError,
@@ -15,13 +14,19 @@ from password_management_context.domain.exceptions import (
     PasswordMissingSpecialCharError,
     PasswordContainsForbiddenPatternError,
 )
-from tests.mocks.fake_domain_event_publisher import FakeDomainEventPublisher
+from password_management_context.domain.services.password_complexity_service import (
+    PasswordComplexityService,
+)
+
+from tests.mocks.fake_access_controller import (
+    FakeAccessController,
+)
 
 
 @pytest.fixture
-def use_case(password_repository, encryption_service, domain_event_publisher):
+def use_case(password_repository, encryption_service, access_controller):
     return CreatePasswordUseCase(
-        password_repository, encryption_service, domain_event_publisher
+        password_repository, encryption_service, access_controller
     )
 
 
@@ -79,38 +84,21 @@ def test_should_create_password_in_folder_with_encrypted_value(
     assert saved_password.encrypted_value == expected_encrypted
 
 
-def test_should_publish_password_created_event_when_creating_password(
-    use_case: CreatePasswordUseCase, domain_event_publisher: FakeDomainEventPublisher
+def test_should_grant_access_to_user_when_creating_password(
+    use_case: CreatePasswordUseCase, access_controller: FakeAccessController
 ):
-    # ARRANGE
     uuid = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     user_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
-    name = "Test Password"
-    folder = "Work"
+    name = "name"
     decrypted_password = STRONG_PASSWORD
 
     command = CreatePasswordCommand(
-        user_id=user_id,
-        id=uuid,
-        name=name,
-        decrypted_password=decrypted_password,
-        folder=folder,
+        user_id=user_id, id=uuid, name=name, decrypted_password=decrypted_password
     )
 
-    # ACT
     use_case.execute(command)
 
-    # ASSERT
-    published_events = domain_event_publisher.get_published_events_of_type(
-        PasswordCreatedEvent
-    )
-    assert len(published_events) == 1
-
-    event = published_events[0]
-    assert event.password_id == uuid
-    assert event.created_by == user_id
-    assert event.name == name
-    assert event.folder == folder
+    assert access_controller.check_access(user_id, uuid)
 
 
 def test_should_reject_password_with_multiple_complexity_violations(
@@ -220,3 +208,26 @@ def test_should_reject_password_too_short(
 
     assert exc_info.value.current_length == 7
     assert exc_info.value.min_length == 12
+
+
+@patch.object(PasswordComplexityService, "validate")
+def test_should_call_password_complexity_service_validate(
+    mock_validate,
+    use_case: CreatePasswordUseCase,
+):
+    # ARRANGE
+    mock_validate.return_value = None
+
+    uuid = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    user_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
+    password = "TestPassword123!"
+
+    command = CreatePasswordCommand(
+        user_id=user_id, id=uuid, name="name", decrypted_password=password
+    )
+
+    # ACT
+    use_case.execute(command)
+
+    # ASSERT
+    mock_validate.assert_called_once_with(password)

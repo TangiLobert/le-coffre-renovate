@@ -56,9 +56,6 @@ from authentication_context.adapters.secondary import (
 )
 
 from shared_kernel.pubsub import InMemoryDomainEventPublisher
-from rights_access_context.adapters.primary.events import (
-    PasswordCreatedSubscriber,
-)
 
 
 @asynccontextmanager
@@ -123,12 +120,6 @@ async def lifespan(app: FastAPI):
         # Domain event publisher
         domain_event_publisher = InMemoryDomainEventPublisher()
         app.state.domain_event_publisher = domain_event_publisher
-
-        # Register event subscribers
-        password_created_subscriber = PasswordCreatedSubscriber(
-            domain_event_publisher, set_owner_use_case
-        )
-        password_created_subscriber.subscribe()
 
         yield
 

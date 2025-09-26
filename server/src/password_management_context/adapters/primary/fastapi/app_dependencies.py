@@ -10,7 +10,6 @@ from password_management_context.application.use_cases import (
 )
 from password_management_context.application.gateways import PasswordRepository
 from shared_kernel.encryption import EncryptionService
-from shared_kernel.pubsub import DomainEventPublisher
 from shared_kernel.access_control import AccessController
 
 
@@ -22,10 +21,6 @@ def get_encryption_service(request: Request) -> EncryptionService:
     return request.app.state.encryption_service
 
 
-def get_domain_event_publisher(request: Request) -> DomainEventPublisher:
-    return request.app.state.domain_event_publisher
-
-
 def get_access_controller(request: Request) -> AccessController:
     return request.app.state.access_controller
 
@@ -33,10 +28,10 @@ def get_access_controller(request: Request) -> AccessController:
 def get_create_password_usecase(
     password_repository: PasswordRepository = Depends(get_password_repository),
     encryption_service: EncryptionService = Depends(get_encryption_service),
-    domain_event_publisher: DomainEventPublisher = Depends(get_domain_event_publisher),
+    access_controller: AccessController = Depends(get_access_controller),
 ):
     return CreatePasswordUseCase(
-        password_repository, encryption_service, domain_event_publisher
+        password_repository, encryption_service, access_controller
     )
 
 

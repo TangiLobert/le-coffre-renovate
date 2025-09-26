@@ -6,9 +6,8 @@ from password_management_context.domain.entities import Password
 from password_management_context.domain.services.password_complexity_service import (
     PasswordComplexityService,
 )
-from password_management_context.domain.events import PasswordCreatedEvent
 from shared_kernel.encryption import EncryptionService
-from shared_kernel.pubsub import DomainEventPublisher
+from shared_kernel.access_control import AccessController
 
 
 class CreatePasswordUseCase:
@@ -16,11 +15,11 @@ class CreatePasswordUseCase:
         self,
         password_repository: PasswordRepository,
         encryption_service: EncryptionService,
-        domain_event_publisher: DomainEventPublisher,
+        access_controller: AccessController,
     ):
         self.password_repository = password_repository
         self.encryption_service = encryption_service
-        self.domain_event_publisher = domain_event_publisher
+        self.access_controller = access_controller
 
     def execute(self, command: CreatePasswordCommand) -> UUID:
         PasswordComplexityService.validate(command.decrypted_password)
@@ -35,14 +34,6 @@ class CreatePasswordUseCase:
         )
 
         self.password_repository.save(password)
-
-        self.domain_event_publisher.publish(
-            PasswordCreatedEvent.create(
-                password_id=command.id,
-                created_by=command.user_id,
-                name=command.name,
-                folder=command.folder,
-            )
-        )
+        self.access_controller.set_owner(command.user_id, password.id)
 
         return password.id
