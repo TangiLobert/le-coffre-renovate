@@ -75,6 +75,6 @@ def create_existing_sso_user(
         display_name=display_name,
         sso_user_id=sso_user_id,
         sso_provider=sso_provider,
-        created_at=datetime.now(),
+        created_at=datetime(2023, 12, 1, 10, 0, 0),
         last_login=last_login,
     )
