@@ -55,7 +55,7 @@ def sso_user_repository():
 
 
 def create_sso_user_from_provider(email, display_name, sso_user_id, sso_provider):
-    """Helper pour créer un SsoUser retourné par le provider (avec UUID temporaire)"""
+    """Helper to create an SsoUser returned by the provider (with temporary UUID)"""
     return SsoUser(
         internal_user_id=UUID("00000000-0000-0000-0000-000000000000"),
         email=email,
