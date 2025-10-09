@@ -5,6 +5,7 @@ from authentication_context.application.use_cases import (
     RegisterAdminWithPasswordUseCase,
     AdminLoginUseCase,
     ValidateUserTokenUseCase,
+    GetSsoAuthorizeUrlUseCase,
 )
 from authentication_context.application.gateways import (
     UserPasswordRepository,
@@ -12,6 +13,7 @@ from authentication_context.application.gateways import (
     TokenGateway,
     SessionRepository,
     UserManagementGateway,
+    SsoGateway,
 )
 
 
@@ -33,6 +35,10 @@ def get_session_repository(request: Request) -> SessionRepository:
 
 def get_user_management_gateway(request: Request) -> UserManagementGateway:
     return request.app.state.user_management_gateway
+
+
+def get_sso_gateway(request: Request) -> SsoGateway:
+    return request.app.state.sso_gateway
 
 
 def get_register_admin_usecase(
@@ -83,3 +89,7 @@ def get_validate_token_usecase(
         token_gateway,
         session_repository,
     )
+
+
+def get_sso_url_usecase(sso_gateway: SsoGateway = Depends(get_sso_gateway)):
+    return GetSsoAuthorizeUrlUseCase(sso_gateway)

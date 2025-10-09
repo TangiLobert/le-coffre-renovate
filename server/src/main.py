@@ -49,6 +49,7 @@ from authentication_context.adapters.secondary import (
     InMemorySessionRepository,
     JwtTokenGateway,
     InMemoryUserManagementGateway,
+    InMemorySSOGateway,
 )
 
 from shared_kernel.pubsub import InMemoryDomainEventPublisher
@@ -105,12 +106,14 @@ async def lifespan(app: FastAPI):
         token_gateway = JwtTokenGateway()
         session_repository = InMemorySessionRepository()
         user_management_gateway = InMemoryUserManagementGateway()
+        sso_gateway = InMemorySSOGateway()
 
         app.state.user_password_repository = user_password_repository
         app.state.password_hashing_gateway = password_hashing_gateway
         app.state.token_gateway = token_gateway
         app.state.session_repository = session_repository
         app.state.user_management_gateway = user_management_gateway
+        app.state.sso_gateway = sso_gateway
 
         # Domain event publisher
         domain_event_publisher = InMemoryDomainEventPublisher()
