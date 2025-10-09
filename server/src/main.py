@@ -55,6 +55,8 @@ from authentication_context.adapters.secondary import (
     InMemoryUserManagementGateway,
 )
 
+from shared_kernel.pubsub import InMemoryDomainEventPublisher
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -114,6 +116,10 @@ async def lifespan(app: FastAPI):
         app.state.token_gateway = token_gateway
         app.state.session_repository = session_repository
         app.state.user_management_gateway = user_management_gateway
+
+        # Domain event publisher
+        domain_event_publisher = InMemoryDomainEventPublisher()
+        app.state.domain_event_publisher = domain_event_publisher
 
         yield
 

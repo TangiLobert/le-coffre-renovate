@@ -26,7 +26,7 @@ class CreatePasswordUseCase:
 
         encrypted_value = self.encryption_service.encrypt(command.decrypted_password)
 
-        password = Password.create(
+        password = Password(
             id=command.id,
             name=command.name,
             encrypted_value=encrypted_value,
