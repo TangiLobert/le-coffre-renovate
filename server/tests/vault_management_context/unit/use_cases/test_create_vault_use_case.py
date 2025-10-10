@@ -1,4 +1,5 @@
 import pytest
+from uuid import uuid4
 
 from vault_management_context.domain.entities import Vault, Share
 from vault_management_context.application.responses.vault_status import VaultStatus
@@ -30,8 +31,6 @@ def test_should_create_shares_and_store_encrypted_key(
     encryption_gateway,
     vault_session_gateway,
 ):
-    from uuid import uuid4
-    
     expected_shares = [
         Share(0, "1"),
         Share(1, "2"),
@@ -65,8 +64,6 @@ def test_should_create_shares_and_store_encrypted_key(
 
 
 def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
-    from uuid import uuid4
-    
     # Create a vault that is already validated (not in PENDING state)
     vault_repository.save(Vault(nb_shares=5, threshold=3, encrypted_key="test", setup_id=str(uuid4()), status=VaultStatus.SETUPED.value))
 
@@ -79,8 +76,6 @@ def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
 
 
 def test_should_allow_re_setup_when_vault_is_pending(use_case, vault_repository, shamir_gateway, encryption_gateway):
-    from uuid import uuid4
-    
     # Create a vault in PENDING state
     vault_repository.save(Vault(nb_shares=3, threshold=2, encrypted_key="test", status=VaultStatus.PENDING.value, setup_id=str(uuid4())))
 
@@ -102,8 +97,6 @@ def test_should_allow_re_setup_when_vault_is_pending(use_case, vault_repository,
 
 
 def test_should_fail_when_nb_shares_is_less_than_2(use_case):
-    from uuid import uuid4
-    
     with pytest.raises(InvalidShareCountError) as exc_info:
         use_case.execute(1, 2, uuid4())
 
@@ -114,8 +107,6 @@ def test_should_fail_when_nb_shares_is_less_than_2(use_case):
 
 
 def test_should_fail_when_threshold_is_less_than_2(use_case):
-    from uuid import uuid4
-    
     with pytest.raises(InvalidThresholdError) as exc_info:
         use_case.execute(3, 1, uuid4())
 
@@ -125,8 +116,6 @@ def test_should_fail_when_threshold_is_less_than_2(use_case):
 
 
 def test_should_fail_when_threshold_is_greater_than_nb_shares(use_case):
-    from uuid import uuid4
-    
     with pytest.raises(ThresholdExceedsShareCountError) as exc_info:
         use_case.execute(3, 4, uuid4())
 
