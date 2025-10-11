@@ -1,16 +1,59 @@
 <script setup lang="ts">
-import Stepper from 'primevue/stepper';
-import StepList from 'primevue/steplist';
-import StepPanels from 'primevue/steppanels';
-import Step from 'primevue/step';
-import StepPanel from 'primevue/steppanel';
-import Button from 'primevue/button';
+import { ref } from "vue";
 import BlankLayout from "../layouts/BlankLayout.vue";
+import { createVaultVaultSetupPost } from "@/client";
 
+const shamirRef = ref()
+const isGeneratingMasterKey = ref(false)
+const showModal = ref(false)
+const storedSharesConfirmed = ref(false)
+
+async function generateMasterKey() {
+    isGeneratingMasterKey.value = true
+
+    const response = await createVaultVaultSetupPost({
+        body: {
+            nb_shares: 3,
+            threshold: 5
+        },
+    });
+    console.log(response);
+    setTimeout(() => {
+        isGeneratingMasterKey.value = false
+    }, 3000)
+    showModal.value = true
+}
 </script>
 
 <template>
     <BlankLayout>
+        <Dialog v-model:visible="showModal" :closable="false" modal header="Shares of the master key"
+            :style="{ width: '32rem' }">
+            <span class="text-surface-500 dark:text-surface-400 block mb-8">Please store the following shares
+                securely:</span>
+            <div class="flex items-center gap-4 mb-4">
+                <label for="username" class="font-semibold w-24">Username</label>
+                <InputText id="username" class="flex-auto" autocomplete="off" />
+            </div>
+            <div class="flex items-center gap-4 mb-2">
+                <label for="email" class="font-semibold w-24">Email</label>
+                <InputText id="email" class="flex-auto" autocomplete="off" />
+            </div>
+            <Divider />
+
+            <div class="flex items-center gap-4 mb-2">
+                <label class="font-semibold w-24"></label>
+                <Checkbox id="storedShares" v-model="storedSharesConfirmed" :binary="true" class="flex-auto" />
+                <label for="storedShares" class="flex-auto ml-2">
+                    I have stored the above shares securely. I cannot retrieve them later.
+                </label>
+            </div>
+            <template #footer>
+                <Button icon="pi pi-check" label="Continue" severity="danger" @click="showModal = false" autofocus
+                    :disabled="!storedSharesConfirmed" />
+            </template>
+        </Dialog>
+
         <div class="card flex justify-center">
             <Stepper value="1" class="basis-[50rem]" linear>
                 <StepList>
@@ -77,12 +120,13 @@ import BlankLayout from "../layouts/BlankLayout.vue";
                                 key into multiple parts.
                             </p>
                             <p class="mt-4">
-                                You can choose how many parts to split the key into and how many parts are needed to
+                                You can choose how many shares to split the key into and how many shares are needed to
                                 reconstruct
                                 the
-                                key. For example, if you split the key into 5 parts and need 3 parts to reconstruct the
+                                key. For example, if you split the key into 5 shares and need 3 shares to reconstruct
+                                the
                                 key, you can lose
-                                2 parts and still be able to reconstruct the key. You should store the parts in
+                                2 shares and still be able to reconstruct the key. You should store the shares in
                                 different locations and by
                                 different people, using HSMs, local password
                                 managers or even paper.
@@ -95,18 +139,18 @@ import BlankLayout from "../layouts/BlankLayout.vue";
                             </p>
 
                             <p class="mt-4">
-                                Please choose how many parts to split the key into and how many parts are needed to
+                                Please choose how many shares to split the key into and how many shares are needed to
                                 reconstruct
                                 the
                                 key.
                             </p>
 
-                            <!-- <ShamirInputs ref="shamirRef" /> -->
+                            <ShamirInputs ref="shamirRef" />
 
                             <div class="flex justify-center mt-4">
-                                <Button>
-                                    Generate parts of the master key
-                                </Button>
+                                <Button :loading="isGeneratingMasterKey" @click="generateMasterKey"
+                                    label="Generate shares of the master key"
+                                    :disabled="!shamirRef?.isValidSSSConfig || isGeneratingMasterKey" />
                             </div>
                         </div>
                     </StepPanel>
