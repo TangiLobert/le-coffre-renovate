@@ -183,7 +183,7 @@ def test_should_configure_microsoft_with_predefined_config():
     )
 
     tenant_id = "my-tenant-123"
-    # Configuration Microsoft endpoints for a specific tenant
+    # Configure Microsoft endpoints for a specific tenant
     gateway.configure(
         client_id="test_client_id",
         client_secret="test_client_secret",
