@@ -1,6 +1,13 @@
 from uuid import UUID
+import jwt
 
 STRONG_PASSWORD = "StrongP@ssw0rd123"
+
+
+def get_user_id_from_token(token: str) -> str:
+    """Extract user_id from JWT token"""
+    decoded = jwt.decode(token, options={"verify_signature": False})
+    return decoded["user_id"]
 
 
 def test_can_read_a_created_password(e2e_client, setup):
@@ -46,8 +53,8 @@ def test_cannot_read_a_password_of_another_user(e2e_client, setup):
     assert retrieved_password.status_code == 404
 
 
-def test_can_read_a_shared_password_of_another_user(e2e_client, setup):
-    user_id = str(UUID("87654321-4321-8765-4321-876543218765"))
+def test_can_read_a_shared_password_of_another_user(e2e_client, setup, admin_token):
+    user_id = get_user_id_from_token(admin_token)
     other_user = str(UUID("12345678-1234-5678-1234-567812345678"))
 
     response = e2e_client.post(
@@ -56,16 +63,18 @@ def test_can_read_a_shared_password_of_another_user(e2e_client, setup):
             "user_id": user_id,
             "name": "Test Password",
             "password": STRONG_PASSWORD,
-            "shared_with": [other_user],
         },
     )
 
     password_id = response.json()["id"]
 
-    e2e_client.post(
-        f"/api/{password_id}/share",
-        json={"from_id": user_id, "to_id": other_user},
+    # Share the password using the new endpoint
+    share_response = e2e_client.post(
+        f"/api/passwords/{password_id}/share",
+        json={"user_id": other_user},
+        headers={"Authorization": f"Bearer {admin_token}"},
     )
+    assert share_response.status_code == 200
 
     retrieved_password = e2e_client.get(
         f"/api/passwords/{password_id}?user_id={other_user}"

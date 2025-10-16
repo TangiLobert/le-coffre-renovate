@@ -5,6 +5,8 @@ from . import (
     passwords_list_routes,
     password_delete_routes,
     password_update_routes,
+    share_password_routes,
+    unshare_password_routes,
 )
 
 
@@ -16,5 +18,7 @@ def get_password_management_router():
     password_management_router.include_router(passwords_list_routes.router)
     password_management_router.include_router(password_delete_routes.router)
     password_management_router.include_router(password_update_routes.router)
+    password_management_router.include_router(share_password_routes.router)
+    password_management_router.include_router(unshare_password_routes.router)
 
     return password_management_router
