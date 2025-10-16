@@ -3,7 +3,7 @@ from .register_admin_with_password_use_case import RegisterAdminWithPasswordUseC
 from .validate_user_token_use_case import ValidateUserTokenUseCase
 from .get_sso_authorize_url_use_case import GetSsoAuthorizeUrlUseCase
 from .sso_login_use_case import SsoLoginUseCase
-from .set_sso_settings_use_case import SsoSetSettingsUseCase
+from .configure_sso_provider_use_case import ConfigureSsoProviderUseCase
 
 __all__ = [
     "AdminLoginUseCase",
@@ -11,5 +11,5 @@ __all__ = [
     "ValidateUserTokenUseCase",
     "GetSsoAuthorizeUrlUseCase",
     "SsoLoginUseCase",
-    "SsoSetSettingsUseCase",
+    "ConfigureSsoProviderUseCase",
 ]

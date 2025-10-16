@@ -15,6 +15,10 @@ class InMemorySSOGateway(SsoGateway):
         self._valid_codes = valid_codes or {}
         self._client_id = None
         self._client_secret = None
+        self._authorization_endpoint = None
+        self._token_endpoint = None
+        self._userinfo_endpoint = None
+        self._jwks_uri = None
 
     async def get_authorize_url(self) -> str:
         return self.authorize_url
@@ -33,6 +37,18 @@ class InMemorySSOGateway(SsoGateway):
             sso_provider=user_data["provider"],
         )
 
-    def set_settings(self, client_id: str, client_secret: str) -> None:
+    def configure(
+        self,
+        client_id: str,
+        client_secret: str,
+        authorization_endpoint: str,
+        token_endpoint: str,
+        userinfo_endpoint: str,
+        jwks_uri: str = "",
+    ) -> None:
         self._client_id = client_id
         self._client_secret = client_secret
+        # self._authorization_endpoint = authorization_endpoint
+        # self._token_endpoint = token_endpoint
+        # self._userinfo_endpoint = userinfo_endpoint
+        # self._jwks_uri = jwks_uri

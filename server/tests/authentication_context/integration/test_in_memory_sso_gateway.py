@@ -63,7 +63,13 @@ def test_should_set_sso_settings(sso_gateway):
     client_secret = "new_client_secret_xyz"
 
     # Act
-    sso_gateway.set_settings(client_id, client_secret)
+    sso_gateway.configure(
+        client_id=client_id,
+        client_secret=client_secret,
+        authorization_endpoint="https://example.com/auth",
+        token_endpoint="https://example.com/token",
+        userinfo_endpoint="https://example.com/userinfo",
+    )
 
     # Assert
     assert sso_gateway._client_id == client_id
