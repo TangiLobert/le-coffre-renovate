@@ -61,7 +61,7 @@ async def test_should_validate_callback_and_return_user_info(authlib_gateway):
 
             # Mock userinfo request
             mock_response = Mock()
-            mock_response.json.return_value = mock_user_info  # Synchrone
+            mock_response.json.return_value = mock_user_info  # Synchronous
             mock_response.raise_for_status = Mock()
             mock_client_instance.get = AsyncMock(return_value=mock_response)
 
