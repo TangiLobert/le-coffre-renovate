@@ -118,7 +118,7 @@ class TestConfigureSsoProviderUseCase:
     ):
         """Test discovery with missing required fields."""
         mock_config = {
-            "authorization_endpoint": "https://provider.com/auth"
+            "authorization_endpoint": "https://provider.com/auth",
             # Missing token_endpoint
         }
 
