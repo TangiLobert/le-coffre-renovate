@@ -30,7 +30,7 @@ class SharePasswordResponse(BaseModel):
 @router.post(
     "/{password_id}/share",
     response_model=SharePasswordResponse,
-    status_code=200,
+    status_code=201,
     summary="Share a password with another user",
 )
 def share_password(
