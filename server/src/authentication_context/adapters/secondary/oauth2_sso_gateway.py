@@ -6,6 +6,7 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 from authentication_context.application.gateways import SsoGateway
 from authentication_context.domain.entities import SsoUser
 from authentication_context.domain.exceptions import InvalidSsoCodeException
+from urllib.parse import urlencode
 
 
 class OAuth2SsoGateway(SsoGateway):
@@ -113,9 +114,11 @@ class OAuth2SsoGateway(SsoGateway):
         try:
             # Exchange authorization code for access token
             async with httpx.AsyncClient() as http_client:
+                auth_response = f"{self.redirect_uri}?{urlencode({'code': code})}"
+
                 token = await client.fetch_token(
                     self._token_endpoint,
-                    authorization_response=f"{self.redirect_uri}?code={code}",
+                    authorization_response=auth_response,
                     client=http_client,
                 )
 
