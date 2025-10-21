@@ -25,6 +25,7 @@ from password_management_context.adapters.primary.fastapi.routes import (
 )
 from password_management_context.adapters.secondary.gateways import (
     InMemoryPasswordRepository,
+    SqlPasswordRepository
 )
 
 from rights_access_context.adapters.primary.fastapi.routes import (
@@ -76,7 +77,7 @@ async def lifespan(app: FastAPI):
         app.state.vault_session_gateway = vault_session_gateway
 
         # Password management dependencies
-        password_repository = InMemoryPasswordRepository()
+        password_repository = SqlPasswordRepository(session)
         encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
         decrypt_use_case = DecryptUseCase(encryption_gateway, vault_session_gateway)
         encryption_service = EncryptionApi(
