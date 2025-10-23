@@ -99,24 +99,24 @@ async def test_should_raise_exception_for_invalid_code(authlib_gateway):
                 await authlib_gateway.validate_callback("invalid_code")
 
 
-def test_should_extract_email_from_various_formats():
+@pytest.mark.parametrize(
+    "user_info,expected_email",
+    [
+        ({"email": "user@example.com"}, "user@example.com"),
+        ({"mail": "user@example.com"}, "user@example.com"),
+        ({"userPrincipalName": "user@example.com"}, "user@example.com"),
+    ],
+    ids=["standard_email", "microsoft_mail", "azure_ad_upn"],
+)
+def test_should_extract_email_from_various_formats(user_info, expected_email):
     # Arrange
     gateway = OAuth2SsoGateway(
         base_url="http://test.example.com",
         redirect_uri="http://localhost:8000/auth/sso/callback",
     )
 
-    # Test standard email field
-    user_info1 = {"email": "user@example.com"}
-    assert gateway._extract_email(user_info1) == "user@example.com"
-
-    # Test Microsoft format
-    user_info2 = {"mail": "user@example.com"}
-    assert gateway._extract_email(user_info2) == "user@example.com"
-
-    # Test Azure AD format
-    user_info3 = {"userPrincipalName": "user@example.com"}
-    assert gateway._extract_email(user_info3) == "user@example.com"
+    # Act & Assert
+    assert gateway._extract_email(user_info) == expected_email
 
 
 def test_should_extract_display_name_from_various_formats():
