@@ -11,6 +11,9 @@ class RightsRepository(Protocol):
     def add_permission(
         self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
     ) -> None: ...
+    def remove_permission(
+        self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
+    ) -> None: ...
     def get_all_permissions(
         self, user_id: UUID, resource_id: UUID
     ) -> set[Permission]: ...

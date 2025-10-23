@@ -20,6 +20,15 @@ class InMemoryRightsRepository(RightsRepository):
             self.permissions[key] = set()
         self.permissions[key].add(permission)
 
+    def remove_permission(
+        self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
+    ) -> None:
+        key = (user_id, resource_id)
+        if key in self.permissions:
+            self.permissions[key].discard(permission)
+            if not self.permissions[key]:
+                del self.permissions[key]
+
     def has_permission(
         self, user_id: UUID, resource_id: UUID, permission: Permission = Permission.READ
     ) -> bool:
