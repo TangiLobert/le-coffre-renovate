@@ -6,6 +6,7 @@ from .jwt_token_gateway import JwtTokenGateway
 from .in_memory_user_management_gateway import InMemoryUserManagementGateway
 from .in_memory_sso_gateway import InMemorySSOGateway
 from .oauth2_sso_gateway import OAuth2SsoGateway
+from .in_memory_sso_user_repository import InMemorySsoUserRepository
 
 __all__ = [
     "BcryptHashingGateway",
@@ -16,4 +17,5 @@ __all__ = [
     "InMemoryUserManagementGateway",
     "InMemorySSOGateway",
     "OAuth2SsoGateway",
+    "InMemorySsoUserRepository",
 ]

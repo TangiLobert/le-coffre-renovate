@@ -162,14 +162,12 @@ class OAuth2SsoGateway(SsoGateway):
 
         try:
             # Exchange authorization code for access token
-            async with httpx.AsyncClient() as http_client:
-                auth_response = f"{self.redirect_uri}?{urlencode({'code': code})}"
+            auth_response = f"{self.redirect_uri}?{urlencode({'code': code})}"
 
-                token = await client.fetch_token(
-                    self._token_endpoint,
-                    authorization_response=auth_response,
-                    client=http_client,
-                )
+            token = await client.fetch_token(
+                self._token_endpoint,
+                authorization_response=auth_response,
+            )
 
             # Fetch user information
             async with httpx.AsyncClient() as http_client:

@@ -9,9 +9,9 @@ from tests.authentication_context.unit.fakes import (
     FakeUserPasswordRepository,
     FakeUserManagementGateway,
     FakeSsoGateway,
-    FakeSsoUserRepository,
 )
 from authentication_context.domain.entities.sso_user import SsoUser
+from authentication_context.adapters.secondary import InMemorySsoUserRepository
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ def sso_gateway():
 
 @pytest.fixture
 def sso_user_repository():
-    return FakeSsoUserRepository()
+    return InMemorySsoUserRepository()
 
 
 def create_sso_user_from_provider(email, display_name, sso_user_id, sso_provider):

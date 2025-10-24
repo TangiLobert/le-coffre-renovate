@@ -2,7 +2,7 @@ from typing import Optional, Dict
 from authentication_context.domain.entities.sso_user import SsoUser
 
 
-class FakeSsoUserRepository:
+class InMemorySsoUserRepository:
     def __init__(self):
         self._users: Dict[str, SsoUser] = {}
 
@@ -21,7 +21,3 @@ class FakeSsoUserRepository:
             if user.email == email:
                 return user
         return None
-
-    def clear(self) -> None:
-        """Helper method for tests to clear all users"""
-        self._users.clear()
