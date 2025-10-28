@@ -1,5 +1,5 @@
 import pytest
-from authentication_context.application.use_cases.get_sso_authorize_url_use_case import (
+from authentication_context.application.use_cases.sso.get_sso_authorize_url_use_case import (
     GetSsoAuthorizeUrlUseCase,
 )
 

@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from authentication_context.application.use_cases.configure_sso_provider_use_case import (
+from authentication_context.application.use_cases.sso.configure_sso_provider_use_case import (
     ConfigureSsoProviderUseCase,
 )
 from authentication_context.domain.exceptions import InvalidSsoSettingsException
@@ -78,9 +78,7 @@ class TestConfigureSsoProviderUseCase:
         # Configure mock to raise ValueError (simulating discovery failure)
         mock_sso_gateway.configure_with_discovery.side_effect = ValueError("HTTP 404")
 
-        with pytest.raises(
-            InvalidSsoSettingsException, match="Auto-discovery failed"
-        ):
+        with pytest.raises(InvalidSsoSettingsException, match="Auto-discovery failed"):
             await use_case.execute(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
@@ -96,9 +94,7 @@ class TestConfigureSsoProviderUseCase:
             "Missing fields in discovery: ['token_endpoint']"
         )
 
-        with pytest.raises(
-            InvalidSsoSettingsException, match="Auto-discovery failed"
-        ):
+        with pytest.raises(InvalidSsoSettingsException, match="Auto-discovery failed"):
             await use_case.execute(
                 client_id="test_client_id",
                 client_secret="test_client_secret",
@@ -110,11 +106,11 @@ class TestConfigureSsoProviderUseCase:
     ):
         """Test configuration failure due to gateway error."""
         # Configure mock to raise a generic Exception (simulating gateway failure)
-        mock_sso_gateway.configure_with_discovery.side_effect = Exception("Gateway error")
+        mock_sso_gateway.configure_with_discovery.side_effect = Exception(
+            "Gateway error"
+        )
 
-        with pytest.raises(
-            InvalidSsoSettingsException, match="Configuration failed"
-        ):
+        with pytest.raises(InvalidSsoSettingsException, match="Configuration failed"):
             await use_case.execute(
                 client_id="test_client_id",
                 client_secret="test_client_secret",

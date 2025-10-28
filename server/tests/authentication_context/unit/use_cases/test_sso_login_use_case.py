@@ -2,7 +2,7 @@ import pytest
 from uuid import UUID
 from datetime import datetime
 
-from authentication_context.application.use_cases.sso_login_use_case import (
+from authentication_context.application.use_cases.sso.sso_login_use_case import (
     SsoLoginUseCase,
 )
 from authentication_context.application.commands.sso_login_command import (
