@@ -90,11 +90,13 @@ def get_validate_token_usecase(
     ),
     token_gateway: TokenGateway = Depends(get_token_gateway),
     session_repository: SessionRepository = Depends(get_session_repository),
+    sso_user_repository: SsoUserRepository = Depends(get_sso_user_repository),
 ):
     return ValidateUserTokenUseCase(
         user_password_repository,
         token_gateway,
         session_repository,
+        sso_user_repository,
     )
 
 

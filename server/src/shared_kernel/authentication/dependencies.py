@@ -7,6 +7,7 @@ from authentication_context.application.gateways import (
     UserPasswordRepository,
     TokenGateway,
     SessionRepository,
+    SsoUserRepository,
 )
 from authentication_context.domain.exceptions import (
     InvalidTokenException,
@@ -27,11 +28,13 @@ def get_validate_token_usecase(request: Request) -> ValidateUserTokenUseCase:
     )
     token_gateway: TokenGateway = request.app.state.token_gateway
     session_repository: SessionRepository = request.app.state.session_repository
+    sso_user_repository: SsoUserRepository = request.app.state.sso_user_repository
 
     return ValidateUserTokenUseCase(
         user_password_repository,
         token_gateway,
         session_repository,
+        sso_user_repository,
     )
 
 

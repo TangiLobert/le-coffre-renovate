@@ -3,7 +3,11 @@ from uuid import UUID
 
 from authentication_context.application.use_cases import ValidateUserTokenUseCase
 from authentication_context.application.commands import ValidateUserTokenCommand
-from authentication_context.domain.entities import UserPassword, AuthenticationSession
+from authentication_context.domain.entities import (
+    UserPassword,
+    AuthenticationSession,
+    SsoUser,
+)
 from authentication_context.domain.exceptions import (
     InvalidTokenException,
     SessionNotFoundException,
@@ -13,9 +17,11 @@ from authentication_context.domain.exceptions import (
 
 
 @pytest.fixture
-def use_case(user_password_repository, token_gateway, session_repository):
+def use_case(
+    user_password_repository, token_gateway, session_repository, sso_user_repository
+):
     return ValidateUserTokenUseCase(
-        user_password_repository, token_gateway, session_repository
+        user_password_repository, token_gateway, session_repository, sso_user_repository
     )
 
 
@@ -183,4 +189,66 @@ async def test_should_raise_exception_when_required_role_not_in_token(
     command = ValidateUserTokenCommand(jwt_token=jwt_token, required_roles=["admin"])
 
     with pytest.raises(InsufficientRoleException):
+        await use_case.execute(command)
+
+
+@pytest.mark.asyncio
+async def test_should_validate_token_for_sso_user(
+    use_case: ValidateUserTokenUseCase,
+    sso_user_repository,
+    token_gateway,
+    session_repository,
+):
+    user_id = UUID("8d742e0e-bb76-4728-83ef-8d546d7c62e6")
+    email = "sso_user@example.com"
+    display_name = "SSO User"
+    jwt_token = "jwt_token_for_sso_user@example.com_xyz789"
+
+    # Setup SSO user
+    sso_user = SsoUser(
+        internal_user_id=user_id,
+        email=email,
+        display_name=display_name,
+        sso_user_id="sso_123456",
+        sso_provider="default",
+    )
+    sso_user_repository.save(sso_user)
+
+    # Setup session
+    session = AuthenticationSession(user_id=user_id, jwt_token=jwt_token)
+    session_repository.save(session)
+
+    # Setup JWT token validation
+    token_gateway.set_valid_token(
+        jwt_token, user_id, email, ["user"], {"display_name": display_name}
+    )
+
+    command = ValidateUserTokenCommand(jwt_token=jwt_token)
+    response = await use_case.execute(command)
+
+    assert response.is_valid is True
+    assert response.user_id == user_id
+    assert response.email == email
+    assert response.display_name == display_name
+    assert response.session_id == session.id
+
+
+@pytest.mark.asyncio
+async def test_should_raise_exception_when_sso_user_not_found(
+    use_case: ValidateUserTokenUseCase,
+    token_gateway,
+    session_repository,
+):
+    user_id = UUID("8d742e0e-bb76-4728-83ef-8d546d7c62e6")
+    email = "nonexistent_sso@example.com"
+    jwt_token = "jwt_token_for_nonexistent_sso_user"
+
+    # Setup valid JWT token and session but no SSO user
+    token_gateway.set_valid_token(jwt_token, user_id, email, ["user"], {})
+
+    session = AuthenticationSession(user_id=user_id, jwt_token=jwt_token)
+    session_repository.save(session)
+
+    command = ValidateUserTokenCommand(jwt_token=jwt_token)
+    with pytest.raises(UserNotFoundException):
         await use_case.execute(command)

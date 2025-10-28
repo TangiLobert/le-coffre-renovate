@@ -4,6 +4,7 @@ from authentication_context.application.gateways import (
     UserPasswordRepository,
     TokenGateway,
     SessionRepository,
+    SsoUserRepository,
 )
 from authentication_context.domain.exceptions import (
     InvalidTokenException,
@@ -19,10 +20,12 @@ class ValidateUserTokenUseCase:
         user_password_repository: UserPasswordRepository,
         token_gateway: TokenGateway,
         session_repository: SessionRepository,
+        sso_user_repository: SsoUserRepository,
     ):
         self._user_password_repository = user_password_repository
         self._token_gateway = token_gateway
         self._session_repository = session_repository
+        self._sso_user_repository = sso_user_repository
 
     async def execute(
         self, command: ValidateUserTokenCommand
@@ -35,9 +38,18 @@ class ValidateUserTokenUseCase:
         if not session:
             raise SessionNotFoundException("Session not found or expired")
 
+        # Try to find user in UserPassword repository (admin users)
         user_password = self._user_password_repository.get_by_id(session.user_id)
-        if not user_password:
-            raise UserNotFoundException("User not found")
+        if user_password:
+            email = user_password.email
+            display_name = user_password.display_name
+        else:
+            # Try to find user in SsoUser repository (SSO users)
+            sso_user = self._sso_user_repository.get_by_email(token_obj.email)
+            if not sso_user or sso_user.internal_user_id != session.user_id:
+                raise UserNotFoundException("User not found")
+            email = sso_user.email
+            display_name = sso_user.display_name
 
         # Check required roles if specified
         if command.required_roles:
@@ -48,8 +60,8 @@ class ValidateUserTokenUseCase:
 
         return ValidateUserTokenResponse(
             is_valid=True,
-            user_id=user_password.id,
-            email=user_password.email,
-            display_name=user_password.display_name,
+            user_id=session.user_id,
+            email=email,
+            display_name=display_name,
             session_id=session.id,
         )
