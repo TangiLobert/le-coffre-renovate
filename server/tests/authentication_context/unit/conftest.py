@@ -3,7 +3,6 @@ from uuid import UUID
 from datetime import datetime
 from tests.authentication_context.unit.fakes import (
     FakeTokenGateway,
-    FakeStateGenerationGateway,
     FakePasswordHashingGateway,
     FakeSessionRepository,
     FakeUserPasswordRepository,
@@ -17,11 +16,6 @@ from authentication_context.adapters.secondary import InMemorySsoUserRepository
 @pytest.fixture
 def token_gateway():
     return FakeTokenGateway()
-
-
-@pytest.fixture
-def state_generation_gateway():
-    return FakeStateGenerationGateway()
 
 
 @pytest.fixture

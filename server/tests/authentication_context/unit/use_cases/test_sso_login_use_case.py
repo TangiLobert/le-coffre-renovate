@@ -78,10 +78,7 @@ async def test_should_authenticate_existing_sso_user_and_return_jwt_token(
 
 
 @pytest.mark.asyncio
-async def test_should_raise_exception_for_invalid_sso_code(
-    use_case: SsoLoginUseCase,
-    sso_gateway,
-):
+async def test_should_raise_exception_for_invalid_sso_code(use_case: SsoLoginUseCase):
     # Arrange
     invalid_code = "invalid_sso_code_999"
     command = SsoLoginCommand(code=invalid_code)
@@ -100,7 +97,6 @@ async def test_should_create_new_user_for_first_time_sso_login(
     sso_user_repository,
     user_management_gateway,
     token_gateway,
-    session_repository,
 ):
     # Arrange
     sso_code = "valid_new_user_code_456"
@@ -138,7 +134,6 @@ async def test_should_update_last_login_for_existing_user_without_recreation(
     sso_user_repository,
     user_management_gateway,
     token_gateway,
-    session_repository,
 ):
     # Arrange
     sso_code = "existing_user_code_789"

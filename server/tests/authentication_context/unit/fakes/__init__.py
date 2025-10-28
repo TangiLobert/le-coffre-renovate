@@ -1,5 +1,4 @@
 from .fake_token_gateway import FakeTokenGateway
-from .fake_state_generation_gateway import FakeStateGenerationGateway
 from .fake_password_hashing_gateway import FakePasswordHashingGateway
 from .fake_session_repository import FakeSessionRepository
 from .fake_user_management_gateway import FakeUserManagementGateway
