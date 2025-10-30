@@ -4,6 +4,7 @@ from user_management_context.application.interfaces import UserRepository
 from user_management_context.application.commands import CreateUserCommand
 from user_management_context.domain.entities import User
 from user_management_context.domain.exceptions import AdminAlreadyExistsError
+from user_management_context.application.services import AdminExistenceService
 from shared_kernel.authentication.constants import ADMIN_ROLE
 
 
@@ -12,8 +13,7 @@ class CreateAdminUseCase:
         self.user_repository = user_repository
 
     def execute(self, command: CreateUserCommand) -> UUID:
-        current_admin = self.user_repository.get_admin()
-        if current_admin:
+        if AdminExistenceService.admin_exists(self.user_repository):
             raise AdminAlreadyExistsError()
 
         admin = User(

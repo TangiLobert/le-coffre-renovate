@@ -40,6 +40,10 @@ from user_management_context.adapters.output.interfaces import InMemoryUserRepos
 from user_management_context.adapters.input.fastapi.routes import (
     get_user_management_router,
 )
+from user_management_context.application.use_cases import (
+    CreateUserUseCase,
+    CanCreateAdminUseCase,
+)
 
 from authentication_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
@@ -49,7 +53,7 @@ from authentication_context.adapters.secondary import (
     InMemoryUserPasswordRepository,
     InMemorySessionRepository,
     JwtTokenGateway,
-    InMemoryUserManagementGateway,
+    UserManagementGatewayAdapter,
     OAuth2SsoGateway,
     InMemorySsoUserRepository,
 )
@@ -99,6 +103,8 @@ async def lifespan(app: FastAPI):
 
         # User management dependencies
         user_repository = InMemoryUserRepository()
+        create_user_usecase = CreateUserUseCase(user_repository)
+        can_create_admin_usecase = CanCreateAdminUseCase(user_repository)
 
         app.state.user_repository = user_repository
 
@@ -107,8 +113,10 @@ async def lifespan(app: FastAPI):
         password_hashing_gateway = BcryptHashingGateway()
         token_gateway = JwtTokenGateway()
         session_repository = InMemorySessionRepository()
-        user_management_gateway = InMemoryUserManagementGateway()
-        
+        user_management_gateway = UserManagementGatewayAdapter(
+            create_user_usecase, can_create_admin_usecase
+        )
+
         # SSO Gateway with OAuth2/OIDC support
         # Base URL should be the public URL of your application
         base_url = os.getenv("APP_BASE_URL", "http://localhost:8000")
@@ -116,7 +124,7 @@ async def lifespan(app: FastAPI):
             base_url=base_url,
             redirect_uri=f"{base_url}/api/auth/sso/callback",
             scope="openid email profile",
-            provider="oauth2"
+            provider="oauth2",
         )
         sso_user_repository = InMemorySsoUserRepository()
 

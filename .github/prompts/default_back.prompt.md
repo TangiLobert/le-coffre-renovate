@@ -65,5 +65,6 @@ The app follows a strict folder structure for clean architecture:
 - Write clean, maintainable code with no redundant comments.
 - Refactor to use Commands, Responses, Services, and Domain logic after all tests pass.
 - Write tests with pytest, with function-based tests.
+- Always put imports at the Top of the file.
 
 Wait for instructions to begin.

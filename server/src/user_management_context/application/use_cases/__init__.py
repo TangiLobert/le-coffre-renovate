@@ -4,6 +4,7 @@ from .get_user_use_case import GetUserUseCase
 from .list_user_use_case import ListUserUseCase
 from .update_user_use_case import UpdateUserUseCase
 from .create_admin_use_case import CreateAdminUseCase
+from .can_create_admin_use_case import CanCreateAdminUseCase
 
 __all__ = [
     "CreateUserUseCase",
@@ -12,4 +13,5 @@ __all__ = [
     "ListUserUseCase",
     "UpdateUserUseCase",
     "CreateAdminUseCase",
+    "CanCreateAdminUseCase",
 ]

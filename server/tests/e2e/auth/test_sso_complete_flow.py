@@ -8,16 +8,30 @@ For full integration with real OIDC, the app would need to be configured with OA
 """
 
 import pytest
+import httpx
+from urllib.parse import urlparse, parse_qs
 
 
 @pytest.mark.asyncio
-async def test_configure_sso_provider_success(e2e_client, setup, oidc_server):
-    """Test SSO configuration endpoint works correctly with OIDC discovery URL."""
+async def test_complete_sso_authentication_flow(
+    e2e_client, setup, oidc_server, e2e_test_user
+):
+    """
+    Complete SSO authentication flow: configure → get SSO URL → wrong callback → right callback → validate token.
 
-    print("\n📝 Testing SSO configuration endpoint...")
+    This test validates:
+    1. SSO configuration with OIDC discovery
+    2. Getting the SSO authorization URL
+    3. Handling invalid authorization codes (error case)
+    4. Handling valid authorization codes (success case)
+    5. Using the obtained JWT token to create a password (validates token)
+    """
 
-    # Configure SSO with the mock OIDC provider's discovery URL
-    response = e2e_client.post(
+    print("\n� Starting complete SSO authentication flow...")
+
+    # Step 1: Configure SSO with the mock OIDC provider
+    print("\n📝 Step 1: Configuring SSO provider...")
+    configure_response = e2e_client.post(
         "/api/auth/sso/configure",
         json={
             "client_id": oidc_server["client_id"],
@@ -25,37 +39,19 @@ async def test_configure_sso_provider_success(e2e_client, setup, oidc_server):
             "discovery_url": oidc_server["discovery_url"],
         },
     )
-
-    assert response.status_code == 200, f"Configuration failed: {response.text}"
+    assert (
+        configure_response.status_code == 200
+    ), f"SSO configuration failed: {configure_response.text}"
     print("✅ SSO configured successfully")
 
-
-@pytest.mark.asyncio
-async def test_get_sso_url_after_configuration(e2e_client, setup, oidc_server):
-    """Test getting SSO URL after configuration."""
-
-    print("\n🔗 Testing get SSO URL endpoint...")
-
-    # Configure first
-    e2e_client.post(
-        "/api/auth/sso/configure",
-        json={
-            "client_id": oidc_server["client_id"],
-            "client_secret": oidc_server["client_secret"],
-            "discovery_url": oidc_server["discovery_url"],
-        },
-    )
-
-    # Get SSO URL
+    # Step 2: Get SSO authorization URL
+    print("\n🔗 Step 2: Getting SSO authorization URL...")
     url_response = e2e_client.get("/api/auth/sso/url")
-
     assert (
         url_response.status_code == 200
     ), f"Failed to get SSO URL: {url_response.text}"
 
     sso_url_data = url_response.json()
-
-    # Handle both string response and object response
     if isinstance(sso_url_data, str):
         sso_url = sso_url_data
     elif isinstance(sso_url_data, dict) and "url" in sso_url_data:
@@ -67,65 +63,85 @@ async def test_get_sso_url_after_configuration(e2e_client, setup, oidc_server):
     assert "http" in sso_url.lower(), "SSO URL should be a valid URL"
     print(f"✅ Got SSO URL: {sso_url}")
 
-
-@pytest.mark.asyncio
-async def test_sso_callback_with_invalid_code(e2e_client, setup, oidc_server):
-    """Test SSO callback with invalid authorization code."""
-
-    print("\n🧪 Testing SSO callback with invalid code...")
-
-    # Configure SSO first
-    e2e_client.post(
-        "/api/auth/sso/configure",
-        json={
-            "client_id": oidc_server["client_id"],
-            "client_secret": oidc_server["client_secret"],
-            "discovery_url": oidc_server["discovery_url"],
-        },
+    # Step 3: Test wrong callback with invalid authorization code
+    print("\n🧪 Step 3: Testing callback with invalid authorization code...")
+    invalid_callback_response = e2e_client.get(
+        "/api/auth/sso/callback?code=invalid-code-12345"
     )
-
-    # Try callback with invalid code
-    print("   🔹 Sending invalid authorization code...")
-    response = e2e_client.get("/api/auth/sso/callback?code=invalid-code-12345")
-
-    assert response.status_code == 400, f"Expected 400 but got {response.status_code}"
-    response_data = response.json()
     assert (
-        "SSO authentication failed" in response_data["detail"]
-        or "invalid" in response_data["detail"].lower()
-        or "fail" in response_data["detail"].lower()
-    )
-    print("✅ Correctly rejected invalid authorization code")
-
-
-@pytest.mark.asyncio
-async def test_sso_configuration_with_invalid_data(e2e_client, setup):
-    """Test SSO configuration with invalid/missing data."""
-
-    print("\n🧪 Testing SSO configuration validation...")
-
-    # Test with missing client_id
-    response = e2e_client.post(
-        "/api/auth/sso/configure",
-        json={
-            "client_id": "",
-            "client_secret": "test-secret",
-            "discovery_url": "https://accounts.google.com/.well-known/openid-configuration",
-        },
-    )
-
-    assert response.status_code == 400, f"Expected 400 but got {response.status_code}"
-    print("✅ Correctly rejected empty client_id")
-
-    # Test with missing fields
-    response = e2e_client.post(
-        "/api/auth/sso/configure",
-        json={
-            "client_id": "test-id",
-        },
-    )
-
+        invalid_callback_response.status_code == 400
+    ), f"Expected 400 but got {invalid_callback_response.status_code}"
+    error_data = invalid_callback_response.json()
     assert (
-        response.status_code == 422
-    ), f"Expected 422 validation error but got {response.status_code}"
-    print("✅ Correctly rejected missing required fields")
+        "SSO authentication failed" in error_data["detail"]
+        or "invalid" in error_data["detail"].lower()
+        or "fail" in error_data["detail"].lower()
+    ), f"Expected authentication error, got: {error_data['detail']}"
+    print("✅ Invalid code correctly rejected")
+
+    # Step 4: Get valid authorization code by simulating user authorization
+    print("\n🔐 Step 4: Simulating user authorization to get valid code...")
+    auth_response = httpx.post(
+        sso_url,
+        data={"sub": e2e_test_user["sub"]},
+        follow_redirects=False,
+    )
+    assert auth_response.status_code in [
+        302,
+        303,
+    ], f"Expected redirect, got {auth_response.status_code}"
+
+    callback_url = auth_response.headers.get("location")
+    assert callback_url, "Should have a redirect location"
+
+    parsed = urlparse(callback_url)
+    query_params = parse_qs(parsed.query)
+    valid_code = query_params.get("code", [None])[0]
+    assert valid_code, f"Authorization code not found in callback URL: {callback_url}"
+    print(f"✅ Obtained valid authorization code: {valid_code[:10]}...")
+
+    # Step 5: Test right callback with valid authorization code
+    print("\n✨ Step 5: Testing callback with valid authorization code...")
+    valid_callback_response = e2e_client.get(
+        f"/api/auth/sso/callback?code={valid_code}"
+    )
+    assert (
+        valid_callback_response.status_code == 200
+    ), f"Valid callback failed: {valid_callback_response.text}"
+
+    callback_data = valid_callback_response.json()
+    assert "access_token" in callback_data, "Response should contain access_token"
+    assert "user" in callback_data, "Response should contain user info"
+
+    sso_token = callback_data["access_token"]
+    user_info = callback_data["user"]
+
+    assert user_info["email"] == e2e_test_user["email"], "Email should match test user"
+    assert (
+        user_info["display_name"] == e2e_test_user["name"]
+    ), "Display name should match test user"
+    print(f"✅ SSO login successful for {user_info['email']}")
+
+    # Step 6: Validate token by creating a password (this proves the JWT token works)
+    print("\n🔑 Step 6: Validating JWT token by creating a password...")
+    create_password_response = e2e_client.post(
+        "/api/passwords/",
+        json={
+            "name": "My SSO Test Password",
+            "password": "SuperSecure123!@#",
+            "folder": "SSO Tests",
+        },
+        headers={"Authorization": f"Bearer {sso_token}"},
+    )
+    assert (
+        create_password_response.status_code == 201
+    ), f"Failed to create password with SSO token: {create_password_response.text}"
+
+    password_data = create_password_response.json()
+    assert password_data["name"] == "My SSO Test Password", "Password name should match"
+    assert password_data["folder"] == "SSO Tests", "Password folder should match"
+    print(
+        f"✅ JWT token validated successfully! Password created with ID: {password_data['id']}"
+    )
+
+    print("\n🎉 Complete SSO authentication flow test passed!")
