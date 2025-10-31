@@ -1,15 +1,19 @@
 from fastapi import Depends, HTTPException, Header
 from starlette.requests import Request
 
-from authentication_context.application.use_cases import ValidateUserTokenUseCase
-from authentication_context.application.commands import ValidateUserTokenCommand
-from authentication_context.application.gateways import (
+from identity_access_management_context.application.use_cases import (
+    ValidateUserTokenUseCase,
+)
+from identity_access_management_context.application.commands import (
+    ValidateUserTokenCommand,
+)
+from identity_access_management_context.application.gateways import (
     UserPasswordRepository,
     TokenGateway,
     SessionRepository,
     SsoUserRepository,
 )
-from authentication_context.domain.exceptions import (
+from identity_access_management_context.domain.exceptions import (
     InvalidTokenException,
     SessionNotFoundException,
     UserNotFoundException,

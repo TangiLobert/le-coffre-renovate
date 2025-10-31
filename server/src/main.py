@@ -36,19 +36,8 @@ from rights_access_context.application.use_cases import (
 )
 from rights_access_context.adapters.secondary import InMemoryRightsRepository
 
-from user_management_context.adapters.output.interfaces import InMemoryUserRepository
-from user_management_context.adapters.input.fastapi.routes import (
-    get_user_management_router,
-)
-from user_management_context.application.use_cases import (
-    CreateUserUseCase,
-    CanCreateAdminUseCase,
-)
-
-from authentication_context.adapters.primary.fastapi.routes import (
-    get_authentication_router,
-)
-from authentication_context.adapters.secondary import (
+from identity_access_management_context.adapters.secondary import (
+    InMemoryUserRepository,
     BcryptHashingGateway,
     InMemoryUserPasswordRepository,
     InMemorySessionRepository,
@@ -56,6 +45,14 @@ from authentication_context.adapters.secondary import (
     UserManagementGatewayAdapter,
     OAuth2SsoGateway,
     InMemorySsoUserRepository,
+)
+from identity_access_management_context.adapters.primary.fastapi.routes import (
+    get_user_management_router,
+    get_authentication_router,
+)
+from identity_access_management_context.application.use_cases import (
+    CreateUserUseCase,
+    CanCreateAdminUseCase,
 )
 
 from shared_kernel.pubsub import InMemoryDomainEventPublisher
