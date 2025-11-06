@@ -1,4 +1,5 @@
 from typing import Protocol, Optional
+from uuid import UUID
 from identity_access_management_context.domain.entities import SsoUser
 
 
@@ -15,4 +16,4 @@ class SsoUserRepository(Protocol):
         self, sso_user_id: str, sso_provider: str = "default"
     ) -> Optional[SsoUser]: ...
 
-    def get_by_email(self, email: str) -> Optional[SsoUser]: ...
+    def get_by_user_id(self, user_id: UUID) -> Optional[SsoUser]: ...

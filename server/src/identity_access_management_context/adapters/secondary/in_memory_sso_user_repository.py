@@ -1,4 +1,5 @@
 from typing import Optional, Dict
+from uuid import UUID
 from identity_access_management_context.domain.entities.sso_user import SsoUser
 
 
@@ -16,8 +17,8 @@ class InMemorySsoUserRepository:
         key = f"{sso_user_id}:{sso_provider}"
         return self._users.get(key)
 
-    def get_by_email(self, email: str) -> Optional[SsoUser]:
+    def get_by_user_id(self, user_id: UUID) -> Optional[SsoUser]:
         for user in self._users.values():
-            if user.email == email:
+            if user.internal_user_id == user_id:
                 return user
         return None

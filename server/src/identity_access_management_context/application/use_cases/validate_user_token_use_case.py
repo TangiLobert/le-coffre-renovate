@@ -49,8 +49,8 @@ class ValidateUserTokenUseCase:
             display_name = user_password.display_name
         else:
             # Try to find user in SsoUser repository (SSO users)
-            sso_user = self._sso_user_repository.get_by_email(token_obj.email)
-            if not sso_user or sso_user.internal_user_id != session.user_id:
+            sso_user = self._sso_user_repository.get_by_user_id(session.user_id)
+            if not sso_user:
                 raise UserNotFoundException("User not found")
             email = sso_user.email
             display_name = sso_user.display_name
