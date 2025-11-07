@@ -3,6 +3,7 @@ from starlette.requests import Request
 
 from identity_access_management_context.application.use_cases import (
     GetUserUseCase,
+    GetUserMeUseCase,
     DeleteUserUseCase,
     UpdateUserUseCase,
     CreateUserUseCase,
@@ -91,6 +92,12 @@ def get_list_user_usecase(
     user_repository: UserRepository = Depends(get_user_repository),
 ):
     return ListUserUseCase(user_repository)
+
+
+def get_get_user_me_usecase(
+    user_repository: UserRepository = Depends(get_user_repository),
+):
+    return GetUserMeUseCase(user_repository)
 
 
 # Authentication Use Cases
