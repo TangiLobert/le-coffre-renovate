@@ -24,7 +24,6 @@ from password_management_context.adapters.primary.fastapi.routes import (
     get_password_management_router,
 )
 from password_management_context.adapters.secondary.gateways import (
-    InMemoryPasswordRepository,
     SqlPasswordRepository
 )
 

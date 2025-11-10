@@ -1,7 +1,7 @@
 from typing import List, Optional, Protocol
 from uuid import UUID
 from .model.password import PasswordTable
-from sqlmodel import Session, select
+from sqlmodel import select
 from password_management_context.domain.exceptions import PasswordNotFoundError
 
 from password_management_context.domain.entities import Password
@@ -17,7 +17,6 @@ class SqlPasswordRepository(PasswordRepository):
         self._session.add(db_obj)
         self._session.commit()
         self._session.refresh(db_obj)
-        return db_obj
 
     def get_by_id(self, id: UUID) -> Password:
         """Get password by UUID"""
