@@ -9,11 +9,8 @@ class GetUserMeUseCase:
         self.user_repository = user_repository
 
     def execute(self, command: GetUserMeCommand) -> User:
-        if command.user_id != command.requesting_user_id:
-            raise UserNotFoundException(command.user_id)
-
-        user = self.user_repository.get_by_id(command.user_id)
+        user = self.user_repository.get_by_id(command.requesting_user_id)
         if user is None:
-            raise UserNotFoundException(command.user_id)
+            raise UserNotFoundException(command.requesting_user_id)
 
         return user

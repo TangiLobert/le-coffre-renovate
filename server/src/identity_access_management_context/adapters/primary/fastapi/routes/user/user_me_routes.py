@@ -45,7 +45,6 @@ def get_user_me(
     """
     try:
         command = GetUserMeCommand(
-            user_id=current_user.user_id,
             requesting_user_id=current_user.user_id,
         )
         user = usecase.execute(command)
