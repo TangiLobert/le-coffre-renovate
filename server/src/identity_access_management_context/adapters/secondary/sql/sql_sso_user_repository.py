@@ -6,11 +6,11 @@ from .model.sso_users_model import SsoUsersTable
 
 from identity_access_management_context.domain.exceptions import (
     UserNotFoundError,
-    UserAlreadyExistsError,
+    SsoUserAlreadyExistsException
 )
 
 
-class InMemorySsoUserRepository:
+class SqlSsoUserRepository:
     def __init__(self, Session):
         self._sessions = Session
 
@@ -20,7 +20,7 @@ class InMemorySsoUserRepository:
         self._sessions.commit()
         self._sessions.refresh(db_obj)
         if not db_obj:
-            raise UserAlreadyExistsError(sso_user.sso_user_id)  
+            raise SsoUserAlreadyExistsException(sso_user.sso_user_id)  
 
     def get_by_sso_user_id(
         self, sso_user_id: str, sso_provider: str = "default"
