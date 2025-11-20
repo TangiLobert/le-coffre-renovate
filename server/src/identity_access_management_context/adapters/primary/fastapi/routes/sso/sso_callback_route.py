@@ -9,7 +9,11 @@ from identity_access_management_context.application.commands.sso_login_command i
 )
 from identity_access_management_context.application.use_cases import SsoLoginUseCase
 from identity_access_management_context.domain.exceptions import InvalidSsoCodeException
-from config import get_cookie_secure_setting
+from config import (
+    get_cookie_secure_setting,
+    get_access_token_cookie_max_age_seconds,
+    get_refresh_token_cookie_max_age_seconds,
+)
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -62,7 +66,7 @@ async def sso_callback(
             httponly=True,
             secure=is_secure,  # HTTPS only in production
             samesite="lax",  # CSRF protection
-            max_age=3600,  # 1 hour
+            max_age=get_access_token_cookie_max_age_seconds(),
         )
 
         # Also set refresh token in cookie
@@ -72,7 +76,7 @@ async def sso_callback(
             httponly=True,
             secure=is_secure,  # HTTPS only in production
             samesite="lax",
-            max_age=3600 * 24 * 7,  # 7 days
+            max_age=get_refresh_token_cookie_max_age_seconds(),
         )
 
         return SsoCallbackResponse(
