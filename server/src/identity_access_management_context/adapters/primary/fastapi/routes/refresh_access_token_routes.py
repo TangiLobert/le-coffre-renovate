@@ -22,7 +22,6 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 class RefreshAccessTokenResponse(BaseModel):
     message: str
-    access_token: str
 
 
 @router.post(
@@ -42,7 +41,7 @@ async def refresh_access_token(
     This endpoint allows clients to obtain a new access token using a valid refresh token.
     The refresh token must be provided as an HTTP-only cookie.
 
-    Returns a new access token and sets it in an HTTP-only secure cookie.
+    Sets a new access token in an HTTP-only secure cookie.
     The refresh token remains valid and unchanged.
 
     **Responses**:
@@ -71,8 +70,7 @@ async def refresh_access_token(
         )
 
         return RefreshAccessTokenResponse(
-            message="Access token refreshed successfully",
-            access_token=result.access_token,
+            message="Access token refreshed successfully"
         )
     except InvalidRefreshTokenException as e:
         raise HTTPException(status_code=400, detail=str(e))
