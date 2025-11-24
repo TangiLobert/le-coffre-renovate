@@ -11,8 +11,8 @@ from identity_access_management_context.application.use_cases import SsoLoginUse
 from identity_access_management_context.domain.exceptions import InvalidSsoCodeException
 from config import (
     get_cookie_secure_setting,
-    get_access_token_cookie_max_age_seconds,
-    get_refresh_token_cookie_max_age_seconds,
+    get_jwt_access_token_expiration_minutes,
+    get_jwt_refresh_token_expiration_days,
 )
 
 
@@ -66,7 +66,8 @@ async def sso_callback(
             httponly=True,
             secure=is_secure,  # HTTPS only in production
             samesite="lax",  # CSRF protection
-            max_age=get_access_token_cookie_max_age_seconds(),
+            max_age=get_jwt_access_token_expiration_minutes()
+            * 60,  # Convert minutes to seconds
         )
 
         # Also set refresh token in cookie
@@ -76,7 +77,8 @@ async def sso_callback(
             httponly=True,
             secure=is_secure,  # HTTPS only in production
             samesite="lax",
-            max_age=get_refresh_token_cookie_max_age_seconds(),
+            max_age=get_jwt_refresh_token_expiration_days()
+            * 86400,  # Convert days to seconds
         )
 
         return SsoCallbackResponse(

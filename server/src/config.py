@@ -65,19 +65,3 @@ def get_cookie_secure_setting() -> bool:
     In development/testing, allow HTTP (secure=False).
     """
     return is_production()
-
-
-def get_access_token_cookie_max_age_seconds() -> int:
-    """
-    Get access token cookie max age in seconds. Default is 3600 seconds (1 hour).
-    This should align with JWT access token expiration time.
-    """
-    return int(os.environ.get("ACCESS_TOKEN_COOKIE_MAX_AGE_SECONDS", "3600"))
-
-
-def get_refresh_token_cookie_max_age_seconds() -> int:
-    """
-    Get refresh token cookie max age in seconds. Default is 604800 seconds (7 days).
-    This should align with JWT refresh token expiration time.
-    """
-    return int(os.environ.get("REFRESH_TOKEN_COOKIE_MAX_AGE_SECONDS", "604800"))

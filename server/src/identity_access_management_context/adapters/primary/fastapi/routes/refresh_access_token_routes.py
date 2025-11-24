@@ -15,7 +15,7 @@ from identity_access_management_context.application.commands import (
 from identity_access_management_context.domain.exceptions import (
     InvalidRefreshTokenException,
 )
-from config import get_cookie_secure_setting, get_access_token_cookie_max_age_seconds
+from config import get_cookie_secure_setting, get_jwt_access_token_expiration_minutes
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -66,12 +66,11 @@ async def refresh_access_token(
             httponly=True,
             secure=is_secure,
             samesite="lax",
-            max_age=get_access_token_cookie_max_age_seconds(),  # 1 hour
+            max_age=get_jwt_access_token_expiration_minutes()
+            * 60,  # Convert minutes to seconds
         )
 
-        return RefreshAccessTokenResponse(
-            message="Access token refreshed successfully"
-        )
+        return RefreshAccessTokenResponse(message="Access token refreshed successfully")
     except InvalidRefreshTokenException as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

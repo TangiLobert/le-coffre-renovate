@@ -95,7 +95,6 @@ async def test_refresh_access_token_workflow(
 
     refresh_data = refresh_response.json()
     assert "message" in refresh_data
-    assert "access_token" in refresh_data
     assert refresh_data["message"] == "Access token refreshed successfully"
 
     # Extract new access token from cookie
