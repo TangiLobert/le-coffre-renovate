@@ -16,6 +16,6 @@ class SsoUsersTable(SQLModel, table=True):
     last_login: Optional[datetime] = Field(description="Last login timestamp", nullable=True, default_factory=lambda: datetime.now(timezone.utc))
 
 
-def create_password_table(engine):
+def create_sso_user_table(engine):
     SQLModel.metadata.create_all(engine)
     
