@@ -6,6 +6,10 @@ from urllib.parse import quote
 from fastapi.testclient import TestClient
 from main import app
 from identity_access_management_context.adapters.secondary import InMemorySSOGateway
+from identity_access_management_context.adapters.secondary.sql.sql_sso_user_repository import SqlSsoUserRepository
+from identity_access_management_context.adapters.secondary.sql.model.sso_users_model import SsoUsersTable
+from identity_access_management_context.adapters.secondary.sql.sql_sso_user_repository import SqlSsoUserRepository
+from sqlmodel import Session, create_engine
 import oidc_provider_mock
 
 
@@ -23,7 +27,27 @@ def database():
         pass
     if "DATABASE_URL" in os.environ:
         del os.environ["DATABASE_URL"]
+        
+@pytest.fixture(scope="function")
+def database_engine_SsoUsers():
+    db_fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(db_fd)
+    try:
+        engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+        SsoUsersTable.metadata.create_all(engine)  # <-- Création de la table
+        yield engine
+    finally:
+        os.unlink(db_path)
 
+@pytest.fixture(scope="function")
+def session(database_engine_SsoUsers):
+    session = Session(database_engine_SsoUsers)
+    yield session
+    session.close()
+        
+@pytest.fixture(scope="function")
+def sql_sso_user_repository(session):
+    return SqlSsoUserRepository(session)
 
 @pytest.fixture
 def api_client(database):

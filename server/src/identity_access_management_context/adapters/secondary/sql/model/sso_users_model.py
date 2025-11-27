@@ -1,18 +1,19 @@
 from typing import Optional
 from sqlmodel import CheckConstraint, SQLModel, Field
-from uuid import UUID
-from datetime import datetime
+from uuid import UUID, uuid4
+from datetime import datetime, timezone
 
 
 class SsoUsersTable(SQLModel, table=True):
     __tablename__ = "SsoUsersTable"
 
-    internal_user_id: UUID = Field(default_factory=UUID, nullable=False, primary_key=True, index=True)
+    internal_user_id: UUID = Field(default_factory=uuid4, nullable=False, primary_key=True, index=True)
     email: str = Field(description="User email", nullable=False)
+    display_name: str = Field(description="User display name", nullable=False)
     sso_user_id: str = Field(description="SSO User ID", nullable=False)
     sso_provider: str = Field(description="Password name", default="default", nullable=False)
-    created_at: datetime = Field(description="Creation timestamp", nullable=False, default=datetime.timezone.utc.now)
-    last_login: datetime = Field(description="Last login timestamp", nullable=True)
+    created_at: datetime = Field(description="Creation timestamp", nullable=True, default_factory=lambda: datetime.now(timezone.utc))
+    last_login: Optional[datetime] = Field(description="Last login timestamp", nullable=True, default_factory=lambda: datetime.now(timezone.utc))
 
 
 def create_password_table(engine):
