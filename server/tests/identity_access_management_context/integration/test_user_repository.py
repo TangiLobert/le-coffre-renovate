@@ -33,3 +33,22 @@ def test_delete_user(sql_user_repository):
   sql_user_repository.delete(user_to_delete)
   with pytest.raises(UserNotFoundError):
     sql_user_repository.get_by_id(user_to_delete.id)
+
+def test_delete_nonexistant_user(sql_user_repository):
+  non_existent_user = User(id=uuid4(), username="nonexistent", email="test@test.fr", name="Non Existent", roles=[])
+  with pytest.raises(UserNotFoundError):
+    sql_user_repository.delete(non_existent_user)
+
+def test_save_existing_user_raises_error(sql_user_repository):
+  existing_user = User(id=uuid4(), username="existinguser", email="test@test.fr", name="Existing User", roles=[])
+  sql_user_repository.save(existing_user)
+  with pytest.raises(UserAlreadyExistsError):
+    sql_user_repository.save(existing_user)
+    
+def test_update_user(sql_user_repository):
+  user_to_update = User(id=uuid4(), username="updatableuser", email="testupdate@test.fr", name="Updatable User", roles=[])
+  sql_user_repository.save(user_to_update)
+  user_to_update.name = "Updated User"
+  sql_user_repository.update(user_to_update)
+  updated_user = sql_user_repository.get_by_id(user_to_update.id)
+  assert updated_user.name == "Updated User"
