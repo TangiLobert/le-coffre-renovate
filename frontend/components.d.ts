@@ -8,9 +8,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppFooter: typeof import('./src/components/AppFooter.vue')['default']
+    Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
+    CreatePasswordModal: typeof import('./src/components/CreatePasswordModal.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
     Divider: typeof import('primevue/divider')['default']
     Drawer: typeof import('primevue/drawer')['default']
@@ -18,7 +21,9 @@ declare module 'vue' {
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
     LoginForm: typeof import('./src/components/LoginForm.vue')['default']
+    MainMenu: typeof import('./src/components/MainMenu.vue')['default']
     Message: typeof import('primevue/message')['default']
+    PanelMenu: typeof import('primevue/panelmenu')['default']
     Password: typeof import('primevue/password')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
@@ -38,5 +43,8 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
+  }
+  export interface GlobalDirectives {
+    Ripple: typeof import('primevue/ripple')['default']
   }
 }

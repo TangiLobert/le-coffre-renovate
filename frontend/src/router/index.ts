@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../pages/HomePage.vue'
-import TestView from '../pages/TestPage.vue'
 import SetupView from '../pages/SetupPage.vue'
 import { useSetupStore } from '@/stores/setup'
 
@@ -18,11 +17,6 @@ const router = createRouter({
       component: () => import('../pages/AboutPage.vue'),
     },
     {
-      path: '/test',
-      name: 'Test',
-      component: TestView
-    },
-    {
       path: '/setup',
       name: 'Setup',
       component: SetupView,
@@ -32,6 +26,11 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('../pages/LoginPage.vue'),
+    },
+    {
+      path: '/profile',
+      name: 'Profile',
+      component: () => import('../pages/ProfilePage.vue'),
     }
   ],
 })
@@ -54,7 +53,18 @@ router.beforeEach(async (to) => {
     return '/setup';
   }
 
-  // Otherwise, the app is set up, allow the navigation
+  // If isSetup and page is /setup, redirect to home
+  if (isSetup && to.name === 'Setup') {
+    return { name: 'Home' };
+  }
+
+  // If we are not logged in, redirect to login
+  const isLoggedIn = localStorage.getItem('login') === 'true';
+  if (!isLoggedIn && to.name !== 'Login') {
+    return { name: 'Login' };
+  }
+
+  // Otherwise, the app is set up and logged in, allow the navigation
   return true;
 });
 

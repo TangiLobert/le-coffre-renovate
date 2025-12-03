@@ -1,36 +1,25 @@
-<!-- <script setup>
-import AppNavigation from "../components/AppNavigation.vue";
-import AppLogo from "../components/AppLogo.vue";
-import AppFooter from "../components/AppFooter.vue";
+<script setup lang="ts">
 </script>
+
 <template>
-  <div class="two-column-layout">
-    <header>
-      <AppLogo />
-      <AppNavigation />
-    </header>
-    <main>
-      <slot />
+  <div class="min-h-screen flex">
+    <!-- Menu latéral -->
+    <aside class="w-80 border-r border-surface-200 dark:border-surface-700 flex flex-col">
+      <div class="p-4 border-b border-surface-200 dark:border-surface-700">
+        <h1 class="text-2xl font-bold text-primary-500 dark:text-primary-400">Le Coffre</h1>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <MainMenu />
+      </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <div class="flex-1 flex flex-col">
+      <main class="flex-1 p-6 overflow-y-auto">
+        <slot />
+      </main>
+
       <AppFooter />
-    </main>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.two-column-layout {
-  display: flex;
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-}
-header {
-  flex-basis: 20%;
-  margin-top: 30px;
-}
-
-main {
-  flex-basis: 80%;
-  margin-top: 10px;
-  padding: 20px;
-}
-</style> -->
