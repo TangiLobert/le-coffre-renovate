@@ -11,9 +11,9 @@ from shared_kernel.access_control import AccessController
 
 
 @pytest.fixture
-def use_case(password_repository, encryption_service, access_controller):
+def use_case(password_repository, access_controller):
     return ListPasswordsUseCase(
-        password_repository, encryption_service, access_controller
+        password_repository, access_controller
     )
 
 
@@ -32,7 +32,6 @@ def test_should_return_all_passwords_on_default_folder_when_passwords_exist(
     access_controller: AccessController,
 ):
     requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
-    password = "gmail_secret"
 
     password1 = Password(
         id=UUID("e0e2eb69-5d6b-4500-947a-6636c8755b3f"),
@@ -58,7 +57,6 @@ def test_should_return_all_passwords_on_default_folder_when_passwords_exist(
 
     assert result[0].id == password1.id
     assert result[0].name == password1.name
-    assert result[0].password == password
     assert result[0].folder is None
 
 
@@ -69,7 +67,6 @@ def test_should_return_passwords_from_specific_folder_when_folder_provided(
 ):
     requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
     folder_name = "Personal"
-    password = "gmail_secret"
 
     password1 = Password(
         id=UUID("e0e2eb69-5d6b-4500-947a-6636c8755b3f"),
@@ -93,7 +90,6 @@ def test_should_return_passwords_from_specific_folder_when_folder_provided(
     assert len(result) == 1
     assert result[0].id == password1.id
     assert result[0].name == password1.name
-    assert result[0].password == password
     assert result[0].folder == password1.folder
 
 
@@ -137,7 +133,6 @@ def test_should_return_only_passwords_user_has_access_to(
     assert len(result) == 1
     assert result[0].id == password1.id
     assert result[0].name == password1.name
-    assert result[0].password == "gmail_secret"
     assert result[0].folder is None
 
 

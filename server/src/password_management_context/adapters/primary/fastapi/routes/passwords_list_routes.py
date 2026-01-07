@@ -21,7 +21,6 @@ router = APIRouter(prefix="/passwords", tags=["Password Management"])
 class GetPasswordListResponse(BaseModel):
     id: UUID
     name: str
-    password: str
     folder: str | None = None
 
 
@@ -50,7 +49,6 @@ def list_passwords(
             GetPasswordListResponse(
                 id=password.id,
                 name=password.name,
-                password=password.password,
                 folder=password.folder,
             )
             for password in passwords
