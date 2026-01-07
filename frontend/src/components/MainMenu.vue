@@ -35,7 +35,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue';
-import { listPasswordsPasswordsListFolderGet } from '@/client/sdk.gen';
+import { listPasswordsPasswordsListGet } from '@/client/sdk.gen';
 import CreatePasswordModal from './CreatePasswordModal.vue';
 import type { GetPasswordResponse } from '@/client';
 
@@ -47,10 +47,7 @@ const passwords = ref<GetPasswordResponse[]>([]);
 
 const loadPasswords = async () => {
   try {
-    const response = await listPasswordsPasswordsListFolderGet({
-      path: {
-        folder: 'TestFolder'
-      }
+    const response = await listPasswordsPasswordsListGet({
     });
     if (response.data) {
       passwords.value = response.data as GetPasswordResponse[];

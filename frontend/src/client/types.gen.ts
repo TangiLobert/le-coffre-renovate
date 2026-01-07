@@ -106,6 +106,10 @@ export type CreateUserRequest = {
      * Name
      */
     name: string;
+    /**
+     * Password
+     */
+    password: string;
 };
 
 /**
@@ -662,6 +666,37 @@ export type CreatePasswordPasswordsPostResponses = {
 
 export type CreatePasswordPasswordsPostResponse = CreatePasswordPasswordsPostResponses[keyof CreatePasswordPasswordsPostResponses];
 
+export type ListPasswordsPasswordsListGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Folder
+         */
+        folder?: string | null;
+    };
+    url: '/passwords/list';
+};
+
+export type ListPasswordsPasswordsListGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPasswordsPasswordsListGetError = ListPasswordsPasswordsListGetErrors[keyof ListPasswordsPasswordsListGetErrors];
+
+export type ListPasswordsPasswordsListGetResponses = {
+    /**
+     * Response List Passwords Passwords List Get
+     * Successful Response
+     */
+    200: Array<GetPasswordListResponse>;
+};
+
+export type ListPasswordsPasswordsListGetResponse = ListPasswordsPasswordsListGetResponses[keyof ListPasswordsPasswordsListGetResponses];
+
 export type DeletePasswordPasswordsPasswordIdDeleteData = {
     body?: never;
     path: {
@@ -749,37 +784,6 @@ export type UpdatePasswordPasswordsPasswordIdPutResponses = {
      */
     201: unknown;
 };
-
-export type ListPasswordsPasswordsListFolderGetData = {
-    body?: never;
-    path: {
-        /**
-         * Folder
-         */
-        folder: string | null;
-    };
-    query?: never;
-    url: '/passwords/list/{folder}';
-};
-
-export type ListPasswordsPasswordsListFolderGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListPasswordsPasswordsListFolderGetError = ListPasswordsPasswordsListFolderGetErrors[keyof ListPasswordsPasswordsListFolderGetErrors];
-
-export type ListPasswordsPasswordsListFolderGetResponses = {
-    /**
-     * Response List Passwords Passwords List  Folder  Get
-     * Successful Response
-     */
-    200: Array<GetPasswordListResponse>;
-};
-
-export type ListPasswordsPasswordsListFolderGetResponse = ListPasswordsPasswordsListFolderGetResponses[keyof ListPasswordsPasswordsListFolderGetResponses];
 
 export type SharePasswordPasswordsPasswordIdSharePostData = {
     body: SharePasswordRequest;
