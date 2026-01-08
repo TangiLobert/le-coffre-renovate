@@ -31,6 +31,8 @@
           v-for="password in folder.passwords"
           :key="password.id"
           :password="password"
+          @edit="handleEdit"
+          @deleted="handleDeleted"
         />
       </div>
     </template>
@@ -51,9 +53,22 @@ const props = defineProps<{
   initialOpen?: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: 'edit', password: GetPasswordListResponse): void;
+  (e: 'deleted'): void;
+}>();
+
 const isOpen = ref(props.initialOpen ?? false);
 
 const toggleFolder = () => {
   isOpen.value = !isOpen.value;
+};
+
+const handleEdit = (password: GetPasswordListResponse) => {
+  emit('edit', password);
+};
+
+const handleDeleted = () => {
+  emit('deleted');
 };
 </script>

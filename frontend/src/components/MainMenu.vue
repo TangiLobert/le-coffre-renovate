@@ -21,29 +21,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from 'vue-router';
+import { onMounted, watch } from "vue";
+import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'primevue';
-import { listPasswordsPasswordsListGet } from '@/client/sdk.gen';
-import type { GetPasswordResponse } from '@/client';
+import { storeToRefs } from 'pinia';
+import { usePasswordsStore } from '@/stores/passwords';
 
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 
-const passwords = ref<GetPasswordResponse[]>([]);
-const passwordsCount = ref(0);
-
-const loadPasswords = async () => {
-  try {
-    const response = await listPasswordsPasswordsListGet({});
-    if (response.data) {
-      passwords.value = response.data as GetPasswordResponse[];
-      passwordsCount.value = passwords.value.length;
-    }
-  } catch (err) {
-    console.error('Failed to load passwords:', err);
-  }
-};
+const passwordsStore = usePasswordsStore();
+const { passwordsCount } = storeToRefs(passwordsStore);
 
 const goToAllPasswords = () => {
   router.push({ name: 'Home' });
@@ -60,7 +49,14 @@ const handleLogout = () => {
   });
 };
 
+// Watch for route changes and reload passwords when returning to home
+watch(() => route.path, (newPath) => {
+  if (newPath === '/' || newPath === '/home') {
+    passwordsStore.fetchPasswords();
+  }
+});
+
 onMounted(() => {
-  loadPasswords();
+  passwordsStore.fetchPasswords();
 });
 </script>

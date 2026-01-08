@@ -18,6 +18,8 @@
         :key="folder.name"
         :folder="folder"
         :initialOpen="selectedFolder === folder.name"
+        @edit="handleEdit"
+        @deleted="handleDeleted"
       />
     </div>
   </div>
@@ -35,6 +37,19 @@ const props = defineProps<{
   selectedFolder: string | null;
   folderFilter?: string | null;
 }>();
+
+const emit = defineEmits<{
+  (e: 'edit', password: GetPasswordListResponse): void;
+  (e: 'deleted'): void;
+}>();
+
+const handleEdit = (password: GetPasswordListResponse) => {
+  emit('edit', password);
+};
+
+const handleDeleted = () => {
+  emit('deleted');
+};
 
 // Group passwords by folder
 const folders = computed(() => {

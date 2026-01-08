@@ -1,46 +1,49 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import MainLayout from "../layouts/MainLayout.vue";
 import CreatePasswordModal from "@/components/CreatePasswordModal.vue";
 import PasswordsList from "@/components/passwords/PasswordsList.vue";
 import type { GetPasswordListResponse } from '@/client/types.gen';
-import { listPasswordsPasswordsListGet } from '@/client';
+import { usePasswordsStore } from '@/stores/passwords';
 
 const route = useRoute();
-const passwords = ref<GetPasswordListResponse[]>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
+const passwordsStore = usePasswordsStore();
+const { passwords, loading, error } = storeToRefs(passwordsStore);
+
 const selectedFolder = ref<string | null>(null);
 const showCreateModal = ref(false);
+const editingPassword = ref<GetPasswordListResponse | null>(null);
 
 const folderFilter = computed(() => route.query.folder as string | undefined);
 
-const loadPasswords = async () => {
-  loading.value = true;
-  error.value = null;
-  
-  try {
-    const response = await listPasswordsPasswordsListGet();
-    passwords.value = response.data ?? [];
-    
-    // Auto-expand folder if filtered
-    const folderQuery = route.query.folder as string | undefined;
-    if (folderQuery) {
-      selectedFolder.value = folderQuery;
-    }
-  } catch (e) {
-    console.error('Error loading passwords:', e);
-    error.value = 'Failed to load passwords';
-  } finally {
-    loading.value = false;
-  }
-};
-
 const handlePasswordCreated = async () => {
   // Reload the passwords list
-  await loadPasswords();
+  await passwordsStore.refresh();
 };
+
+const handlePasswordUpdated = async () => {
+  // Reload the passwords list
+  await passwordsStore.refresh();
+};
+
+const handleEdit = (password: GetPasswordListResponse) => {
+  editingPassword.value = password;
+  showCreateModal.value = true;
+};
+
+const handleDeleted = async () => {
+  // Reload the passwords list
+  await passwordsStore.refresh();
+};
+
+// Watch for modal visibility changes to reset editing state
+watch(showCreateModal, (isVisible) => {
+  if (!isVisible) {
+    editingPassword.value = null;
+  }
+});
 
 // Watch for route changes to reload/filter
 watch(() => route.query.folder, (folderQuery) => {
@@ -48,7 +51,13 @@ watch(() => route.query.folder, (folderQuery) => {
 });
 
 onMounted(() => {
-  loadPasswords();
+  // Auto-expand folder if filtered
+  const folderQuery = route.query.folder as string | undefined;
+  if (folderQuery) {
+    selectedFolder.value = folderQuery;
+  }
+  
+  passwordsStore.fetchPasswords();
 });
 </script>
 
@@ -66,10 +75,17 @@ onMounted(() => {
         :error="error"
         :selectedFolder="selectedFolder"
         :folderFilter="folderFilter"
+        @edit="handleEdit"
+        @deleted="handleDeleted"
       />
     </div>
     
-    <!-- Create Password Modal -->
-    <CreatePasswordModal v-model:visible="showCreateModal" @created="handlePasswordCreated" />
+    <!-- Create/Edit Password Modal -->
+    <CreatePasswordModal 
+      v-model:visible="showCreateModal" 
+      :editPassword="editingPassword"
+      @created="handlePasswordCreated"
+      @updated="handlePasswordUpdated"
+    />
   </MainLayout>
 </template>
