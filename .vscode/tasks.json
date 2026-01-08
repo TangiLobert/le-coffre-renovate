@@ -9,15 +9,12 @@
       "problemMatcher": [],
       "presentation": {
         "echo": true,
-        "reveal": "always",
+        "reveal": "silent",
         "focus": false,
         "panel": "dedicated",
         "showReuseMessage": false,
         "clear": false
       },
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
     },
     {
       "label": "Start Backend",
@@ -55,9 +52,6 @@
       "label": "Start All Services",
       "dependsOn": ["Start Nginx", "Start Backend", "Start Frontend"],
       "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
     }
   ]
 }
