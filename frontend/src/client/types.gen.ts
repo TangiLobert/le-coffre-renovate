@@ -451,11 +451,11 @@ export type UpdatePasswordRequest = {
     /**
      * Name
      */
-    name: string;
+    name?: string | null;
     /**
      * Password
      */
-    password: string;
+    password?: string | null;
     /**
      * Folder
      */
