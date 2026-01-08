@@ -2,12 +2,12 @@ import pytest
 from uuid import uuid4
 from identity_access_management_context.domain.entities import User
 from identity_access_management_context.domain.exceptions import UserNotFoundError, UserAlreadyExistsError
-from identity_access_management_context.adapters.secondary.sql.sql_user_repository import SqlUserRepository
+
 
 @pytest.fixture(scope="function")
 def test_save_user_get_by_id(sql_user_repository):
   test_user = User(id=uuid4(), username="testuser", email="test@test.fr", name="Test User", roles=[])
-  sql_user_repository.save(test_user) # Reminder: Declare the repository in conftest.py
+  sql_user_repository.save(test_user)
   retrieved_user = sql_user_repository.get_by_id(test_user.id)
   assert retrieved_user is not None
   assert retrieved_user.id == test_user.id
