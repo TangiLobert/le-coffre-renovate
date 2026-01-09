@@ -3,7 +3,7 @@
   "dockerComposeFile": "../docker-compose.dev.yml",
   "service": "devcontainer",
   "workspaceFolder": "/app",
-  "forwardPorts": [8000, 5173],
+  "forwardPorts": [8123, 8000, 5173],
   "remoteUser": "devuser",
   "initializeCommand": "echo USER_UID=$(id -u) > ${localWorkspaceFolder}/.env && echo USER_GID=$(id -g) >> ${localWorkspaceFolder}/.env",
   "postCreateCommand": "cd /app/server && uv sync && cd /app/frontend && bun install",
