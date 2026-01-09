@@ -4,6 +4,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm
 # Install Node.js, Bun, nginx and other dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    gh \
     bash \
     sudo \
     curl \
