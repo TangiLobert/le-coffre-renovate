@@ -18,4 +18,6 @@ services:
     user: "${USER_UID:-1000}:${USER_GID:-1000}"
     environment:
       - PYTHONPATH=/app/server/src
+      - USER_UID=${USER_UID:-1000}
+      - USER_GID=${USER_GID:-1000}
     command: tail -f /dev/null

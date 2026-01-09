@@ -119,7 +119,7 @@ Open with VSCode and reopen in the devcontainer when prompted. The unified devco
 
 **Quick Start:**
 1. Open project in VS Code
-2. Click "Reopen in Container" when prompted
+2. Click "Reopen in Container" when prompted (VS Code will automatically detect your user's UID/GID and configure the container accordingly)
 3. Use VS Code tasks to start services:
    - Press `Ctrl+Shift+P` → "Run Task" → "Start All Services"
 

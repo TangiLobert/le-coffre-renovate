@@ -6,7 +6,13 @@ This project uses a unified devcontainer that includes both frontend (Bun) and b
 
 1. Open this project in VS Code
 2. When prompted, click "Reopen in Container" or run the command "Dev Containers: Reopen in Container"
-3. VS Code will build the container and set up the development environment
+3. VS Code will automatically:
+   - Detect your host user's UID and GID
+   - Create a `.env` file with these values
+   - Build the container with matching user permissions
+   - Set up the development environment
+
+This ensures all files created in the container have the correct ownership on your host system.
 
 ## Running the Services
 
