@@ -56,7 +56,10 @@ def test_should_return_all_passwords_when_no_folder_when_passwords_exist(
     assert len(result) == 2
 
     for i in result:
-        any(p.id == i.id and p.name == i.name and p.folder == i.folder for p in [password1, password2])
+        assert any(
+            p.id == i.id and p.name == i.name and p.folder == i.folder
+            for p in [password1, password2]
+        )
 
 
 def test_should_return_passwords_from_specific_folder_when_folder_provided(
