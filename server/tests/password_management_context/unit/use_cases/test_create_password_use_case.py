@@ -103,8 +103,6 @@ def test_should_create_password_in_default_folder_when_not_given(
     saved_password = password_repository.get_by_id(password_id)
     assert saved_password.folder == "default"
 
-    
-
 def test_should_grant_access_to_user_when_creating_password(
     use_case: CreatePasswordUseCase, access_controller: FakeAccessController
 ):
