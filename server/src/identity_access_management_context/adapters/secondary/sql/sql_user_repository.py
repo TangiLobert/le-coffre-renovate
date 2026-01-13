@@ -73,11 +73,11 @@ class SqlUserRepository(UserRepository):
             self._session.rollback()
             raise UserAlreadyExistsError(user.username)
 
-    def delete(self, user: User) -> None:
-        statement = select(UserTable).where(UserTable.id == user.id)
+    def delete(self, user_id: UUID) -> None:
+        statement = select(UserTable).where(UserTable.id == user_id)
         db_obj = self._session.exec(statement).first()
         if db_obj is None:
-            raise UserNotFoundError(user.id)
+            raise UserNotFoundError(user_id)
         self._session.delete(db_obj)
         self._session.commit()
 

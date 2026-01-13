@@ -1,12 +1,12 @@
-from uuid import UUID
-from typing import List, Optional
-from sqlmodel import CheckConstraint, SQLModel, Field
+from uuid import UUID, uuid4
+from typing import Optional
+from sqlmodel import SQLModel, Field
 import json
 
 class UserTable(SQLModel, table=True):
   __tablename__="UserTable"
-  
-  id: UUID = Field(default_factory=UUID, nullable=False, primary_key=True, index=True)
+
+  id: UUID = Field(default_factory=uuid4, nullable=False, primary_key=True, index=True)
   username: str = Field(nullable=False)
   email: str = Field(nullable=False)
   name: str = Field(nullable=False)

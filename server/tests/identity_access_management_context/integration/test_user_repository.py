@@ -30,7 +30,7 @@ def test_list_all_users(sql_user_repository):
 def test_delete_user(sql_user_repository):
   user_to_delete = User(id=uuid4(), username="tobedeleted", email="test@test.fr", name="To Be Deleted", roles=[])
   sql_user_repository.save(user_to_delete)
-  sql_user_repository.delete(user_to_delete)
+  sql_user_repository.delete(user_to_delete.id)
   deleted_user = sql_user_repository.get_by_id(user_to_delete.id)
   assert deleted_user is None
 
@@ -58,3 +58,16 @@ def test_update_nonexistant_user(sql_user_repository):
   non_existent_user.name = "Updated non existent user"
   with pytest.raises(UserNotFoundError):
     sql_user_repository.update(non_existent_user)
+
+def test_get_by_admin_role(sql_user_repository):
+  admin_user = User(id=uuid4(), username="adminuser", email="admin@example.com", name="Admin User", roles=["admin"])
+  normal_user = User(id=uuid4(), username="normaluser", email="normal@example.com", name="Normal User", roles=["user"])
+  sql_user_repository.save(admin_user)
+  sql_user_repository.save(normal_user)
+  retrieved_admin = sql_user_repository.get_admin()
+  assert retrieved_admin is not None
+  assert retrieved_admin.id == admin_user.id
+  assert retrieved_admin.username == admin_user.username
+  assert retrieved_admin.email == admin_user.email
+  assert retrieved_admin.name == admin_user.name
+  assert retrieved_admin.roles == admin_user.roles
