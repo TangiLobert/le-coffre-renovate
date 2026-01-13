@@ -32,7 +32,7 @@ def test_should_unlock_vault_with_valid_shares_and_decrypt_key(
     vault_key = "test_vault_key_12345678"
     master_key = "master_key"
     encrypted_key = "encrypted_vault_key_hex"
-    shares = [Share(0, "share0"), Share(1, "share1")]
+    shares = [Share("share0"), Share("share1")]
 
     vault_repository.save(
         Vault(
@@ -57,7 +57,7 @@ def test_should_unlock_vault_with_valid_shares_and_decrypt_key(
 
 
 def test_should_fail_when_vault_is_not_setup(use_case):
-    shares = [Share(0, "share0"), Share(1, "share1")]
+    shares = [Share("share0"), Share("share1")]
 
     with pytest.raises(VaultNotSetupException):
         use_case.execute(shares)
@@ -65,7 +65,7 @@ def test_should_fail_when_vault_is_not_setup(use_case):
 
 def test_should_fail_when_not_enough_shares_provided(use_case, vault_repository):
     vault_repository.save_vault_with_shares(nb_shares=3, threshold=2)
-    shares = [Share(0, "share0")]
+    shares = [Share("share0")]
 
     with pytest.raises(ShareReconstructionError):
         use_case.execute(shares)
@@ -85,11 +85,11 @@ def test_should_fail_when_shamir_reconstruction_fails(
         )
     )
 
-    shares = [Share(0, "share0"), Share(1, "share1")]
+    shares = [Share("share0"), Share("share1")]
     master_secret = "master_secret"
     shamir_gateway.set_shamir_result(ShamirResult(shares, master_secret))
 
-    invalid_shares = [Share(0, "invalid_share0"), Share(1, "invalid_share1")]
+    invalid_shares = [Share("invalid_share0"), Share("invalid_share1")]
 
     with pytest.raises(ShareReconstructionError):
         use_case.execute(invalid_shares)
@@ -109,7 +109,7 @@ def test_should_fail_when_vault_is_already_unlock(
         )
     )
 
-    shares = [Share(0, "share0"), Share(1, "share1")]
+    shares = [Share("share0"), Share("share1")]
     master_key = "master_key"
     shamir_gateway.set_shamir_result(ShamirResult(shares, master_key))
 

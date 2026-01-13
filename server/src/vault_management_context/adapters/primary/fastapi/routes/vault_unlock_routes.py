@@ -14,29 +14,22 @@ from vault_management_context.domain.exceptions import VaultManagementDomainErro
 router = APIRouter(prefix="/vault", tags=["Vault"])
 
 
-class ShareRequest(BaseModel):
-    model_config = ConfigDict(
-        json_schema_extra={"example": {"index": 0, "secret": "abc123def456"}}
-    )
-
-    index: int
-    secret: str
-
-
 class UnlockVaultPostRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "shares": [
-                    {"index": 0, "secret": "abc123def456"},
-                    {"index": 1, "secret": "def789ghi012"},
+                    "0:abc123def456",
+                    "1:def789ghi012",
                 ]
             }
         }
     )
 
-    shares: List[ShareRequest] = Field(
-        ..., min_length=1, description="List of shares to unlock the vault"
+    shares: List[str] = Field(
+        ...,
+        min_length=1,
+        description="List of share secrets (hex strings with embedded index)",
     )
 
 
@@ -60,12 +53,11 @@ def unlock_vault(
     This endpoint does not require authentication as it's needed to unlock the vault
     before any user can authenticate.
 
-    - **shares**: List of shares (index + secret) needed to reconstruct the master secret
+    - **shares**: List of share secrets (hex strings with embedded index in format "index:hexsecret")
     """
     try:
-        shares = [
-            Share(share_req.index, share_req.secret) for share_req in request.shares
-        ]
+        # Create Share objects from secrets (index is embedded in secret)
+        shares = [Share(share_secret) for share_secret in request.shares]
         usecase.execute(shares)
         return {"message": "Vault unlocked successfully"}
     except VaultManagementDomainError as e:

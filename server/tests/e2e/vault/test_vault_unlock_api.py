@@ -12,7 +12,9 @@ def test_can_unlock_vault_with_valid_shares(e2e_client, admin_token):
 
     setup_data = setup_response.json()
     shares = setup_data["shares"]
-    shares_to_use = shares[:threshold]
+    # Extract secret strings from share objects
+    share_secrets = [share["secret"] for share in shares]
+    shares_to_use = share_secrets[:threshold]
     setup_id = setup_data["setup_id"]
 
     # Validate the setup to complete it
@@ -30,10 +32,7 @@ def test_can_unlock_vault_with_valid_shares(e2e_client, admin_token):
     unlock_response = e2e_client.post(
         "/api/vault/unlock",
         json={
-            "shares": [
-                {"index": share["index"], "secret": share["secret"]}
-                for share in shares_to_use
-            ]
+            "shares": shares_to_use  # Shares are now just hex strings
         },
     )
 
@@ -55,6 +54,8 @@ def test_vault_unlock_fails_with_insufficient_real_shares(e2e_client, admin_toke
 
     setup_data = setup_response.json()
     real_shares = setup_data["shares"]
+    # Extract secret strings from share objects
+    share_secrets = [share["secret"] for share in real_shares]
     setup_id = setup_data["setup_id"]
 
     # Validate the setup to complete it
@@ -68,16 +69,13 @@ def test_vault_unlock_fails_with_insufficient_real_shares(e2e_client, admin_toke
     lock_response = e2e_client.post("/api/vault/lock", headers=headers)
     assert lock_response.status_code == 200
 
-    insufficient_shares = real_shares[:2]
+    insufficient_shares = share_secrets[:2]
 
     # No authentication required for unlock
     unlock_response = e2e_client.post(
         "/api/vault/unlock",
         json={
-            "shares": [
-                {"index": share["index"], "secret": share["secret"]}
-                for share in insufficient_shares
-            ]
+            "shares": insufficient_shares  # Shares are now just hex strings
         },
     )
 
@@ -99,6 +97,8 @@ def test_vault_unlock_fails_when_shares_given_are_wrong(e2e_client, admin_token)
 
     setup_data = setup_response.json()
     real_shares = setup_data["shares"]
+    # Extract secret strings from share objects
+    share_secrets = [share["secret"] for share in real_shares]
     setup_id = setup_data["setup_id"]
 
     # Validate the setup to complete it
@@ -112,8 +112,9 @@ def test_vault_unlock_fails_when_shares_given_are_wrong(e2e_client, admin_token)
     lock_response = e2e_client.post("/api/vault/lock", headers=headers)
     assert lock_response.status_code == 200
 
+    # Create invalid shares by corrupting them
     invalid_shares = [
-        {"index": share["index"], "secret": "wrongsecret"} for share in real_shares[:3]
+        share.replace(share.split(":")[1], "wrongsecret") for share in share_secrets[:3]
     ]
 
     # No authentication required for unlock
@@ -143,7 +144,9 @@ def test_vault_unlock_succeeds_without_authentication(
 
     setup_data = setup_response.json()
     shares = setup_data["shares"]
-    shares_to_use = shares[:3]
+    # Extract secret strings from share objects
+    share_secrets = [share["secret"] for share in shares]
+    shares_to_use = share_secrets[:3]
     setup_id = setup_data["setup_id"]
 
     # Validate the setup to complete it
@@ -161,10 +164,7 @@ def test_vault_unlock_succeeds_without_authentication(
     unlock_response = unauthenticated_client.post(
         "/api/vault/unlock",
         json={
-            "shares": [
-                {"index": share["index"], "secret": share["secret"]}
-                for share in shares_to_use
-            ]
+            "shares": shares_to_use  # Shares are now just hex strings
         },
     )
 
@@ -187,7 +187,9 @@ def test_vault_unlock_succeeds_with_any_token(e2e_client, admin_token):
 
     setup_data = setup_response.json()
     shares = setup_data["shares"]
-    shares_to_use = shares[:3]
+    # Extract secret strings from share objects
+    share_secrets = [share["secret"] for share in shares]
+    shares_to_use = share_secrets[:3]
     setup_id = setup_data["setup_id"]
 
     # Validate the setup to complete it
@@ -207,10 +209,7 @@ def test_vault_unlock_succeeds_with_any_token(e2e_client, admin_token):
     unlock_response = e2e_client.post(
         "/api/vault/unlock",
         json={
-            "shares": [
-                {"index": share["index"], "secret": share["secret"]}
-                for share in shares_to_use
-            ]
+            "shares": shares_to_use  # Shares are now just hex strings
         },
         headers=invalid_headers,
     )

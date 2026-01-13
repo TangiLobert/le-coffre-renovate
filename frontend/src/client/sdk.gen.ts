@@ -62,7 +62,7 @@ export const validateVaultSetupVaultValidateSetupPost = <ThrowOnError extends bo
  * This endpoint does not require authentication as it's needed to unlock the vault
  * before any user can authenticate.
  *
- * - **shares**: List of shares (index + secret) needed to reconstruct the master secret
+ * - **shares**: List of share secrets (hex strings with embedded index in format "index:hexsecret")
  */
 export const unlockVaultVaultUnlockPost = <ThrowOnError extends boolean = false>(options: Options<UnlockVaultVaultUnlockPostData, ThrowOnError>) => {
     return (options.client ?? client).post<UnlockVaultVaultUnlockPostResponses, UnlockVaultVaultUnlockPostErrors, ThrowOnError>({

@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { unlockVaultVaultUnlockPost } from '@/client/sdk.gen';
-import type { ShareRequest } from '@/client/types.gen';
 
 const visible = defineModel<boolean>('visible', { required: true });
 
@@ -58,13 +57,11 @@ const handleSubmit = async () => {
   try {
     loading.value = true;
 
-    const shareRequests: ShareRequest[] = shares.value.map(share => ({
-      index: share.index,
-      secret: share.secret.trim()
-    }));
+    // Shares are now just the secret strings (no need to send index separately)
+    const shareSecrets = shares.value.map(share => share.secret.trim());
 
     const response = await unlockVaultVaultUnlockPost({
-      body: { shares: shareRequests }
+      body: { shares: shareSecrets }
     });
 
     if (response.error) {
