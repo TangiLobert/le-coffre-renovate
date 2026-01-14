@@ -32,6 +32,7 @@ declare module 'vue' {
     Password: typeof import('primevue/password')['default']
     PasswordCard: typeof import('./src/components/passwords/PasswordCard.vue')['default']
     PasswordsList: typeof import('./src/components/passwords/PasswordsList.vue')['default']
+    ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SelectButton: typeof import('primevue/selectbutton')['default']
