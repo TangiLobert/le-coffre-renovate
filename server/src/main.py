@@ -44,15 +44,13 @@ from rights_access_context.application.use_cases import (
 from rights_access_context.adapters.secondary import InMemoryRightsRepository
 
 from identity_access_management_context.adapters.secondary import (
-    InMemoryUserRepository,
     SqlUserRepository,
     BcryptHashingGateway,
     InMemoryUserPasswordRepository,
     JwtTokenGateway,
     UserManagementGatewayAdapter,
     OAuth2SsoGateway,
-    InMemorySsoUserRepository,
-    SqlSsoUserRepository
+    SqlSsoUserRepository,
 )
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
@@ -140,7 +138,7 @@ async def lifespan(app: FastAPI):
             scope="openid email profile",
             provider="oauth2",
         )
-        sso_user_repository = InMemorySsoUserRepository()
+        sso_user_repository = SqlSsoUserRepository(session)
 
         app.state.user_password_repository = user_password_repository
         app.state.password_hashing_gateway = password_hashing_gateway
