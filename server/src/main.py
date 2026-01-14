@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
         # IAM dependencies
         app.state.time_provider = UtcTimeProvider()
 
-        user_repository = InMemoryUserRepository()
+        user_repository = SqlUserRepository(session)
         user_password_repository = InMemoryUserPasswordRepository()
         password_hashing_gateway = BcryptHashingGateway()
 
@@ -139,7 +139,7 @@ async def lifespan(app: FastAPI):
             scope="openid email profile",
             provider="oauth2",
         )
-        sso_user_repository = InMemorySsoUserRepository()
+        sso_user_repository = SqlSsoUserRepository(session)
 
         app.state.user_password_repository = user_password_repository
         app.state.password_hashing_gateway = password_hashing_gateway
