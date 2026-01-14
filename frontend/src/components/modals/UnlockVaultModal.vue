@@ -11,36 +11,23 @@ const emit = defineEmits<{
 
 const toast = useToast();
 
-interface ShareInput {
-  index: number;
-  secret: string;
-}
-
-const shares = ref<ShareInput[]>([
-  { index: 1, secret: '' },
-  { index: 2, secret: '' }
-]);
+const shares = ref<string[]>(['', '']);
 
 const loading = ref(false);
 
 const addShare = () => {
-  const nextIndex = shares.value.length + 1;
-  shares.value.push({ index: nextIndex, secret: '' });
+  shares.value.push('');
 };
 
 const removeShare = (index: number) => {
   if (shares.value.length > 2) {
     shares.value.splice(index, 1);
-    // Renumber the remaining shares
-    shares.value.forEach((share, idx) => {
-      share.index = idx + 1;
-    });
   }
 };
 
 const isValid = computed(() => {
   return shares.value.length >= 2 &&
-    shares.value.every(share => share.secret.trim().length > 0);
+    shares.value.every(share => share.trim().length > 0);
 });
 
 const handleSubmit = async () => {
@@ -57,8 +44,7 @@ const handleSubmit = async () => {
   try {
     loading.value = true;
 
-    // Shares are now just the secret strings (no need to send index separately)
-    const shareSecrets = shares.value.map(share => share.secret.trim());
+    const shareSecrets = shares.value.map(share => share.trim());
 
     const response = await unlockVaultVaultUnlockPost({
       body: { shares: shareSecrets }
@@ -123,10 +109,10 @@ const handleSubmit = async () => {
         <div v-for="(share, index) in shares" :key="index" class="flex gap-2 items-start">
           <div class="flex-1">
             <label :for="`share-${index}`" class="block text-sm font-semibold mb-1">
-              Share {{ share.index }}
+              Share {{ index + 1 }}
             </label>
-            <Password :id="`share-${index}`" v-model="share.secret" placeholder="Enter share secret" :disabled="loading"
-              :feedback="false" toggleMask class="w-full" inputClass="w-full font-mono" />
+            <Password :id="`share-${index}`" v-model="shares[index]" placeholder="Enter share secret"
+              :disabled="loading" :feedback="false" toggleMask class="w-full" inputClass="w-full font-mono" />
           </div>
           <Button v-if="shares.length > 2" icon="pi pi-trash" severity="danger" text rounded :disabled="loading"
             @click="removeShare(index)" class="mt-7" v-tooltip.top="'Remove share'" />
