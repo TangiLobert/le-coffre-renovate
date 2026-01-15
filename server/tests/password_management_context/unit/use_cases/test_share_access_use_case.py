@@ -37,18 +37,17 @@ def test_given_owner_when_sharing_should_grant_read_access(
 ):
     # Arrange: Given an owner of a resource
     owner_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
-    password_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e7")
     user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
 
     password_repository.save(password)
-    password_permissions_repository.set_owner(owner_id, password_id)
+    password_permissions_repository.set_owner(owner_id, password.id)
 
     # Act: When owner shares the resource
-    use_case.execute(ShareResourceCommand(owner_id, user_id, password_id))
+    use_case.execute(ShareResourceCommand(owner_id, user_id, password.id))
 
     # Assert: Then the recipient should have READ access only
     assert password_permissions_repository.has_access(
-        user_id, password_id, PasswordPermission.READ
+        user_id, password.id, PasswordPermission.READ
     )
 
 
@@ -61,22 +60,21 @@ def test_given_non_owner_with_permissions_when_sharing_should_fail(
     # Arrange: Given a user with UPDATE permission but not owner
     owner_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     non_owner_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
-    password_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e7")
     third_user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e8")
 
     password_repository.save(password)
-    password_permissions_repository.set_owner(owner_id, password_id)
+    password_permissions_repository.set_owner(owner_id, password.id)
     password_permissions_repository.grant_access(
-        non_owner_id, password_id, PasswordPermission.READ
+        non_owner_id, password.id, PasswordPermission.READ
     )
 
     # Act & Assert: When non-owner tries to share, then should fail
     with pytest.raises(PasswordAccessDeniedError):
-        use_case.execute(ShareResourceCommand(non_owner_id, third_user_id, password_id))
+        use_case.execute(ShareResourceCommand(non_owner_id, third_user_id, password.id))
 
     # Assert: Third user should not have access
-    assert password_permissions_repository.has_access(
-        third_user_id, password_id, PasswordPermission.READ
+    assert not password_permissions_repository.has_access(
+        third_user_id, password.id, PasswordPermission.READ
     )
 
 
@@ -88,21 +86,20 @@ def test_given_owner_when_sharing_already_shared_resource_should_succeed(
 ):
     # Arrange
     owner_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
-    password_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e7")
     user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")
 
     password_repository.save(password)
-    password_permissions_repository.set_owner(owner_id, password_id)
+    password_permissions_repository.set_owner(owner_id, password.id)
     password_permissions_repository.grant_access(
-        user_id, password_id, PasswordPermission.READ
+        user_id, password.id, PasswordPermission.READ
     )
 
     # Act
-    use_case.execute(ShareResourceCommand(owner_id, user_id, password_id))
+    use_case.execute(ShareResourceCommand(owner_id, user_id, password.id))
 
     # Assert
     assert password_permissions_repository.has_access(
-        user_id, password_id, PasswordPermission.READ
+        user_id, password.id, PasswordPermission.READ
     )
 
 

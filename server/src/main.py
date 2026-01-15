@@ -31,7 +31,7 @@ from vault_management_context.application.use_cases import (
 from password_management_context.adapters.primary.fastapi.routes import (
     get_password_management_router,
 )
-from password_management_context.adapters.secondary.sql import (
+from password_management_context.adapters.secondary import (
     SqlPasswordRepository,
     SqlPasswordPermissionsRepository,
 )
@@ -86,12 +86,6 @@ async def lifespan(app: FastAPI):
         app.state.password_repository = password_repository
         app.state.password_permissions_repository = password_permissions_repository
         app.state.encryption_service = encryption_service
-
-        password_permissions_repository = SqlPasswordPermissionsRepository(session)
-        password_repository = SqlPasswordRepository(session)
-
-        app.state.password_permissions_repository = password_permissions_repository
-        app.state.password_repository = password_repository
 
         # IAM dependencies
         app.state.time_provider = UtcTimeProvider()

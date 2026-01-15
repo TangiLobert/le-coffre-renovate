@@ -79,26 +79,25 @@ class SqlPasswordPermissionsRepository(PasswordPermissionsRepository):
             self._session.add(permission_entry)
             self._session.commit()
 
-    def revoke_access(
-        self, user_id: UUID, password_id: UUID, permission: PasswordPermission
-    ) -> None:
-        """Revoke a specific permission from a user for a password"""
+    def revoke_access(self, user_id: UUID, password_id: UUID) -> None:
+        """Revoke all permissions from a user for a password"""
         statement = select(PermissionsTable).where(
             PermissionsTable.user_id == user_id,
             PermissionsTable.resource_id == password_id,
-            PermissionsTable.permission == permission.value,
         )
-        permission_entry = self._session.exec(statement).first()
+        permission_entries = self._session.exec(statement).all()
 
-        if permission_entry:
+        for permission_entry in permission_entries:
             self._session.delete(permission_entry)
+
+        if permission_entries:
             self._session.commit()
 
     def get_all_users_with_access(
         self, password_id: UUID
     ) -> dict[UUID, set[PasswordPermission]]:
-        """Get all user IDs that have any kind of access to a password"""
-        user_ids = set()
+        """Get all users who have access to a password with their permissions"""
+        result: dict[UUID, set[PasswordPermission]] = {}
 
         # Get all owners
         ownership_statement = select(OwnershipTable).where(
@@ -106,14 +105,23 @@ class SqlPasswordPermissionsRepository(PasswordPermissionsRepository):
         )
         ownerships = self._session.exec(ownership_statement).all()
         for ownership in ownerships:
-            user_ids.add(ownership.user_id)
+            if ownership.user_id not in result:
+                result[ownership.user_id] = set()
 
         # Get all users with permissions
         permission_statement = select(PermissionsTable).where(
             PermissionsTable.resource_id == password_id
         )
         permissions = self._session.exec(permission_statement).all()
-        for permission in permissions:
-            user_ids.add(permission.user_id)
+        for permission_entry in permissions:
+            if permission_entry.user_id not in result:
+                result[permission_entry.user_id] = set()
+            try:
+                result[permission_entry.user_id].add(
+                    PasswordPermission(permission_entry.permission)
+                )
+            except ValueError:
+                # Skip invalid permissions
+                pass
 
-        return list(user_ids)
+        return result

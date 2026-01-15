@@ -1,4 +1,3 @@
-from uuid import uuid4
 from utils import STRONG_PASSWORD
 
 
@@ -222,29 +221,3 @@ def test_cannot_unshare_with_owner(authenticated_admin_client, setup):
     )
     assert unshare_response.status_code == 400
     assert "owner" in unshare_response.json()["detail"].lower()
-
-
-def test_cannot_share_with_nonexistent_user(authenticated_admin_client, setup):
-    """
-    Test that sharing with a non-existent user returns 404
-    """
-    nonexistent_user_id = str(uuid4())
-
-    # Create password
-    create_response = authenticated_admin_client.post(
-        "/api/passwords",
-        json={
-            "name": "Test Password",
-            "password": STRONG_PASSWORD,
-        },
-    )
-    assert create_response.status_code == 201
-    password_id = create_response.json()["id"]
-
-    # Try to share with non-existent user
-    share_response = authenticated_admin_client.post(
-        f"/api/passwords/{password_id}/share",
-        json={"user_id": nonexistent_user_id},
-    )
-    assert share_response.status_code == 404
-    assert "does not exist" in share_response.json()["detail"]

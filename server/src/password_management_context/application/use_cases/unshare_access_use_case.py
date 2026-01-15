@@ -20,6 +20,7 @@ class UnshareAccessUseCase:
         self.password_permissions_repository = password_permissions_repository
 
     def execute(self, command: UnshareResourceCommand):
+        # Check if requester is the owner
         if not self.password_permissions_repository.is_owner(
             command.owner_id, command.password_id
         ):
@@ -33,6 +34,7 @@ class UnshareAccessUseCase:
         ):
             raise CannotUnshareWithOwnerError(command.user_id, command.password_id)
 
+        # Revoke all access
         self.password_permissions_repository.revoke_access(
             command.user_id, command.password_id
         )

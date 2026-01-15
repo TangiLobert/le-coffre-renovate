@@ -43,7 +43,7 @@ def unshare_password(
         command = UnshareResourceCommand(
             owner_id=current_user.user_id,
             user_id=user_id,
-            resource_id=password_id,
+            password_id=password_id,
         )
         usecase.execute(command)
 

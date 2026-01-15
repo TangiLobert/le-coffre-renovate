@@ -9,6 +9,7 @@ from password_management_context.adapters.primary.fastapi.app_dependencies impor
 from password_management_context.application.use_cases import ShareAccessUseCase
 from password_management_context.application.commands import ShareResourceCommand
 from password_management_context.domain.exceptions import PasswordAccessDeniedError
+from identity_access_management_context.domain.exceptions import UserNotFoundException
 from shared_kernel.authentication import ValidatedUser
 from shared_kernel.authentication.dependencies import get_current_user
 
@@ -57,6 +58,8 @@ def share_password(
         )
     except PasswordAccessDeniedError as e:
         raise HTTPException(status_code=403, detail=str(e))
+    except UserNotFoundException:
+        raise HTTPException(status_code=404, detail="User does not exist")
     except Exception as e:
         logging.error(e)
         raise HTTPException(status_code=500, detail="Internal server error")

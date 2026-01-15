@@ -20,6 +20,10 @@ class ShareAccessUseCase:
         self.password_permissions_repository = password_permissions_repository
 
     def execute(self, command: ShareResourceCommand):
+        # Verify the password exists - will raise PasswordNotFoundError if not
+        self.password_repository.get_by_id(command.password_id)
+
+        # Check if requester is the owner
         if not self.password_permissions_repository.is_owner(
             command.owner_id, command.password_id
         ):
