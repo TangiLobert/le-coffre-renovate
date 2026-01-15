@@ -51,8 +51,8 @@ from identity_access_management_context.adapters.secondary import (
     UserManagementGatewayAdapter,
     OAuth2SsoGateway,
     InMemorySsoUserRepository,
-    SqlUserPasswordRepository
-    SqlSsoUserRepository,
+    SqlUserPasswordRepository,
+    SqlSsoUserRepository
 )
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
