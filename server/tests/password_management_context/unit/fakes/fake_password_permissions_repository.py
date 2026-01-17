@@ -9,19 +9,15 @@ class FakePasswordPermissionsRepository:
         self._ownerships: Dict[Tuple[UUID, UUID], bool] = {}
         self._permissions: Dict[Tuple[UUID, UUID], Set[PasswordPermission]] = {}
 
-    def set_owner(self, user_id: UUID, password_id: UUID) -> None:
-        self._ownerships[(user_id, password_id)] = True
+    def set_owner(self, owner_id: UUID, password_id: UUID) -> None:
+        self._ownerships[(owner_id, password_id)] = True
 
-    def is_owner(self, user_id: UUID, password_id: UUID) -> bool:
-        return self._ownerships.get((user_id, password_id), False)
+    def is_owner(self, owner_id: UUID, password_id: UUID) -> bool:
+        return self._ownerships.get((owner_id, password_id), False)
 
     def has_access(
         self, user_id: UUID, password_id: UUID, permission: PasswordPermission
     ) -> bool:
-        # Owner always has access
-        if self.is_owner(user_id, password_id):
-            return True
-
         # Check if user has explicit permissions
         key = (user_id, password_id)
         return key in self._permissions and permission in self._permissions[key]
@@ -50,10 +46,10 @@ class FakePasswordPermissionsRepository:
                 result[user_id] = (False, permissions.copy())
 
         # Add owners (with empty permission set to distinguish them)
-        for user_id, pwd_id in self._ownerships:
+        for owner_id, pwd_id in self._ownerships:
             if pwd_id == password_id:
-                if user_id not in result:
-                    result[user_id] = (True, set())
+                if owner_id not in result:
+                    result[owner_id] = (True, set())
 
         return result
 

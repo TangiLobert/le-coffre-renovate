@@ -19,24 +19,24 @@ class SqlPasswordPermissionsRepository(PasswordPermissionsRepository):
     def __init__(self, Session):
         self._session = Session
 
-    def set_owner(self, user_id: UUID, password_id: UUID) -> None:
-        """Set a user as the owner of a password"""
+    def set_owner(self, owner_id: UUID, password_id: UUID) -> None:
+        """Set a group as the owner of a password"""
         # Check if ownership already exists
         statement = select(OwnershipTable).where(
-            OwnershipTable.user_id == user_id,
+            OwnershipTable.user_id == owner_id,
             OwnershipTable.resource_id == password_id,
         )
         existing = self._session.exec(statement).first()
 
         if not existing:
-            ownership = OwnershipTable(user_id=user_id, resource_id=password_id)
+            ownership = OwnershipTable(user_id=owner_id, resource_id=password_id)
             self._session.add(ownership)
             self._session.commit()
 
-    def is_owner(self, user_id: UUID, password_id: UUID) -> bool:
-        """Check if a user is the owner of a password"""
+    def is_owner(self, owner_id: UUID, password_id: UUID) -> bool:
+        """Check if a group is the owner of a password"""
         statement = select(OwnershipTable).where(
-            OwnershipTable.user_id == user_id,
+            OwnershipTable.user_id == owner_id,
             OwnershipTable.resource_id == password_id,
         )
         result = self._session.exec(statement).first()
@@ -46,10 +46,7 @@ class SqlPasswordPermissionsRepository(PasswordPermissionsRepository):
         self, user_id: UUID, password_id: UUID, permission: PasswordPermission
     ) -> bool:
         """Check if a user has any access to a password"""
-        # User has access if they are the owner OR have explicit permissions
-        if self.is_owner(user_id, password_id):
-            return True
-
+        # Check if user has explicit permissions
         statement = select(PermissionsTable).where(
             PermissionsTable.user_id == user_id,
             PermissionsTable.resource_id == password_id,

@@ -22,6 +22,22 @@ class FolderNotFoundError(PasswordManagementDomainError):
         super().__init__(f"The requested folder '{folder_name}' was not found")
 
 
+class GroupNotFoundError(PasswordManagementDomainError):
+    """Raised when attempting to create a password for a non-existing group"""
+
+    def __init__(self, group_id: UUID):
+        super().__init__(f"The group with ID {group_id} was not found")
+
+
+class UserNotOwnerOfGroupError(PasswordManagementDomainError):
+    """Raised when a user attempts to create a password for a group they don't own"""
+
+    def __init__(self, user_id: UUID, group_id: UUID):
+        super().__init__(
+            f"User {user_id} is not the owner of group {group_id}"
+        )
+
+
 class PasswordComplexityError(PasswordManagementDomainError):
     """Base exception for password complexity violations"""
 

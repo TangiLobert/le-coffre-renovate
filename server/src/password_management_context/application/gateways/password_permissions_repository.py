@@ -7,12 +7,12 @@ from password_management_context.domain.value_objects import PasswordPermission
 class PasswordPermissionsRepository(Protocol):
     """Repository for managing password access permissions"""
 
-    def set_owner(self, user_id: UUID, password_id: UUID) -> None:
-        """Set a user as the owner of a password"""
+    def set_owner(self, owner_id: UUID, password_id: UUID) -> None:
+        """Set an owner (user or group) of a password"""
         ...
 
-    def is_owner(self, user_id: UUID, password_id: UUID) -> bool:
-        """Check if a user is the owner of a password"""
+    def is_owner(self, owner_id: UUID, password_id: UUID) -> bool:
+        """Check if an owner (user or group) is the owner of a password"""
         ...
 
     def has_access(

@@ -4,8 +4,13 @@ from password_management_context.application.commands import CreatePasswordComma
 from password_management_context.application.gateways import (
     PasswordRepository,
     PasswordPermissionsRepository,
+    GroupAccessGateway,
 )
 from password_management_context.domain.entities import Password
+from password_management_context.domain.exceptions import (
+    GroupNotFoundError,
+    UserNotOwnerOfGroupError,
+)
 from password_management_context.domain.services.password_complexity_service import (
     PasswordComplexityService,
 )
@@ -18,12 +23,22 @@ class CreatePasswordUseCase:
         password_repository: PasswordRepository,
         encryption_service: EncryptionService,
         password_permissions_repository: PasswordPermissionsRepository,
+        group_access_gateway: GroupAccessGateway,
     ):
         self.password_repository = password_repository
         self.encryption_service = encryption_service
         self.password_permissions_repository = password_permissions_repository
+        self.group_access_gateway = group_access_gateway
 
     def execute(self, command: CreatePasswordCommand) -> UUID:
+        if not self.group_access_gateway.group_exists(command.group_id):
+            raise GroupNotFoundError(command.group_id)
+
+        if not self.group_access_gateway.is_user_owner_of_group(
+            command.user_id, command.group_id
+        ):
+            raise UserNotOwnerOfGroupError(command.user_id, command.group_id)
+
         PasswordComplexityService.validate(command.decrypted_password)
 
         encrypted_value = self.encryption_service.encrypt(command.decrypted_password)
@@ -36,6 +51,6 @@ class CreatePasswordUseCase:
         )
 
         self.password_repository.save(password)
-        self.password_permissions_repository.set_owner(command.user_id, password.id)
+        self.password_permissions_repository.set_owner(command.group_id, password.id)
 
         return password.id
