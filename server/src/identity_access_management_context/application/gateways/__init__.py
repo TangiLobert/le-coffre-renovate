@@ -6,6 +6,7 @@ from .token_gateway import TokenGateway, Token
 from .user_management_gateway import UserManagementGateway
 from .user_password_repository import UserPasswordRepository
 from .group_repository import GroupRepository
+from .group_member_repository import GroupMemberRepository
 
 __all__ = [
     "UserRepository",
@@ -18,4 +19,5 @@ __all__ = [
     "UserManagementGateway",
     "UserPasswordRepository",
     "GroupRepository",
+    "GroupMemberRepository",
 ]

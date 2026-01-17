@@ -29,9 +29,9 @@ from tests.identity_access_management_context.unit.fakes.fake_time_provider impo
 from tests.identity_access_management_context.unit.fakes.fake_group_repository import (
     FakeGroupRepository,
 )
-# from tests.fakes.fake_access_controller import (
-#     FakeAccessController,
-# )
+from tests.identity_access_management_context.unit.fakes.fake_group_member_repository import (
+    FakeGroupMemberRepository,
+)
 
 
 @pytest.fixture
@@ -77,6 +77,11 @@ def sso_user_repository():
 @pytest.fixture
 def group_repository():
     return FakeGroupRepository()
+
+
+@pytest.fixture
+def group_member_repository():
+    return FakeGroupMemberRepository()
 
 
 # @pytest.fixture
