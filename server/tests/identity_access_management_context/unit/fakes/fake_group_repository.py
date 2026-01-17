@@ -21,8 +21,11 @@ class FakeGroupRepository:
                 return group
         return None
 
-    def get_all(self) -> list[PersonalGroup]:
+    def get_all_personals(self) -> list[PersonalGroup]:
         return list(self._groups.values())
+
+    def get_all(self) -> list[Group]:
+        return list(self._new_groups.values())
 
     def save_group(self, group: Group) -> None:
         self._new_groups[group.id] = group

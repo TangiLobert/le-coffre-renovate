@@ -9,8 +9,12 @@ class GroupRepository(Protocol):
         """Save a personal group to the repository."""
         ...
 
-    def get_all(self) -> list[PersonalGroup]:
+    def get_all_personals(self) -> list[PersonalGroup]:
         """Get all personal groups."""
+        ...
+
+    def get_all(self) -> list[Group]:
+        """Get all groups."""
         ...
 
     def save_group(self, group: Group) -> None:

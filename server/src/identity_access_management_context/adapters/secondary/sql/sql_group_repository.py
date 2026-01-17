@@ -22,7 +22,7 @@ class SqlGroupRepository(GroupRepository):
         self._session.add(personal_group_table)
         self._session.commit()
 
-    def get_all(self) -> list[PersonalGroup]:
+    def get_all_personals(self) -> list[PersonalGroup]:
         """Get all personal groups."""
         statement = select(PersonalGroupTable)
         results = self._session.exec(statement).all()
@@ -31,6 +31,19 @@ class SqlGroupRepository(GroupRepository):
                 id=result.id,
                 name=result.name,
                 user_id=result.user_id,
+            )
+            for result in results
+        ]
+
+    def get_all(self) -> list[Group]:
+        """Get all groups."""
+        statement = select(GroupTable)
+        results = self._session.exec(statement).all()
+        return [
+            Group(
+                id=result.id,
+                name=result.name,
+                is_personal=result.is_personal,
             )
             for result in results
         ]

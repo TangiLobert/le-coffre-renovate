@@ -56,5 +56,5 @@ class GroupAccessGatewayAdapter:
             return True
 
         # Fallback: check if it's a personal group
-        all_personal_groups = self._group_repository.get_all()
+        all_personal_groups = self._group_repository.get_all_personals()
         return any(g.id == group_id for g in all_personal_groups)

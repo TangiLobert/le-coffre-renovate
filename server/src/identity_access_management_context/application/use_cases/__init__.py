@@ -11,6 +11,8 @@ from .refresh_access_token_use_case import RefreshAccessTokenUseCase
 from .create_group_use_case import CreateGroupUseCase
 from .add_user_to_group_use_case import AddUserToGroupUseCase
 from .remove_user_from_group_use_case import RemoveUserFromGroupUseCase
+from .list_groups_use_case import ListGroupsUseCase
+from .get_group_use_case import GetGroupUseCase
 
 # Import from subdirectories
 from .admin.admin_login_use_case import AdminLoginUseCase
@@ -35,6 +37,8 @@ __all__ = [
     "CreateGroupUseCase",
     "AddUserToGroupUseCase",
     "RemoveUserFromGroupUseCase",
+    "ListGroupsUseCase",
+    "GetGroupUseCase",
     "AdminLoginUseCase",
     "RegisterAdminWithPasswordUseCase",
     "GetSsoAuthorizeUrlUseCase",
