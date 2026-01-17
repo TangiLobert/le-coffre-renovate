@@ -14,6 +14,9 @@ from identity_access_management_context.application.use_cases import (
     ConfigureSsoProviderUseCase,
     SsoLoginUseCase,
     RefreshAccessTokenUseCase,
+    CreateGroupUseCase,
+    AddUserToGroupUseCase,
+    RemoveUserFromGroupUseCase,
 )
 from identity_access_management_context.application.gateways import (
     UserRepository,
@@ -24,12 +27,17 @@ from identity_access_management_context.application.gateways import (
     SsoGateway,
     SsoUserRepository,
     GroupRepository,
+    GroupMemberRepository,
 )
 from shared_kernel.time import TimeProvider
 
 
 def get_group_repository(request: Request) -> GroupRepository:
     return request.app.state.group_repository
+
+
+def get_group_member_repository(request: Request) -> GroupMemberRepository:
+    return request.app.state.group_member_repository
 
 
 def get_user_repository(request: Request) -> UserRepository:
@@ -193,4 +201,47 @@ def get_refresh_access_token_usecase(
         token_gateway,
         user_repository,
         time_provider,
+    )
+
+
+# Group Management Use Cases
+def get_create_group_usecase(
+    user_repository: UserRepository = Depends(get_user_repository),
+    group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
+):
+    return CreateGroupUseCase(
+        user_repository,
+        group_repository,
+        group_member_repository,
+    )
+
+
+def get_add_user_to_group_usecase(
+    user_repository: UserRepository = Depends(get_user_repository),
+    group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
+):
+    return AddUserToGroupUseCase(
+        user_repository,
+        group_repository,
+        group_member_repository,
+    )
+
+
+def get_remove_user_from_group_usecase(
+    user_repository: UserRepository = Depends(get_user_repository),
+    group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
+):
+    return RemoveUserFromGroupUseCase(
+        user_repository,
+        group_repository,
+        group_member_repository,
     )

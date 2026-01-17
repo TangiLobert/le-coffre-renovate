@@ -56,6 +56,7 @@ from identity_access_management_context.adapters.secondary.group_access_gateway_
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
     get_authentication_router,
+    get_group_management_router,
 )
 from identity_access_management_context.application.use_cases import (
     CreateUserUseCase,
@@ -159,3 +160,4 @@ app.include_router(get_vault_management_router())
 app.include_router(get_password_management_router())
 app.include_router(get_user_management_router())
 app.include_router(get_authentication_router())
+app.include_router(get_group_management_router())
