@@ -45,6 +45,10 @@ from identity_access_management_context.adapters.secondary import (
     SqlUserPasswordRepository,
     SqlSsoUserRepository,
 )
+from identity_access_management_context.adapters.secondary.sql import (
+    SqlGroupRepository,
+    create_tables as create_iam_tables,
+)
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
     get_authentication_router,
@@ -61,6 +65,7 @@ from shared_kernel.pubsub import InMemoryDomainEventPublisher
 async def lifespan(app: FastAPI):
     engine = create_engine(get_database_url())
     create_tables(engine)
+    create_iam_tables(engine)
 
     with Session(engine) as session:
         # Vault management dependencies
@@ -92,14 +97,16 @@ async def lifespan(app: FastAPI):
 
         user_repository = SqlUserRepository(session)
         user_password_repository = SqlUserPasswordRepository(session)
+        group_repository = SqlGroupRepository(session)
         password_hashing_gateway = BcryptHashingGateway()
 
         create_user_usecase = CreateUserUseCase(
-            user_repository, password_hashing_gateway
+            user_repository, group_repository, password_hashing_gateway
         )
         can_create_admin_usecase = CanCreateAdminUseCase(user_repository)
 
         app.state.user_repository = user_repository
+        app.state.group_repository = group_repository
 
         token_gateway = JwtTokenGateway(
             secret_key=get_jwt_secret_key(),

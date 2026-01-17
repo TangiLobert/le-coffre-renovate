@@ -4,16 +4,26 @@ from uuid import UUID
 from identity_access_management_context.application.use_cases import (
     RegisterAdminWithPasswordUseCase,
 )
-from identity_access_management_context.application.commands import RegisterAdminWithPasswordCommand
-from identity_access_management_context.domain.exceptions import AdminAlreadyExistsException
+from identity_access_management_context.application.commands import (
+    RegisterAdminWithPasswordCommand,
+)
+from identity_access_management_context.domain.exceptions import (
+    AdminAlreadyExistsException,
+)
 
 
 @pytest.fixture
 def use_case(
-    user_password_repository, password_hashing_gateway, user_management_gateway
+    user_password_repository,
+    group_repository,
+    password_hashing_gateway,
+    user_management_gateway,
 ):
     return RegisterAdminWithPasswordUseCase(
-        user_password_repository, password_hashing_gateway, user_management_gateway
+        user_password_repository,
+        group_repository,
+        password_hashing_gateway,
+        user_management_gateway,
     )
 
 
