@@ -32,6 +32,15 @@
       </div>
       <div class="flex gap-1">
         <Button 
+          icon="pi pi-share-alt" 
+          text 
+          rounded 
+          size="small"
+          severity="secondary"
+          aria-label="Share"
+          @click="handleShare"
+        />
+        <Button 
           icon="pi pi-pencil" 
           text 
           rounded 
@@ -68,6 +77,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'edit', password: GetPasswordListResponse): void;
+  (e: 'share', password: GetPasswordListResponse): void;
   (e: 'deleted'): void;
 }>();
 
@@ -132,6 +142,10 @@ const copyToClipboard = async () => {
 
 const handleEdit = () => {
   emit('edit', props.password);
+};
+
+const handleShare = () => {
+  emit('share', props.password);
 };
 
 const handleDelete = () => {

@@ -39,6 +39,7 @@ declare module 'vue' {
     SelectButton: typeof import('primevue/selectbutton')['default']
     SetupDone: typeof import('./src/components/setup/SetupDone.vue')['default']
     ShamirInputs: typeof import('./src/components/setup/shamir/ShamirInputs.vue')['default']
+    SharePasswordModal: typeof import('./src/components/modals/SharePasswordModal.vue')['default']
     SharesModal: typeof import('./src/components/setup/shamir/SharesModal.vue')['default']
     Step: typeof import('primevue/step')['default']
     StepAdminAccountForm: typeof import('./src/components/setup/StepAdminAccountForm.vue')['default']
