@@ -42,6 +42,18 @@ class GroupAccessGatewayAdapter:
         # For shared groups, check membership
         return self._group_member_repository.is_owner(group_id, user_id)
 
+    def is_user_member_of_group(self, user_id: UUID, group_id: UUID) -> bool:
+        group = self._group_repository.get_by_id(group_id)
+        if group is None:
+            return False
+
+        # For personal groups, check if the user_id matches
+        if group.is_personal and group.user_id == user_id:
+            return True
+
+        # For shared groups, check membership
+        return self._group_member_repository.is_member(group_id, user_id)
+
     def group_exists(self, group_id: UUID) -> bool:
         """Check if a group exists.
 

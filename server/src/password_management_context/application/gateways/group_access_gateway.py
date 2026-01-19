@@ -9,6 +9,10 @@ class GroupAccessGateway(Protocol):
         """Verify if a user owns a specific group"""
         ...
 
+    def is_user_member_of_group(self, user_id: UUID, group_id: UUID) -> bool:
+        """Verify if a user is a member of a specific group"""
+        ...
+
     def group_exists(self, group_id: UUID) -> bool:
         """Check if a group exists in the system"""
         ...

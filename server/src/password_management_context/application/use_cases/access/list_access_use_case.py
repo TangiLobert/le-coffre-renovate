@@ -80,8 +80,15 @@ class ListAccessUseCase:
         )
 
         for group_id, (is_owner, permissions) in all_permissions.items():
-            # Check if user owns this group
-            if self.group_access_gateway.is_user_owner_of_group(user_id, group_id):
+            # Check if user is owner or member of this group
+            is_user_owner = self.group_access_gateway.is_user_owner_of_group(
+                user_id, group_id
+            )
+            is_user_member = self.group_access_gateway.is_user_member_of_group(
+                user_id, group_id
+            )
+
+            if is_user_owner or is_user_member:
                 # If the group is the owner or has READ permission, user has access
                 if is_owner or PasswordPermission.READ in permissions:
                     return True

@@ -12,6 +12,9 @@ class FakeGroupAccessGateway:
         """Check if user owns the group"""
         return self._group_owners.get(group_id) == user_id
 
+    def is_user_member_of_group(self, user_id: UUID, group_id: UUID) -> bool:
+        return user_id in self._group_members.get(group_id, [])
+
     def group_exists(self, group_id: UUID) -> bool:
         """Check if group exists"""
         return group_id in self._group_owners
