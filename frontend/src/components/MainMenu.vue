@@ -18,7 +18,7 @@
       </div>
     </div>
     <!-- Logout Button at bottom -->
-    <div class="p-4 border-t">
+    <div class="p-4 border-t border-surface">
       <Button label="Logout" icon="pi pi-sign-out" @click="handleLogout" severity="secondary" outlined class="w-full" />
     </div>
   </div>
