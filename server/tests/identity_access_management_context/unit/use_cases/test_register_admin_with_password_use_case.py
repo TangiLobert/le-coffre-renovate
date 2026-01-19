@@ -3,8 +3,6 @@ from uuid import UUID, uuid4
 from identity_access_management_context.domain.entities import User
 from identity_access_management_context.application.use_cases import (
     RegisterAdminWithPasswordUseCase,
-    CreateAdminUseCase,
-    CanCreateAdminUseCase,
 )
 from identity_access_management_context.application.commands import (
     RegisterAdminWithPasswordCommand,
@@ -15,27 +13,15 @@ from identity_access_management_context.domain.exceptions import (
 
 
 @pytest.fixture
-def create_admin_usecase(user_repository):
-    return CreateAdminUseCase(user_repository)
-
-
-@pytest.fixture
-def can_create_admin_usecase(user_repository):
-    return CanCreateAdminUseCase(user_repository)
-
-
-@pytest.fixture
 def use_case(
     user_password_repository,
     password_hashing_gateway,
-    create_admin_usecase,
-    can_create_admin_usecase,
+    user_management_service,
 ):
     return RegisterAdminWithPasswordUseCase(
         user_password_repository,
         password_hashing_gateway,
-        create_admin_usecase,
-        can_create_admin_usecase,
+        user_management_service,
     )
 
 
@@ -72,7 +58,7 @@ async def test_should_register_first_admin_with_password_and_return_user_id(
 
 @pytest.mark.asyncio
 async def test_should_raise_exception_when_admin_already_exists(
-    use_case: RegisterAdminWithPasswordUseCase, user_repository, create_admin_usecase
+    use_case: RegisterAdminWithPasswordUseCase, user_repository
 ):
     # First create an admin
     existing_admin_id = uuid4()

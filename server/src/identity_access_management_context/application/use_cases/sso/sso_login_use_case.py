@@ -4,7 +4,6 @@ from datetime import datetime
 from identity_access_management_context.application.commands.sso_login_command import (
     SsoLoginCommand,
 )
-from identity_access_management_context.application.commands import CreateUserCommand
 from identity_access_management_context.application.responses.sso_login_response import (
     SsoLoginResponse,
 )
@@ -13,7 +12,9 @@ from identity_access_management_context.application.gateways import (
     SsoUserRepository,
     TokenGateway,
 )
-from identity_access_management_context.application.use_cases import CreateUserUseCase
+from identity_access_management_context.application.services import (
+    UserManagementService,
+)
 from identity_access_management_context.domain.entities.sso_user import SsoUser
 from shared_kernel.time import TimeProvider
 
@@ -33,13 +34,13 @@ class SsoLoginUseCase:
         self,
         sso_gateway: SsoGateway,
         sso_user_repository: SsoUserRepository,
-        create_user_usecase: CreateUserUseCase,
+        user_management_service: UserManagementService,
         token_gateway: TokenGateway,
         time_provider: TimeProvider,
     ):
         self._sso_gateway = sso_gateway
         self._sso_user_repository = sso_user_repository
-        self._create_user_usecase = create_user_usecase
+        self._user_management_service = user_management_service
         self._token_gateway = token_gateway
         self._time_provider = time_provider
 
@@ -72,14 +73,13 @@ class SsoLoginUseCase:
             display_name = sso_user_from_provider.display_name
             is_new_user = True
 
-            # Create user in User Management context
-            create_user_command = CreateUserCommand(
-                id=user_id,
+            # Create user in User Management context via service
+            self._user_management_service.create_user(
+                user_id=user_id,
                 email=email,
                 username=email.split("@")[0],
                 name=display_name,
             )
-            self._create_user_usecase.execute(create_user_command)
 
             # Save SSO user mapping in Auth context
             sso_user = SsoUser(

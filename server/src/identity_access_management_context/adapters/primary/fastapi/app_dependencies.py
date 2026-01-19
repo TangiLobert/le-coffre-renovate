@@ -7,8 +7,6 @@ from identity_access_management_context.application.use_cases import (
     DeleteUserUseCase,
     UpdateUserUseCase,
     CreateUserUseCase,
-    CreateAdminUseCase,
-    CanCreateAdminUseCase,
     ListUserUseCase,
     AdminLoginUseCase,
     RegisterAdminWithPasswordUseCase,
@@ -16,6 +14,9 @@ from identity_access_management_context.application.use_cases import (
     ConfigureSsoProviderUseCase,
     SsoLoginUseCase,
     RefreshAccessTokenUseCase,
+)
+from identity_access_management_context.application.services import (
+    UserManagementService,
 )
 from identity_access_management_context.application.gateways import (
     UserRepository,
@@ -54,6 +55,15 @@ def get_sso_user_repository(request: Request) -> SsoUserRepository:
 
 def get_time_provider(request: Request) -> TimeProvider:
     return request.app.state.time_provider
+
+
+def get_user_management_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_hashing_gateway: PasswordHashingGateway = Depends(
+        get_password_hashing_gateway
+    ),
+) -> UserManagementService:
+    return UserManagementService(user_repository, password_hashing_gateway)
 
 
 # User Management Use Cases
@@ -115,18 +125,6 @@ def get_admin_login_usecase(
     )
 
 
-def get_create_admin_usecase(
-    user_repository: UserRepository = Depends(get_user_repository),
-):
-    return CreateAdminUseCase(user_repository)
-
-
-def get_can_create_admin_usecase(
-    user_repository: UserRepository = Depends(get_user_repository),
-):
-    return CanCreateAdminUseCase(user_repository)
-
-
 def get_register_admin_with_password_usecase(
     user_password_repository: UserPasswordRepository = Depends(
         get_user_password_repository
@@ -134,16 +132,14 @@ def get_register_admin_with_password_usecase(
     password_hashing_gateway: PasswordHashingGateway = Depends(
         get_password_hashing_gateway
     ),
-    create_admin_usecase: CreateAdminUseCase = Depends(get_create_admin_usecase),
-    can_create_admin_usecase: CanCreateAdminUseCase = Depends(
-        get_can_create_admin_usecase
+    user_management_service: UserManagementService = Depends(
+        get_user_management_service
     ),
 ):
     return RegisterAdminWithPasswordUseCase(
         user_password_repository,
         password_hashing_gateway,
-        create_admin_usecase,
-        can_create_admin_usecase,
+        user_management_service,
     )
 
 
@@ -170,14 +166,16 @@ def get_configure_sso_provider_usecase(
 def get_sso_login_usecase(
     sso_gateway: SsoGateway = Depends(get_sso_gateway),
     sso_user_repository: SsoUserRepository = Depends(get_sso_user_repository),
-    create_user_usecase: CreateUserUseCase = Depends(get_create_user_usecase),
+    user_management_service: UserManagementService = Depends(
+        get_user_management_service
+    ),
     token_gateway: TokenGateway = Depends(get_token_gateway),
     time_provider: TimeProvider = Depends(get_time_provider),
 ):
     return SsoLoginUseCase(
         sso_gateway,
         sso_user_repository,
-        create_user_usecase,
+        user_management_service,
         token_gateway,
         time_provider,
     )

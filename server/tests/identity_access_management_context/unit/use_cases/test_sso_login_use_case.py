@@ -5,7 +5,6 @@ from datetime import datetime
 from identity_access_management_context.application.use_cases.sso.sso_login_use_case import (
     SsoLoginUseCase,
 )
-from identity_access_management_context.application.use_cases import CreateUserUseCase
 from identity_access_management_context.application.commands.sso_login_command import (
     SsoLoginCommand,
 )
@@ -17,22 +16,17 @@ from tests.identity_access_management_context.unit.conftest import (
 
 
 @pytest.fixture
-def create_user_usecase(user_repository, password_hashing_gateway):
-    return CreateUserUseCase(user_repository, password_hashing_gateway)
-
-
-@pytest.fixture
 def use_case(
     sso_gateway,
     sso_user_repository,
-    create_user_usecase,
+    user_management_service,
     token_gateway,
     time_provider,
 ):
     return SsoLoginUseCase(
         sso_gateway=sso_gateway,
         sso_user_repository=sso_user_repository,
-        create_user_usecase=create_user_usecase,
+        user_management_service=user_management_service,
         token_gateway=token_gateway,
         time_provider=time_provider,
     )
