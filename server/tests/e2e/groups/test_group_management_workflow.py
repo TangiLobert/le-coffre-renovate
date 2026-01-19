@@ -9,59 +9,31 @@ This test module covers the complete workflow:
 """
 
 
-def test_group_management_complete_workflow(e2e_client):
+def test_group_management_complete_workflow(
+    authenticated_admin_client, sso_user_factory
+):
     """
     End-to-end test that:
-    1. Registers an admin (group owner)
-    2. Creates two additional users (to be members)
-    3. Creates a group
-    4. Adds a user to the group
-    5. Verifies non-owner cannot add members
-    6. Removes a user from the group
-    7. Verifies non-owner cannot remove members
-    8. Verifies cannot remove owner
+    1. Creates two additional SSO users (to be members)
+    2. Creates a group
+    3. Adds a user to the group
+    4. Verifies non-owner cannot add members
+    5. Removes a user from the group
+    6. Verifies non-owner cannot remove members
+    7. Verifies cannot remove owner
     """
-    # Step 1: Register admin (will be group owner)
-    admin_data = {
-        "email": "admin@example.com",
-        "password": "secure_password123",
-        "display_name": "Admin User",
-    }
+    # Step 1: Create two additional SSO users
+    user1 = sso_user_factory("user1@example.com", "User One")
+    user1_id = user1["user_id"]
 
-    register_response = e2e_client.post("/api/auth/register-admin", json=admin_data)
-    assert register_response.status_code == 201
+    user2 = sso_user_factory("user2@example.com", "User Two")
+    user2_id = user2["user_id"]
 
-    # Login as admin
-    login_data = {"email": admin_data["email"], "password": admin_data["password"]}
-    login_response = e2e_client.post("/api/auth/login", json=login_data)
-    assert login_response.status_code == 200
-
-    # Step 2: Create two additional users
-    user1_data = {
-        "username": "user1",
-        "email": "user1@example.com",
-        "name": "User One",
-        "password": "user1_password",
-    }
-    create_user1_response = e2e_client.post("/api/users/", json=user1_data)
-    assert create_user1_response.status_code == 201
-    user1 = create_user1_response.json()
-    user1_id = user1["id"]
-
-    user2_data = {
-        "username": "user2",
-        "email": "user2@example.com",
-        "name": "User Two",
-        "password": "user2_password",
-    }
-    create_user2_response = e2e_client.post("/api/users/", json=user2_data)
-    assert create_user2_response.status_code == 201
-    user2 = create_user2_response.json()
-    user2_id = user2["id"]
-
-    # Step 3: Create a group (admin is owner)
+    # Step 2: Create a group (admin is owner)
     group_data = {"name": "Engineering Team"}
-    create_group_response = e2e_client.post("/api/groups/", json=group_data)
+    create_group_response = authenticated_admin_client.post(
+        "/api/groups/", json=group_data
+    )
     assert create_group_response.status_code == 201
 
     group = create_group_response.json()
@@ -70,9 +42,9 @@ def test_group_management_complete_workflow(e2e_client):
     assert group["message"] == "Group created successfully"
     group_id = group["id"]
 
-    # Step 4: Add user1 to the group
+    # Step 3: Add user1 to the group
     add_member_data = {"user_id": user1_id}
-    add_member_response = e2e_client.post(
+    add_member_response = authenticated_admin_client.post(
         f"/api/groups/{group_id}/members", json=add_member_data
     )
     assert add_member_response.status_code == 201
@@ -82,46 +54,48 @@ def test_group_management_complete_workflow(e2e_client):
     assert add_member_result["user_id"] == user1_id
     assert add_member_result["message"] == "Member added successfully"
 
-    # Step 5: Add user2 to the group
+    # Step 4: Add user2 to the group
     add_member2_data = {"user_id": user2_id}
-    add_member2_response = e2e_client.post(
+    add_member2_response = authenticated_admin_client.post(
         f"/api/groups/{group_id}/members", json=add_member2_data
     )
     assert add_member2_response.status_code == 201
 
-    # Step 6: Verify idempotency - adding user1 again should succeed
-    add_member_again_response = e2e_client.post(
+    # Step 5: Verify idempotency - adding user1 again should succeed
+    add_member_again_response = authenticated_admin_client.post(
         f"/api/groups/{group_id}/members", json=add_member_data
     )
     assert add_member_again_response.status_code == 201
 
-    # Step 7: Remove user2 from the group
-    remove_member_response = e2e_client.delete(
+    # Step 6: Remove user2 from the group
+    remove_member_response = authenticated_admin_client.delete(
         f"/api/groups/{group_id}/members/{user2_id}"
     )
-    assert remove_member_response.status_code == 200
+    assert remove_member_response.status_code == 200, remove_member_response.text
 
     remove_result = remove_member_response.json()
     assert remove_result["message"] == "Member removed successfully"
 
-    # Step 8: Verify cannot remove user that is not a member
-    remove_nonmember_response = e2e_client.delete(
+    # Step 7: Verify cannot remove user that is not a member
+    remove_nonmember_response = authenticated_admin_client.delete(
         f"/api/groups/{group_id}/members/{user2_id}"
     )
     assert remove_nonmember_response.status_code == 400
     assert "is not a member of group" in remove_nonmember_response.json()["detail"]
 
 
-def test_group_management_authorization_rules(e2e_client):
+def test_group_management_authorization_rules(
+    e2e_client, sso_user_factory, client_factory
+):
     """
     End-to-end test verifying authorization rules:
     1. Only owners can add members
     2. Only owners can remove members
     3. Cannot remove owners from groups
 
-    Note: Using two admins since regular users don't have login credentials.
+    Note: Using admin for group creation and SSO users as members/non-owners.
     """
-    # Register first admin (group owner)
+    # Register admin (group owner)
     owner_data = {
         "email": "owner@example.com",
         "password": "owner_password",
@@ -137,15 +111,12 @@ def test_group_management_authorization_rules(e2e_client):
     me_response = e2e_client.get("/api/users/me")
     owner_id = me_response.json()["id"]
 
-    # Create a user (target for group membership)
-    target_data = {
-        "username": "target",
-        "email": "target@example.com",
-        "name": "Target User",
-        "password": "target_password",
-    }
-    target_response = e2e_client.post("/api/users/", json=target_data)
-    target_id = target_response.json()["id"]
+    # Create SSO users (target for group membership and non-owner)
+    target_user = sso_user_factory("target@example.com", "Target User")
+    target_id = target_user["user_id"]
+
+    non_owner_user = sso_user_factory("nonowner@example.com", "Non-Owner User")
+    non_owner_user_id = non_owner_user["user_id"]
 
     # Owner creates a group
     group_response = e2e_client.post("/api/groups/", json={"name": "Test Group"})
@@ -153,55 +124,31 @@ def test_group_management_authorization_rules(e2e_client):
     group_id = group_response.json()["id"]
 
     # Add target to group as member
-    e2e_client.post(
+    add_response = e2e_client.post(
         f"/api/groups/{group_id}/members",
         json={"user_id": target_id},
     )
 
-    # Logout owner
-    e2e_client.post("/api/auth/logout")
+    assert add_response.status_code == 201
 
-    # Register second admin (non-owner)
-    non_owner_data = {
-        "email": "nonowner@example.com",
-        "password": "nonowner_password",
-        "display_name": "Non-Owner Admin",
-    }
-    e2e_client.post("/api/auth/register-admin", json=non_owner_data)
-    e2e_client.post(
-        "/api/auth/login",
-        json={"email": non_owner_data["email"], "password": non_owner_data["password"]},
-    )
+    # Create a new client for the non-owner user to avoid cookie conflicts
+    non_owner_client = client_factory()
+    non_owner_client.cookies.set("access_token", non_owner_user["token"])
 
-    # Create another user for testing
-    new_user_data = {
-        "username": "newuser",
-        "email": "newuser@example.com",
-        "name": "New User",
-        "password": "password",
-    }
-    new_user_response = e2e_client.post("/api/users/", json=new_user_data)
-    new_user_id = new_user_response.json()["id"]
-
-    # Try to add user as non-owner - should fail with 403
-    add_response = e2e_client.post(
+    # Try to add the non-owner user to the group (as non-owner) - should fail with 403
+    add_response = non_owner_client.post(
         f"/api/groups/{group_id}/members",
-        json={"user_id": new_user_id},
+        json={"user_id": non_owner_user_id},
     )
     assert add_response.status_code == 403
     assert "is not an owner of group" in add_response.json()["detail"]
 
     # Try to remove user as non-owner - should fail with 403
-    remove_response = e2e_client.delete(f"/api/groups/{group_id}/members/{target_id}")
+    remove_response = non_owner_client.delete(
+        f"/api/groups/{group_id}/members/{target_id}"
+    )
     assert remove_response.status_code == 403
     assert "is not an owner of group" in remove_response.json()["detail"]
-
-    # Login back as owner
-    e2e_client.post("/api/auth/logout")
-    e2e_client.post(
-        "/api/auth/login",
-        json={"email": owner_data["email"], "password": owner_data["password"]},
-    )
 
     # Try to remove owner - should fail with 400
     remove_owner_response = e2e_client.delete(
@@ -249,14 +196,3 @@ def test_cannot_add_nonexistent_user_to_group(e2e_client):
     )
     assert add_response.status_code == 404
     assert "was not found" in add_response.json()["detail"]
-
-
-def test_cannot_modify_personal_group(e2e_client):
-    """
-    Test that personal groups cannot be modified (members cannot be added/removed).
-    Note: Personal groups are created automatically when a user is created.
-    This test requires knowing the personal group ID, which isn't exposed via API yet.
-    """
-    # This is a placeholder test that documents the expected behavior
-    # TODO: Implement once we have an API to list groups or get personal group ID
-    pass

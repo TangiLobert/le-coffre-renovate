@@ -1,4 +1,4 @@
-def test_user_creation_creates_personal_group(e2e_client):
+def test_user_creation_creates_personal_group(e2e_client, sso_user_factory):
     """
     End-to-end test that:
     1. Registers an admin
@@ -22,30 +22,13 @@ def test_user_creation_creates_personal_group(e2e_client):
     assert login_response.status_code == 200
 
     # Step 3: Create a user
-    user_data = {
-        "username": "johndoe",
-        "email": "john.doe@example.com",
-        "name": "John Doe",
-        "password": "user_password123",
-    }
-
-    create_user_response = e2e_client.post("/api/users/", json=user_data)
-    assert create_user_response.status_code == 201
-    created_user = create_user_response.json()
-
-    assert created_user["username"] == user_data["username"]
-    assert created_user["email"] == user_data["email"]
-    assert created_user["message"] == "User created successfully"
+    user = sso_user_factory("alice@example.com", "Alice Smith")
 
     # Step 4: Verify user exists
-    user_id = created_user["id"]
+    user_id = user["user_id"]
     get_user_response = e2e_client.get(f"/api/users/{user_id}")
     assert get_user_response.status_code == 200
 
     user_info = get_user_response.json()
     assert user_info["id"] == user_id
-    assert user_info["username"] == user_data["username"]
-
-    # Note: Currently there's no API endpoint to list groups,
-    # so we're verifying that the user creation succeeded without errors.
-    # The integration and unit tests verify that the personal group is created.
+    assert user_info["username"] == "alice"

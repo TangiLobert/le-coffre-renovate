@@ -103,7 +103,9 @@ def test_can_read_a_shared_password_of_another_user(
     assert other_user_retrieved.json()["password"] == STRONG_PASSWORD
 
 
-def test_can_create_any_password(authenticated_admin_client, setup):
+def test_can_create_any_password(
+    authenticated_admin_client, setup, admin_personal_group_id
+):
     """Test that users can create passwords without complexity requirements"""
     simple_password = "a"
     response = authenticated_admin_client.post(
@@ -111,6 +113,7 @@ def test_can_create_any_password(authenticated_admin_client, setup):
         json={
             "name": "Simple Password",
             "password": simple_password,
+            "group_id": admin_personal_group_id,
         },
     )
 

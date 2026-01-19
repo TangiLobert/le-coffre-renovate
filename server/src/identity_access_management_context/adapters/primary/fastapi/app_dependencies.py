@@ -142,6 +142,9 @@ def get_register_admin_with_password_usecase(
         get_user_password_repository
     ),
     group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
     password_hashing_gateway: PasswordHashingGateway = Depends(
         get_password_hashing_gateway
     ),
@@ -151,6 +154,8 @@ def get_register_admin_with_password_usecase(
         user_password_repository,
         password_hashing_gateway,
         user_repository,
+        group_repository,
+        group_member_repository,
     )
 
 
@@ -183,6 +188,10 @@ def get_sso_login_usecase(
     ),
     token_gateway: TokenGateway = Depends(get_token_gateway),
     time_provider: TimeProvider = Depends(get_time_provider),
+    group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
 ):
     return SsoLoginUseCase(
         sso_gateway,
@@ -191,6 +200,8 @@ def get_sso_login_usecase(
         password_hashing_gateway,
         token_gateway,
         time_provider,
+        group_repository,
+        group_member_repository,
     )
 
 
