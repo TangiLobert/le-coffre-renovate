@@ -16,12 +16,12 @@ from identity_access_management_context.domain.exceptions import (
 def use_case(
     user_password_repository,
     password_hashing_gateway,
-    user_management_service,
+    user_repository,
 ):
     return RegisterAdminWithPasswordUseCase(
         user_password_repository,
         password_hashing_gateway,
-        user_management_service,
+        user_repository,
     )
 
 

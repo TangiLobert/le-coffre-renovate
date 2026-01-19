@@ -11,6 +11,8 @@ from identity_access_management_context.application.gateways import (
     SsoGateway,
     SsoUserRepository,
     TokenGateway,
+    UserRepository,
+    PasswordHashingGateway,
 )
 from identity_access_management_context.application.services import (
     UserManagementService,
@@ -34,13 +36,15 @@ class SsoLoginUseCase:
         self,
         sso_gateway: SsoGateway,
         sso_user_repository: SsoUserRepository,
-        user_management_service: UserManagementService,
+        user_repository: UserRepository,
+        password_hashing_gateway: PasswordHashingGateway,
         token_gateway: TokenGateway,
         time_provider: TimeProvider,
     ):
         self._sso_gateway = sso_gateway
         self._sso_user_repository = sso_user_repository
-        self._user_management_service = user_management_service
+        self._user_repository = user_repository
+        self._password_hashing_gateway = password_hashing_gateway
         self._token_gateway = token_gateway
         self._time_provider = time_provider
 
@@ -74,7 +78,10 @@ class SsoLoginUseCase:
             is_new_user = True
 
             # Create user in User Management context via service
-            self._user_management_service.create_user(
+            user_management_service = UserManagementService(
+                self._user_repository, self._password_hashing_gateway
+            )
+            user_management_service.create_user(
                 user_id=user_id,
                 email=email,
                 username=email.split("@")[0],

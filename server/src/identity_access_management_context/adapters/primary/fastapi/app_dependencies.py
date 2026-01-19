@@ -15,9 +15,6 @@ from identity_access_management_context.application.use_cases import (
     SsoLoginUseCase,
     RefreshAccessTokenUseCase,
 )
-from identity_access_management_context.application.services import (
-    UserManagementService,
-)
 from identity_access_management_context.application.gateways import (
     UserRepository,
     UserPasswordRepository,
@@ -55,15 +52,6 @@ def get_sso_user_repository(request: Request) -> SsoUserRepository:
 
 def get_time_provider(request: Request) -> TimeProvider:
     return request.app.state.time_provider
-
-
-def get_user_management_service(
-    user_repository: UserRepository = Depends(get_user_repository),
-    password_hashing_gateway: PasswordHashingGateway = Depends(
-        get_password_hashing_gateway
-    ),
-) -> UserManagementService:
-    return UserManagementService(user_repository, password_hashing_gateway)
 
 
 # User Management Use Cases
@@ -132,14 +120,12 @@ def get_register_admin_with_password_usecase(
     password_hashing_gateway: PasswordHashingGateway = Depends(
         get_password_hashing_gateway
     ),
-    user_management_service: UserManagementService = Depends(
-        get_user_management_service
-    ),
+    user_repository: UserRepository = Depends(get_user_repository),
 ):
     return RegisterAdminWithPasswordUseCase(
         user_password_repository,
         password_hashing_gateway,
-        user_management_service,
+        user_repository,
     )
 
 
@@ -166,8 +152,9 @@ def get_configure_sso_provider_usecase(
 def get_sso_login_usecase(
     sso_gateway: SsoGateway = Depends(get_sso_gateway),
     sso_user_repository: SsoUserRepository = Depends(get_sso_user_repository),
-    user_management_service: UserManagementService = Depends(
-        get_user_management_service
+    user_repository: UserRepository = Depends(get_user_repository),
+    password_hashing_gateway: PasswordHashingGateway = Depends(
+        get_password_hashing_gateway
     ),
     token_gateway: TokenGateway = Depends(get_token_gateway),
     time_provider: TimeProvider = Depends(get_time_provider),
@@ -175,7 +162,8 @@ def get_sso_login_usecase(
     return SsoLoginUseCase(
         sso_gateway,
         sso_user_repository,
-        user_management_service,
+        user_repository,
+        password_hashing_gateway,
         token_gateway,
         time_provider,
     )

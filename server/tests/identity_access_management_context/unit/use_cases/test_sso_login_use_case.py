@@ -19,14 +19,16 @@ from tests.identity_access_management_context.unit.conftest import (
 def use_case(
     sso_gateway,
     sso_user_repository,
-    user_management_service,
+    user_repository,
+    password_hashing_gateway,
     token_gateway,
     time_provider,
 ):
     return SsoLoginUseCase(
         sso_gateway=sso_gateway,
         sso_user_repository=sso_user_repository,
-        user_management_service=user_management_service,
+        user_repository=user_repository,
+        password_hashing_gateway=password_hashing_gateway,
         token_gateway=token_gateway,
         time_provider=time_provider,
     )

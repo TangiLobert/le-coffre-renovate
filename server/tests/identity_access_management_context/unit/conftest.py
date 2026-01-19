@@ -7,9 +7,6 @@ from identity_access_management_context.adapters.secondary import (
 )
 from identity_access_management_context.domain.entities import SsoUser
 from identity_access_management_context.application.gateways import SsoUserInfo
-from identity_access_management_context.application.services import (
-    UserManagementService,
-)
 from tests.identity_access_management_context.unit.fakes.fake_user_password_repository import (
     FakeUserPasswordRepository,
 )
@@ -40,11 +37,6 @@ def user_password_repository():
 @pytest.fixture
 def password_hashing_gateway():
     return FakePasswordHashingGateway()
-
-
-@pytest.fixture
-def user_management_service(user_repository, password_hashing_gateway):
-    return UserManagementService(user_repository, password_hashing_gateway)
 
 
 @pytest.fixture
