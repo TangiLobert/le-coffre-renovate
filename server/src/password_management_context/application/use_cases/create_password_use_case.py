@@ -11,9 +11,6 @@ from password_management_context.domain.exceptions import (
     GroupNotFoundError,
     UserNotOwnerOfGroupError,
 )
-from password_management_context.domain.services.password_complexity_service import (
-    PasswordComplexityService,
-)
 from shared_kernel.encryption import EncryptionService
 
 
@@ -38,8 +35,6 @@ class CreatePasswordUseCase:
             command.user_id, command.group_id
         ):
             raise UserNotOwnerOfGroupError(command.user_id, command.group_id)
-
-        PasswordComplexityService.validate(command.decrypted_password)
 
         encrypted_value = self.encryption_service.encrypt(command.decrypted_password)
 

@@ -4,7 +4,7 @@ import { useToast } from 'primevue/usetoast';
 import { storeToRefs } from 'pinia';
 import { createPasswordPasswordsPost, updatePasswordPasswordsPasswordIdPut } from '@/client/sdk.gen';
 import type { GetPasswordListResponse } from '@/client/types.gen';
-import { useGroupsStore } from '@/stores/groups';
+import PasswordGenerator from '@/components/passwords/PasswordGenerator.vue';
 
 const visible = defineModel<boolean>('visible', { required: true });
 
@@ -226,10 +226,15 @@ const handleCancel = () => {
   }
   visible.value = false;
 };
+
+const handleGenerate = (generatedPassword: string) => {
+  password.value = generatedPassword;
+};
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" modal :header="isEditMode ? 'Edit Password' : 'Create New Password'" :style="{ width: '32rem' }">
+  <Dialog v-model:visible="visible" modal :header="isEditMode ? 'Edit Password' : 'Create New Password'"
+    :style="{ width: '32rem' }">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <label for="password-name" class="font-semibold">Name</label>
@@ -270,10 +275,15 @@ const handleCancel = () => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password-value" class="font-semibold">Password{{ isEditMode ? ' (leave empty to keep current)' : '' }}</label>
-        <Password id="password-value" v-model="password" :placeholder="isEditMode ? 'Leave empty to keep current password' : 'Enter password'" :disabled="loading" toggleMask
-          :feedback="false" fluid />
+        <label for="password-value" class="font-semibold">Password{{ isEditMode ? ' (leave empty to keep current)' : ''
+          }}</label>
+        <Password id="password-value" v-model="password"
+          :placeholder="isEditMode ? 'Leave empty to keep current password' : 'Enter password'" :disabled="loading"
+          toggleMask :feedback="false" fluid />
       </div>
+
+      <!-- Password Generator -->
+      <PasswordGenerator @generate="handleGenerate" />
 
       <div class="flex flex-col gap-2">
         <label for="password-folder" class="font-semibold">Folder (optional)</label>

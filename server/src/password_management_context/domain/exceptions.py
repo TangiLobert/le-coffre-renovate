@@ -1,5 +1,4 @@
 from uuid import UUID
-from typing import List
 
 
 class PasswordManagementDomainError(Exception):
@@ -88,17 +87,6 @@ class PasswordContainsForbiddenPatternError(PasswordComplexityError):
     def __init__(self, forbidden_pattern: str):
         self.forbidden_pattern = forbidden_pattern
         super().__init__(f"Password contains forbidden pattern: {forbidden_pattern}")
-
-
-class PasswordMultipleComplexityError(PasswordComplexityError):
-    """Raised when password has multiple complexity violations"""
-
-    def __init__(self, violations: List[PasswordComplexityError]):
-        self.violations = violations
-        messages = [str(violation) for violation in violations]
-        super().__init__(
-            f"Password has multiple complexity violations: {'; '.join(messages)}"
-        )
 
 
 class PasswordAccessDeniedError(PasswordManagementDomainError):

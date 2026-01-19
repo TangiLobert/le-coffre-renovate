@@ -103,17 +103,15 @@ def test_can_read_a_shared_password_of_another_user(
     assert other_user_retrieved.json()["password"] == STRONG_PASSWORD
 
 
-def test_cannot_create_weak_password(
-    authenticated_admin_client, setup, admin_personal_group_id
-):
-    weak_password = "weakpass"
+def test_can_create_any_password(authenticated_admin_client, setup):
+    """Test that users can create passwords without complexity requirements"""
+    simple_password = "a"
     response = authenticated_admin_client.post(
         "/api/passwords",
         json={
-            "name": "Weak Password",
-            "password": weak_password,
-            "group_id": admin_personal_group_id,
+            "name": "Simple Password",
+            "password": simple_password,
         },
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 201
