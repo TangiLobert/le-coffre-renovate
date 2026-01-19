@@ -10,8 +10,12 @@ from identity_access_management_context.application.responses.sso_login_response
 from identity_access_management_context.application.gateways import (
     SsoGateway,
     SsoUserRepository,
-    UserManagementGateway,
     TokenGateway,
+    UserRepository,
+    PasswordHashingGateway,
+)
+from identity_access_management_context.application.services import (
+    UserManagementService,
 )
 from identity_access_management_context.domain.entities.sso_user import SsoUser
 from shared_kernel.time import TimeProvider
@@ -32,13 +36,15 @@ class SsoLoginUseCase:
         self,
         sso_gateway: SsoGateway,
         sso_user_repository: SsoUserRepository,
-        user_management_gateway: UserManagementGateway,
+        user_repository: UserRepository,
+        password_hashing_gateway: PasswordHashingGateway,
         token_gateway: TokenGateway,
         time_provider: TimeProvider,
     ):
         self._sso_gateway = sso_gateway
         self._sso_user_repository = sso_user_repository
-        self._user_management_gateway = user_management_gateway
+        self._user_repository = user_repository
+        self._password_hashing_gateway = password_hashing_gateway
         self._token_gateway = token_gateway
         self._time_provider = time_provider
 
@@ -71,9 +77,15 @@ class SsoLoginUseCase:
             display_name = sso_user_from_provider.display_name
             is_new_user = True
 
-            # Create user in User Management context
-            await self._user_management_gateway.create_user(
-                user_id=user_id, email=email, display_name=display_name
+            # Create user in User Management context via service
+            user_management_service = UserManagementService(
+                self._user_repository, self._password_hashing_gateway
+            )
+            user_management_service.create_user(
+                user_id=user_id,
+                email=email,
+                username=email.split("@")[0],
+                name=display_name,
             )
 
             # Save SSO user mapping in Auth context
