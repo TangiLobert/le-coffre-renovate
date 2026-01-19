@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import { createPasswordPasswordsPost, updatePasswordPasswordsPasswordIdPut } from '@/client/sdk.gen';
 import type { GetPasswordListResponse } from '@/client/types.gen';
 import PasswordGenerator from '@/components/passwords/PasswordGenerator.vue';
+import { useGroupsStore } from '@/stores/groups';
 
 const visible = defineModel<boolean>('visible', { required: true });
 
