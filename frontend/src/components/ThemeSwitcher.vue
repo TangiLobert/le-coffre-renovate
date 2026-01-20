@@ -156,10 +156,13 @@ const loadSettings = () => {
     }
     $primevue.config.ripple = settings.ripple;
 
-    // Apply dark mode if it was enabled
+    // Apply or remove dark mode based on saved setting
     if (settings.dark) {
       document.documentElement.classList.add('p-dark');
       iconClass.value = 'pi-sun';
+    } else {
+      document.documentElement.classList.remove('p-dark');
+      iconClass.value = 'pi-moon';
     }
 
     // Re-apply the entire theme based on the loaded settings

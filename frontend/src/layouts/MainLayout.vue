@@ -6,7 +6,7 @@
     <!-- Menu latéral -->
     <aside class="w-80 border-r border-surface flex flex-col">
       <div class="p-4 border-b border-surface">
-        <h1 class="text-2xl font-bold text-primary-500 dark:text-primary-400">Le Coffre</h1>
+        <h1 class="text-2xl font-bold text-primary">Le Coffre</h1>
       </div>
       <div class="flex-1 overflow-y-auto">
         <MainMenu />
