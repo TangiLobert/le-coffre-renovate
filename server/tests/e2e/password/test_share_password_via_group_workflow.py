@@ -187,12 +187,10 @@ def test_share_password_via_personal_group_workflow(
     )
     assert get_before_share.status_code == 404
 
-    # Step 7: Admin shares the password to the second user's PERSONAL group
-    # Note: We share to personal group, not the regular group, because the current
-    # implementation only checks group ownership, not membership
+    # Step 7: Admin shares the password to the ENGINEERING TEAM group
     share_response = authenticated_admin_client.post(
         f"/api/passwords/{password_id}/share",
-        json={"group_id": second_user_personal_group_id},
+        json={"group_id": group_id},
     )
     assert share_response.status_code == 201
     assert "successfully shared" in share_response.json()["message"]
@@ -212,6 +210,19 @@ def test_share_password_via_personal_group_workflow(
     assert list_response.status_code == 200
     passwords_list = list_response.json()
     assert any(pwd["id"] == password_id for pwd in passwords_list)
+
+    # Step 10: Delete shared link to ENGINEERING TEAM
+    unshare_response = authenticated_admin_client.delete(
+        f"/api/passwords/{password_id}/share/{group_id}",
+    )
+
+    assert unshare_response.status_code == 204
+
+    # Step 11: Check that second user cannot read the password anymore
+    get_after_share = second_user_client.get(
+        f"/api/passwords/{password_id}",
+    )
+    assert get_after_share.status_code == 404
 
 
 def test_share_password_via_group_with_multiple_members(
