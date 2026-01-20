@@ -10,6 +10,7 @@ from .validate_user_token_use_case import ValidateUserTokenUseCase
 from .refresh_access_token_use_case import RefreshAccessTokenUseCase
 from .create_group_use_case import CreateGroupUseCase
 from .add_user_to_group_use_case import AddUserToGroupUseCase
+from .add_owner_to_group_use_case import AddOwnerToGroupUseCase
 from .remove_user_from_group_use_case import RemoveUserFromGroupUseCase
 from .list_groups_use_case import ListGroupsUseCase
 from .get_group_use_case import GetGroupUseCase
@@ -36,6 +37,7 @@ __all__ = [
     "RefreshAccessTokenUseCase",
     "CreateGroupUseCase",
     "AddUserToGroupUseCase",
+    "AddOwnerToGroupUseCase",
     "RemoveUserFromGroupUseCase",
     "ListGroupsUseCase",
     "GetGroupUseCase",

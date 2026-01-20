@@ -9,6 +9,7 @@ from .get_user_me_command import GetUserMeCommand
 from .refresh_access_token_command import RefreshAccessTokenCommand
 from .create_group_command import CreateGroupCommand
 from .add_user_to_group_command import AddUserToGroupCommand
+from .add_owner_to_group_command import AddOwnerToGroupCommand
 from .remove_user_from_group_command import RemoveUserFromGroupCommand
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "RefreshAccessTokenCommand",
     "CreateGroupCommand",
     "AddUserToGroupCommand",
+    "AddOwnerToGroupCommand",
     "RemoveUserFromGroupCommand",
 ]
