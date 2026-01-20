@@ -16,6 +16,7 @@ from identity_access_management_context.application.use_cases import (
     RefreshAccessTokenUseCase,
     CreateGroupUseCase,
     AddUserToGroupUseCase,
+    AddOwnerToGroupUseCase,
     RemoveUserFromGroupUseCase,
     GetGroupUseCase,
     ListGroupsUseCase,
@@ -240,6 +241,20 @@ def get_add_user_to_group_usecase(
     ),
 ):
     return AddUserToGroupUseCase(
+        user_repository,
+        group_repository,
+        group_member_repository,
+    )
+
+
+def get_add_owner_to_group_usecase(
+    user_repository: UserRepository = Depends(get_user_repository),
+    group_repository: GroupRepository = Depends(get_group_repository),
+    group_member_repository: GroupMemberRepository = Depends(
+        get_group_member_repository
+    ),
+):
+    return AddOwnerToGroupUseCase(
         user_repository,
         group_repository,
         group_member_repository,
