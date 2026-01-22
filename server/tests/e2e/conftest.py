@@ -123,13 +123,13 @@ def sso_user_factory(client_factory, configured_sso):
         """Create a user in OIDC provider and authenticate them with a dedicated client."""
         # Create a fresh client for this user (doesn't interfere with other clients)
         user_client = client_factory()
-        
+
         sso_user = create_sso_user_in_provider(configured_sso, email, name)
         user_data = authenticate_sso_user(user_client, configured_sso, sso_user)
-        
+
         # Add the client to the returned data for convenience
         user_data["client"] = user_client
-        
+
         return user_data
 
     return _create_sso_user

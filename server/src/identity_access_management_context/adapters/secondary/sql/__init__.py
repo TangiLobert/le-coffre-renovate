@@ -9,7 +9,7 @@ from .sql_group_member_repository import SqlGroupMemberRepository
 from .sql_user_repository import SqlUserRepository
 from .sql_user_password_repository import SqlUserPasswordRepository
 from .sql_sso_user_repository import SqlSsoUserRepository
-from .sql_sso_gateway import SqlSsoGateway
+from .sql_sso_configuration_repository import SqlSsoConfigurationRepository
 
 
 def create_tables(engine):
@@ -24,7 +24,7 @@ __all__ = [
     "SqlUserRepository",
     "SqlUserPasswordRepository",
     "SqlSsoUserRepository",
-    "SqlSsoGateway",
+    "SqlSsoConfigurationRepository",
     "GroupTable",
     "GroupMemberTable",
     "SsoConfigurationTable",
