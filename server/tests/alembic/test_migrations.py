@@ -76,8 +76,8 @@ def test_upgrade_migration_creates_all_tables(alembic_config, temp_database):
         
         for table_name in expected_tables:
             result = conn.execute(text(
-                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
-            ))
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"
+            ), {"table_name": table_name})
             assert result.fetchone() is not None, f"Table {table_name} should exist after migration"
     
     engine.dispose()
