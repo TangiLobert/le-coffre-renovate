@@ -13,9 +13,7 @@ from password_management_context.domain.exceptions import (
     GroupNotFoundError,
     UserNotOwnerOfGroupError,
 )
-from tests.password_management_context.unit.fakes import (
-    FakeEventPublisher,
-)
+from tests.shared_kernel.fakes import FakeEventPublisher
 
 
 ANY_PASSWORD = "any_password"
