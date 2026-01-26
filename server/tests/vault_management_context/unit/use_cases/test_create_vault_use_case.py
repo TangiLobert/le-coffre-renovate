@@ -1,6 +1,12 @@
 import pytest
 from uuid import uuid4
 
+from ..fakes import (
+    FakeVaultRepository,
+    FakeShamirGateway,
+    FakeEncryptionGateway,
+    FakeVaultSessionGateway,
+)
 from vault_management_context.application.commands import CreateVaultCommand
 from vault_management_context.domain.entities import Vault, Share
 from vault_management_context.application.responses.vault_status import VaultStatus
@@ -18,7 +24,10 @@ from vault_management_context.domain.value_objects.shamir_result import ShamirRe
 
 @pytest.fixture()
 def use_case(
-    vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
+    vault_repository: FakeVaultRepository,
+    shamir_gateway: FakeShamirGateway,
+    encryption_gateway: FakeEncryptionGateway,
+    vault_session_gateway: FakeVaultSessionGateway,
 ):
     return CreateVaultUseCase(
         vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
@@ -27,9 +36,9 @@ def use_case(
 
 def test_should_create_shares_and_store_encrypted_key(
     use_case,
-    vault_repository,
-    shamir_gateway,
-    encryption_gateway,
+    vault_repository: FakeVaultRepository,
+    shamir_gateway: FakeShamirGateway,
+    encryption_gateway: FakeEncryptionGateway,
 ):
     expected_shares = [
         Share("1"),
@@ -59,6 +68,8 @@ def test_should_create_shares_and_store_encrypted_key(
     assert result.setup_id == str(setup_id)
 
     stored_vault = vault_repository.get()
+
+    assert stored_vault
     assert stored_vault.nb_shares == 5
     assert stored_vault.threshold == 3
     assert stored_vault.encrypted_key == encrypted_key
@@ -66,7 +77,9 @@ def test_should_create_shares_and_store_encrypted_key(
     assert stored_vault.setup_id == str(setup_id)
 
 
-def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
+def test_should_fail_when_vault_is_already_created(
+    use_case, vault_repository: FakeVaultRepository
+):
     # Create a vault that is already validated (not in PENDING state)
     vault_repository.save(
         Vault(
@@ -88,7 +101,10 @@ def test_should_fail_when_vault_is_already_created(use_case, vault_repository):
 
 
 def test_should_allow_re_setup_when_vault_is_pending(
-    use_case, vault_repository, shamir_gateway, encryption_gateway
+    use_case,
+    vault_repository: FakeVaultRepository,
+    shamir_gateway: FakeShamirGateway,
+    encryption_gateway: FakeEncryptionGateway,
 ):
     # Create a vault in PENDING state
     vault_repository.save(
