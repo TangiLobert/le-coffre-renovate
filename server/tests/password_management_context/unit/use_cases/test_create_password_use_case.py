@@ -14,15 +14,11 @@ from password_management_context.domain.exceptions import (
     GroupNotFoundError,
     UserNotOwnerOfGroupError,
 )
+from password_management_context.domain.events import PasswordCreatedEvent
 from tests.shared_kernel.fakes import FakeEventPublisher
 
 
 ANY_PASSWORD = "any_password"
-
-
-@pytest.fixture
-def event_publisher():
-    return FakeEventPublisher()
 
 
 @pytest.fixture
@@ -31,13 +27,14 @@ def use_case(
     encryption_service: FakeEncryptionService,
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
+    domain_event_publisher: FakeEventPublisher,
 ):
     return CreatePasswordUseCase(
         password_repository,
         encryption_service,
         password_permissions_repository,
         group_access_gateway,
-        event_publisher,
+        domain_event_publisher,
     )
 
 
@@ -262,13 +259,9 @@ def test_should_set_user_as_owner_when_creating_password(
 
 def test_should_publish_password_created_event_when_password_is_created(
     use_case: CreatePasswordUseCase,
-    group_access_gateway: GroupAccessGateway,
-    event_publisher: FakeEventPublisher,
+    group_access_gateway: FakeGroupAccessGateway,
+    domain_event_publisher: FakeEventPublisher,
 ):
-    from password_management_context.domain.events.password_created_event import (
-        PasswordCreatedEvent,
-    )
-
     uuid = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
     user_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
     group_id = UUID("2d742e0e-bb76-4728-83ef-8d546d7c62e7")
@@ -290,8 +283,8 @@ def test_should_publish_password_created_event_when_password_is_created(
     use_case.execute(command)
 
     # Assert event was published
-    assert len(event_publisher.published_events) == 1
-    published_event = event_publisher.published_events[0]
+    assert len(domain_event_publisher.published_events) == 1
+    published_event = domain_event_publisher.published_events[0]
     assert isinstance(published_event, PasswordCreatedEvent)
     assert published_event.password_id == uuid
     assert published_event.password_name == name
