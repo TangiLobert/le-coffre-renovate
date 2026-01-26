@@ -348,7 +348,7 @@ from shared_kernel.authentication import ValidatedUser
 - **Contexts are ISOLATED**: Use gateways for cross-context communication
 - **Tests must be ISOLATED**: Function-scoped fixtures, no shared state
 - **Types are MANDATORY**: No `Any`, explicit return types
-- **Imports are ORGANIZED**: Top of file, grouped and sorted
+- **Imports are ORGANIZED**: Top of file, grouped and sorted. NEVER inside a function
 - **Code is SELF-DOCUMENTING**: No redundant comments
 - **uv is the STANDARD**: For running Python, tests, and dependencies
 
