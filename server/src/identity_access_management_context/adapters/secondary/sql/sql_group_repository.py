@@ -73,3 +73,11 @@ class SqlGroupRepository(GroupRepository):
             is_personal=result.is_personal,
             user_id=result.user_id,
         )
+
+    def delete_group(self, group_id: UUID) -> None:
+        """Delete a group from the repository."""
+        statement = select(GroupTable).where(GroupTable.id == group_id)
+        result = self._session.exec(statement).first()
+        if result is not None:
+            self._session.delete(result)
+            self._session.commit()

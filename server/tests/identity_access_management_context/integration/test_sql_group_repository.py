@@ -220,3 +220,31 @@ def test_given_multiple_groups_when_saved_then_all_retrievable_by_id(
     assert retrieved1 is not None and retrieved1.id == group1.id
     assert retrieved2 is not None and retrieved2.id == group2.id
     assert retrieved3 is not None and retrieved3.id == group3.id
+
+
+def test_given_group_when_deleting_then_group_is_removed(sql_group_repository):
+    # Given
+    group_id = uuid4()
+    name = "Group to Delete"
+    group = Group(id=group_id, name=name, is_personal=False)
+    sql_group_repository.save_group(group)
+
+    # Verify it exists
+    assert sql_group_repository.get_by_id(group_id) is not None
+
+    # When
+    sql_group_repository.delete_group(group_id)
+
+    # Then
+    retrieved_group = sql_group_repository.get_by_id(group_id)
+    assert retrieved_group is None
+
+
+def test_given_nonexistent_group_when_deleting_then_no_error_raised(
+    sql_group_repository,
+):
+    # Given
+    nonexistent_group_id = uuid4()
+
+    # When / Then - should not raise error
+    sql_group_repository.delete_group(nonexistent_group_id)
