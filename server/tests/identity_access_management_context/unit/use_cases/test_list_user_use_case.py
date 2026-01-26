@@ -13,7 +13,7 @@ def use_case(user_repository: FakeUserRepository):
     return ListUserUseCase(user_repository)
 
 
-def test_should_list_users_when_admin(
+def test_given_admin_user_when_listing_users_should_return_all_users(
     use_case: ListUserUseCase, user_repository: FakeUserRepository
 ):
     admin_user = AuthenticatedUser(

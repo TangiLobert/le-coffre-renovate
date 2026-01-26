@@ -21,7 +21,7 @@ def use_case(
     return LockVaultUseCase(vault_repository, vault_session_gateway)
 
 
-def test_should_lock_vault(
+def test_given_unlocked_vault_when_locking_vault_should_clear_session_key(
     use_case,
     vault_repository: FakeVaultRepository,
     vault_session_gateway: FakeVaultSessionGateway,
@@ -41,7 +41,7 @@ def test_should_lock_vault(
         vault_session_gateway.get_decrypted_key()
 
 
-def test_should_not_lock_vault_if_not_unlocked(
+def test_given_locked_vault_when_locking_vault_should_raise_vault_locked_exception(
     use_case, vault_repository: FakeVaultRepository
 ):
     admin_user = AuthenticatedUser(
@@ -56,7 +56,9 @@ def test_should_not_lock_vault_if_not_unlocked(
         use_case.execute(command)
 
 
-def test_when_not_setup_should_lock_fail(use_case):
+def test_given_vault_not_setup_when_locking_vault_should_raise_vault_not_setup_exception(
+    use_case,
+):
     admin_user = AuthenticatedUser(
         user_id=UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5"), roles=["admin"]
     )
@@ -66,7 +68,7 @@ def test_when_not_setup_should_lock_fail(use_case):
         use_case.execute(command)
 
 
-def test_should_raise_not_admin_error_when_requesting_user_is_not_admin(
+def test_given_non_admin_user_when_locking_vault_should_raise_not_admin_error(
     use_case,
     vault_repository: FakeVaultRepository,
     vault_session_gateway: FakeVaultSessionGateway,

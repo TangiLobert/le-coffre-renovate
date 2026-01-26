@@ -17,13 +17,15 @@ def use_case(
     return GetVaultStatusUseCase(vault_repository, vault_session_gateway)
 
 
-def test_should_return_not_setup_when_no_vault(use_case):
+def test_given_no_vault_exists_when_getting_vault_status_should_return_not_setup(
+    use_case,
+):
     command = GetVaultStatusCommand()
     status = use_case.execute(command)
     assert status.name == "NOT_SETUP"
 
 
-def test_should_return_locked_when_vault_is_locked(
+def test_given_setuped_vault_without_session_when_getting_vault_status_should_return_locked(
     use_case,
     vault_repository: FakeVaultRepository,
     vault_session_gateway: FakeVaultSessionGateway,
@@ -45,7 +47,7 @@ def test_should_return_locked_when_vault_is_locked(
     assert status.name == "LOCKED"
 
 
-def test_should_return_unlocked_when_vault_is_unlocked(
+def test_given_setuped_vault_with_session_when_getting_vault_status_should_return_unlocked(
     use_case,
     vault_repository: FakeVaultRepository,
     vault_session_gateway: FakeVaultSessionGateway,
@@ -67,7 +69,7 @@ def test_should_return_unlocked_when_vault_is_unlocked(
     assert status.name == "UNLOCKED"
 
 
-def test_should_return_unlocked_when_vault_is_pending_with_session(
+def test_given_pending_vault_with_session_when_getting_vault_status_should_return_unlocked(
     use_case,
     vault_repository: FakeVaultRepository,
     vault_session_gateway: FakeVaultSessionGateway,

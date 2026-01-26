@@ -14,7 +14,7 @@ def use_case(
     return UpdateUserUseCase(user_repository)
 
 
-def test_should_update_user(
+def test_given_valid_update_data_when_updating_user_should_persist_changes(
     use_case: UpdateUserUseCase,
     user_repository: FakeUserRepository,
 ):

@@ -58,7 +58,7 @@ def test_given_owner_when_deleting_should_success(
         password_repository.get_by_id(uuid)
 
 
-def test_should_raise_error_when_password_does_not_exist(
+def test_given_password_not_exists_when_deleting_password_should_raise_password_not_found_error(
     use_case: DeletePasswordUseCase,
 ):
     requester_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e6")

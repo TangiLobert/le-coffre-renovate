@@ -34,7 +34,7 @@ def password():
     return Password(uuid4(), "toto", "encrypted_value", "default")
 
 
-def test_given_owner_when_sharing_should_grant_read_access(
+def test_given_owner_and_target_group_when_sharing_access_should_grant_read_permission(
     use_case: ShareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -64,7 +64,7 @@ def test_given_owner_when_sharing_should_grant_read_access(
     )
 
 
-def test_given_non_owner_with_permissions_when_sharing_should_fail(
+def test_given_non_owner_user_when_sharing_access_should_raise_user_not_owner_error(
     use_case: ShareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -104,7 +104,7 @@ def test_given_non_owner_with_permissions_when_sharing_should_fail(
     )
 
 
-def test_given_owner_when_sharing_already_shared_resource_should_succeed(
+def test_given_already_shared_password_when_sharing_again_should_maintain_access(
     use_case: ShareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -137,7 +137,7 @@ def test_given_owner_when_sharing_already_shared_resource_should_succeed(
     )
 
 
-def test_given_non_existing_password_when_sharing_should_fail(
+def test_given_non_existing_password_when_sharing_access_should_raise_password_not_found_error(
     use_case: ShareAccessUseCase,
 ):
     owner_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")

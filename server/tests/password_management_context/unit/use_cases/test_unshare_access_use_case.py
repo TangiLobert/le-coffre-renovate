@@ -32,7 +32,7 @@ def password():
     return Password(uuid4(), "toto", "encrypted_value", "default")
 
 
-def test_given_owner_when_unsharing_from_user_with_read_access_should_revoke_access(
+def test_given_owner_and_group_with_read_access_when_unsharing_access_should_revoke_access(
     use_case: UnshareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -65,7 +65,7 @@ def test_given_owner_when_unsharing_from_user_with_read_access_should_revoke_acc
     )
 
 
-def test_given_non_owner_when_unsharing_should_fail(
+def test_given_non_owner_when_unsharing_access_should_raise_access_denied_error(
     use_case: UnshareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -92,7 +92,7 @@ def test_given_non_owner_when_unsharing_should_fail(
         )
 
 
-def test_given_owner_when_unsharing_from_another_owner_should_fail(
+def test_given_owner_group_when_unsharing_from_owner_group_should_raise_cannot_unshare_error(
     use_case: UnshareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -116,7 +116,7 @@ def test_given_owner_when_unsharing_from_another_owner_should_fail(
         )
 
 
-def test_given_no_password_when_unsharing_should_fail(
+def test_given_password_not_exists_when_unsharing_access_should_raise_password_not_found_error(
     use_case: UnshareAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,

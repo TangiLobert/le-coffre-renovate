@@ -14,7 +14,7 @@ def use_case(
     return DeleteUserUseCase(user_repository)
 
 
-def test_when_admin_should_delete_user(
+def test_given_admin_user_when_deleting_user_should_remove_user(
     use_case: DeleteUserUseCase, user_repository: FakeUserRepository
 ):
     user_uuid = UUID("123e4567-e89b-12d3-a456-426614174000")
@@ -35,7 +35,7 @@ def test_when_admin_should_delete_user(
     assert user_repository.get_by_id(user_uuid) is None
 
 
-def test_should_raise_not_admin_error_when_requesting_user_is_not_admin(
+def test_given_non_admin_user_when_deleting_user_should_raise_not_admin_error(
     use_case: DeleteUserUseCase, user_repository: FakeUserRepository
 ):
     user_uuid = UUID("123e4567-e89b-12d3-a456-426614174000")

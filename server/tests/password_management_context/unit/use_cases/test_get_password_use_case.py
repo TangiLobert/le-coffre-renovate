@@ -35,7 +35,7 @@ def use_case(
     )
 
 
-def test_should_return_password_when_user_has_access(
+def test_given_user_with_read_permission_when_getting_password_should_return_decrypted_password(
     use_case: GetPasswordUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -64,7 +64,7 @@ def test_should_return_password_when_user_has_access(
     assert result.password == "supersecret"
 
 
-def test_should_raise_access_denied_when_user_has_no_access(
+def test_given_user_without_access_when_getting_password_should_raise_access_denied_error(
     use_case: GetPasswordUseCase,
     password_repository: FakePasswordRepository,
 ):
@@ -84,7 +84,7 @@ def test_should_raise_access_denied_when_user_has_no_access(
         use_case.execute(command)
 
 
-def test_should_raise_exception_when_password_not_found(
+def test_given_password_not_exists_when_getting_password_should_raise_password_not_found_error(
     use_case: GetPasswordUseCase,
     password_permissions_repository: FakePasswordPermissionsRepository,
 ):
@@ -100,7 +100,7 @@ def test_should_raise_exception_when_password_not_found(
         use_case.execute(command)
 
 
-def test_should_return_password_when_owner(
+def test_given_user_is_owner_when_getting_password_should_return_decrypted_password(
     use_case: GetPasswordUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -127,7 +127,7 @@ def test_should_return_password_when_owner(
     assert result.password == "supersecret"
 
 
-def test_should_return_password_when_member_of_group(
+def test_given_user_is_group_member_when_getting_password_should_return_decrypted_password(
     use_case: GetPasswordUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,

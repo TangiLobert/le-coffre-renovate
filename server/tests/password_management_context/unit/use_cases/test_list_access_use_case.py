@@ -40,7 +40,7 @@ def password():
     )
 
 
-def test_given_owner_and_password_when_listing_access_should_succeed(
+def test_given_owner_user_and_existing_password_when_listing_access_should_return_owner_access(
     use_case: ListAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -67,7 +67,7 @@ def test_given_owner_and_password_when_listing_access_should_succeed(
     assert response.group_accesses[0].is_owner is True
 
 
-def test_given_user_and_password_when_listing_access_should_succeed(
+def test_given_user_with_read_permission_when_listing_access_should_return_read_access(
     use_case: ListAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -97,7 +97,9 @@ def test_given_user_and_password_when_listing_access_should_succeed(
     assert response.group_accesses[0].is_owner is False
 
 
-def test_given_no_password_when_listing_access_should_fail(use_case):
+def test_given_password_not_exists_when_listing_access_should_raise_password_not_found_error(
+    use_case,
+):
     requester_id = UUID("87654321-4321-8765-4321-876543218765")
 
     command = ListAccessCommand(
@@ -108,7 +110,7 @@ def test_given_no_password_when_listing_access_should_fail(use_case):
         use_case.execute(command)
 
 
-def test_given_multiple_user_having_access_when_listing_access_should_have_them_all(
+def test_given_multiple_groups_with_access_when_listing_access_should_return_all_user_and_group_accesses(
     use_case: ListAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -160,7 +162,7 @@ def test_given_multiple_user_having_access_when_listing_access_should_have_them_
             assert access.is_owner is False
 
 
-def test_given_owner_from_one_group_and_member_for_other_when_listing_access_should_have_them_all(
+def test_given_owner_is_member_of_another_group_when_listing_access_should_return_both_accesses(
     use_case: ListAccessUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,

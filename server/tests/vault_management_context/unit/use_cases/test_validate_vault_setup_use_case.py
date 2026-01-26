@@ -17,7 +17,7 @@ def use_case(vault_repository: FakeVaultRepository):
     return ValidateVaultSetupUseCase(vault_repository)
 
 
-def test_should_validate_setup_with_correct_setup_id(
+def test_given_pending_vault_with_correct_setup_id_when_validating_should_update_status_to_setuped(
     use_case, vault_repository: FakeVaultRepository
 ):
     setup_id = "test-setup-id-123"
@@ -41,7 +41,9 @@ def test_should_validate_setup_with_correct_setup_id(
     assert stored_vault.status == VaultStatus.SETUPED.value
 
 
-def test_should_fail_when_no_vault_exists(use_case):
+def test_given_no_vault_exists_when_validating_setup_should_raise_no_vault_existing_error(
+    use_case,
+):
     command = ValidateVaultSetupCommand(setup_id="any-setup-id")
     with pytest.raises(NoVaultExisting) as exc_info:
         use_case.execute(command)
@@ -49,7 +51,7 @@ def test_should_fail_when_no_vault_exists(use_case):
     assert str(exc_info.value) == "No vault found"
 
 
-def test_should_fail_when_vault_not_in_pending_state(
+def test_given_vault_already_setuped_when_validating_setup_should_raise_vault_already_setuped_error(
     use_case, vault_repository: FakeVaultRepository
 ):
     setup_id = "test-setup-id-123"
@@ -69,7 +71,7 @@ def test_should_fail_when_vault_not_in_pending_state(
     assert str(exc_info.value) == "Vault is not in pending state"
 
 
-def test_should_fail_when_setup_id_does_not_match(
+def test_given_wrong_setup_id_when_validating_setup_should_raise_vault_setup_id_not_found_error(
     use_case, vault_repository: FakeVaultRepository
 ):
     vault = Vault(

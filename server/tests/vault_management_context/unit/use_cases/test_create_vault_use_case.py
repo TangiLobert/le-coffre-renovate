@@ -34,7 +34,7 @@ def use_case(
     )
 
 
-def test_should_create_shares_and_store_encrypted_key(
+def test_given_valid_vault_config_when_creating_vault_should_create_shares_and_store_encrypted_key(
     use_case,
     vault_repository: FakeVaultRepository,
     shamir_gateway: FakeShamirGateway,
@@ -77,7 +77,7 @@ def test_should_create_shares_and_store_encrypted_key(
     assert stored_vault.setup_id == str(setup_id)
 
 
-def test_should_fail_when_vault_is_already_created(
+def test_given_existing_validated_vault_when_creating_vault_should_raise_vault_already_exists_error(
     use_case, vault_repository: FakeVaultRepository
 ):
     # Create a vault that is already validated (not in PENDING state)
@@ -100,7 +100,7 @@ def test_should_fail_when_vault_is_already_created(
     )
 
 
-def test_should_allow_re_setup_when_vault_is_pending(
+def test_given_pending_vault_when_creating_vault_should_allow_re_setup(
     use_case,
     vault_repository: FakeVaultRepository,
     shamir_gateway: FakeShamirGateway,
@@ -137,7 +137,9 @@ def test_should_allow_re_setup_when_vault_is_pending(
     assert result.setup_id == str(new_setup_id)
 
 
-def test_should_fail_when_nb_shares_is_less_than_2(use_case):
+def test_given_nb_shares_less_than_2_when_creating_vault_should_raise_invalid_share_count_error(
+    use_case,
+):
     command = CreateVaultCommand(nb_shares=1, threshold=2, setup_id=uuid4())
     with pytest.raises(InvalidShareCountError) as exc_info:
         use_case.execute(command)
@@ -148,7 +150,9 @@ def test_should_fail_when_nb_shares_is_less_than_2(use_case):
     )
 
 
-def test_should_fail_when_threshold_is_less_than_2(use_case):
+def test_given_threshold_less_than_2_when_creating_vault_should_raise_invalid_threshold_error(
+    use_case,
+):
     command = CreateVaultCommand(nb_shares=3, threshold=1, setup_id=uuid4())
     with pytest.raises(InvalidThresholdError) as exc_info:
         use_case.execute(command)
@@ -158,7 +162,9 @@ def test_should_fail_when_threshold_is_less_than_2(use_case):
     )
 
 
-def test_should_fail_when_threshold_is_greater_than_nb_shares(use_case):
+def test_given_threshold_greater_than_nb_shares_when_creating_vault_should_raise_threshold_exceeds_error(
+    use_case,
+):
     command = CreateVaultCommand(nb_shares=3, threshold=4, setup_id=uuid4())
     with pytest.raises(ThresholdExceedsShareCountError) as exc_info:
         use_case.execute(command)

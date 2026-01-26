@@ -15,7 +15,7 @@ def use_case(
     return EncryptUseCase(encryption_gateway, vault_session_gateway)
 
 
-def test_should_encrypt_data(
+def test_given_decrypted_data_when_encrypting_should_return_encrypted_data(
     use_case,
     encryption_gateway: FakeEncryptionGateway,
     vault_session_gateway: FakeVaultSessionGateway,
