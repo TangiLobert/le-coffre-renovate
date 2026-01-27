@@ -46,4 +46,5 @@ class DeleteGroupUseCase:
         if self.password_ownership_gateway.group_owns_passwords(command.group_id):
             raise CannotDeleteGroupWithPasswordsException(command.group_id)
 
+        self.group_member_repository.delete_by_group_id(command.group_id)
         self.group_repository.delete_group(command.group_id)
