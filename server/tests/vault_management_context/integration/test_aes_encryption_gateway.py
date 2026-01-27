@@ -1,6 +1,6 @@
 import pytest
 
-from vault_management_context.adapters.secondary.gateways import AesEncryptionGateway
+from vault_management_context.adapters.secondary import AesEncryptionGateway
 
 
 @pytest.fixture
