@@ -10,11 +10,11 @@ from .fakes import (
     FakeSsoGateway,
     FakeSsoConfigurationRepository,
     FakeTimeProvider,
-    FakeEncryptionService,
     FakeGroupRepository,
     FakeGroupMemberRepository,
     FakeSsoUserRepository,
     FakeUserRepository,
+    FakeSsoEncryptionGateway,
 )
 
 
@@ -44,8 +44,8 @@ def time_provider():
 
 
 @pytest.fixture
-def encryption_service():
-    return FakeEncryptionService()
+def sso_encryption_gateway():
+    return FakeSsoEncryptionGateway()
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@ from identity_access_management_context.application.gateways import UserReposito
 from password_management_context.application.gateways import (
     PasswordRepository,
     GroupAccessGateway,
+    PasswordEncryptionGateway,
 )
 from password_management_context.application.use_cases import (
     GetPasswordUseCase,
@@ -18,7 +19,6 @@ from password_management_context.application.use_cases import (
 from password_management_context.application.gateways.password_permissions_repository import (
     PasswordPermissionsRepository,
 )
-from shared_kernel.encryption import EncryptionService
 from shared_kernel.pubsub.gateway.event_publisher_gateway import DomainEventPublisher
 
 
@@ -26,8 +26,8 @@ def get_password_repository(request: Request) -> PasswordRepository:
     return request.app.state.password_repository
 
 
-def get_encryption_service(request: Request) -> EncryptionService:
-    return request.app.state.encryption_service
+def get_password_encryption_gateway(request: Request) -> PasswordEncryptionGateway:
+    return request.app.state.password_encryption_gateway
 
 
 def get_password_permissions_repository(
@@ -46,7 +46,9 @@ def get_event_publisher(request: Request) -> DomainEventPublisher:
 
 def get_create_password_usecase(
     password_repository: PasswordRepository = Depends(get_password_repository),
-    encryption_service: EncryptionService = Depends(get_encryption_service),
+    password_encryption_gateway: PasswordEncryptionGateway = Depends(
+        get_password_encryption_gateway
+    ),
     password_permissions_repository: PasswordPermissionsRepository = Depends(
         get_password_permissions_repository
     ),
@@ -55,7 +57,7 @@ def get_create_password_usecase(
 ):
     return CreatePasswordUseCase(
         password_repository,
-        encryption_service,
+        password_encryption_gateway,
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
@@ -64,7 +66,9 @@ def get_create_password_usecase(
 
 def get_get_password_usecase(
     password_repository: PasswordRepository = Depends(get_password_repository),
-    encryption_service: EncryptionService = Depends(get_encryption_service),
+    password_encryption_gateway: PasswordEncryptionGateway = Depends(
+        get_password_encryption_gateway
+    ),
     password_permissions_repository: PasswordPermissionsRepository = Depends(
         get_password_permissions_repository
     ),
@@ -73,7 +77,7 @@ def get_get_password_usecase(
 ):
     return GetPasswordUseCase(
         password_repository,
-        encryption_service,
+        password_encryption_gateway,
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
@@ -82,7 +86,9 @@ def get_get_password_usecase(
 
 def get_update_password_usecase(
     password_repository: PasswordRepository = Depends(get_password_repository),
-    encryption_service: EncryptionService = Depends(get_encryption_service),
+    password_encryption_gateway: PasswordEncryptionGateway = Depends(
+        get_password_encryption_gateway
+    ),
     password_permissions_repository: PasswordPermissionsRepository = Depends(
         get_password_permissions_repository
     ),
@@ -91,7 +97,7 @@ def get_update_password_usecase(
 ):
     return UpdatePasswordUseCase(
         password_repository,
-        encryption_service,
+        password_encryption_gateway,
         password_permissions_repository,
         group_access_gateway,
         event_publisher,

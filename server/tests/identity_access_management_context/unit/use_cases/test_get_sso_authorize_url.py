@@ -9,7 +9,7 @@ from identity_access_management_context.domain.entities import SsoConfiguration
 from ..fakes import (
     FakeSsoGateway,
     FakeSsoConfigurationRepository,
-    FakeEncryptionService,
+    FakeSsoEncryptionGateway,
 )
 
 
@@ -17,10 +17,10 @@ from ..fakes import (
 def use_case(
     sso_gateway: FakeSsoGateway,
     sso_configuration_repository: FakeSsoConfigurationRepository,
-    encryption_service: FakeEncryptionService,
+    sso_encryption_gateway: FakeSsoEncryptionGateway,
 ):
     return GetSsoAuthorizeUrlUseCase(
-        sso_gateway, sso_configuration_repository, encryption_service
+        sso_gateway, sso_configuration_repository, sso_encryption_gateway
     )
 
 

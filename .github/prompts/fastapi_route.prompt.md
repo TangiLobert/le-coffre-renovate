@@ -394,7 +394,6 @@ Domain Exceptions:
 
 Dependencies Needed:
 - get_password_repository(request)
-- get_encryption_service(request)
 - get_password_permissions_repository(request)
 - get_group_access_gateway(request)
 - get_create_password_usecase(...dependencies...)

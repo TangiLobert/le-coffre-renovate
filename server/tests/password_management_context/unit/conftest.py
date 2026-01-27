@@ -4,7 +4,7 @@ from .fakes import (
     FakePasswordPermissionsRepository,
     FakePasswordRepository,
     FakeGroupAccessGateway,
-    FakeEncryptionService,
+    FakePasswordEncryptionGateway,
 )
 from tests.fakes import FakeDomainEventPublisher
 
@@ -12,11 +12,6 @@ from tests.fakes import FakeDomainEventPublisher
 @pytest.fixture
 def password_repository():
     return FakePasswordRepository()
-
-
-@pytest.fixture
-def encryption_service():
-    return FakeEncryptionService()
 
 
 @pytest.fixture
@@ -32,3 +27,8 @@ def group_access_gateway():
 @pytest.fixture
 def domain_event_publisher():
     return FakeDomainEventPublisher()
+
+
+@pytest.fixture
+def password_encryption_gateway():
+    return FakePasswordEncryptionGateway()
