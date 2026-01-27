@@ -7,3 +7,6 @@ class FakeEventRepository:
 
     def append_event(self, event: DomainEvent) -> None:
         self.events.append(event)
+
+    def list_events(self) -> list[DomainEvent]:
+        return self.events

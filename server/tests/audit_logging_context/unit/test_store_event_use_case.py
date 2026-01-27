@@ -6,14 +6,6 @@ from shared_kernel.pubsub.domain.domain_event import DomainEvent
 from audit_logging_context.application.use_cases.store_event_use_case import (
     StoreEventUseCase,
 )
-from .fakes.fake_event_repository import (
-    FakeEventRepository,
-)
-
-
-@pytest.fixture
-def event_repository():
-    return FakeEventRepository()
 
 
 @pytest.fixture
