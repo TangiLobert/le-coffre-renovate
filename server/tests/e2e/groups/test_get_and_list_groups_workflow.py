@@ -5,25 +5,28 @@ E2E tests for Group Management workflows - Get and List Groups
 from uuid import uuid4
 
 
-def test_get_and_list_groups_complete_workflow(e2e_client, sso_user_token, setup):
+def test_get_and_list_groups_complete_workflow(authenticated_sso_user_client, setup):
     """
     Complete workflow: Create groups → List all → Get specific → Filter list
     """
+    client = authenticated_sso_user_client
+
+    # Get user ID for verification later
+    user_response = client.get("/api/users/me")
+    user_id = user_response.json()["id"]
 
     # Step 1: Create a shared group
-    create_group_response = e2e_client.post(
+    create_group_response = client.post(
         "/api/groups/",
         json={"name": "Engineering Team"},
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert create_group_response.status_code == 201
     group_data = create_group_response.json()
     group_id = group_data["id"]
 
     # Step 2: List all groups (should include personal + shared)
-    list_all_response = e2e_client.get(
+    list_all_response = client.get(
         "/api/groups?include_personal=true",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert list_all_response.status_code == 200
     all_groups = list_all_response.json()
@@ -37,9 +40,8 @@ def test_get_and_list_groups_complete_workflow(e2e_client, sso_user_token, setup
     assert has_shared, "Should have at least one shared group"
 
     # Step 3: Get the specific shared group
-    get_group_response = e2e_client.get(
+    get_group_response = client.get(
         f"/api/groups/{group_id}",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert get_group_response.status_code == 200
     retrieved_group = get_group_response.json()
@@ -53,12 +55,11 @@ def test_get_and_list_groups_complete_workflow(e2e_client, sso_user_token, setup
     assert isinstance(retrieved_group["owners"], list)
     assert isinstance(retrieved_group["members"], list)
     # The creator should be an owner
-    assert sso_user_token["user_id"] in retrieved_group["owners"]
+    assert user_id in retrieved_group["owners"]
 
     # Step 4: List only shared groups (exclude personal)
-    list_shared_response = e2e_client.get(
+    list_shared_response = client.get(
         "/api/groups?include_personal=false",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert list_shared_response.status_code == 200
     shared_groups = list_shared_response.json()
@@ -73,15 +74,14 @@ def test_get_and_list_groups_complete_workflow(e2e_client, sso_user_token, setup
     assert created_group_in_list, "Created group should be in shared groups list"
 
 
-def test_get_group_not_found(e2e_client, sso_user_token):
+def test_get_group_not_found(authenticated_sso_user_client):
     """
     Test getting a non-existent group returns 404
     """
     non_existent_id = uuid4()
 
-    response = e2e_client.get(
+    response = authenticated_sso_user_client.get(
         f"/api/groups/{non_existent_id}",
-        cookies={"access_token": sso_user_token["token"]},
     )
 
     assert response.status_code == 404
@@ -108,29 +108,28 @@ def test_list_groups_requires_authentication(e2e_client):
     assert response.status_code == 401
 
 
-def test_list_groups_with_personal_flag_variations(e2e_client, sso_user_token):
+def test_list_groups_with_personal_flag_variations(authenticated_sso_user_client):
     """
     Test the include_personal flag with different values
     """
+    client = authenticated_sso_user_client
+
     # Create a shared group
-    e2e_client.post(
+    client.post(
         "/api/groups/",
         json={"name": "Test Group"},
-        cookies={"access_token": sso_user_token["token"]},
     )
 
     # Test with include_personal=true (default)
-    response_with_personal = e2e_client.get(
+    response_with_personal = client.get(
         "/api/groups?include_personal=true",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert response_with_personal.status_code == 200
     with_personal = response_with_personal.json()
 
     # Test with include_personal=false
-    response_without_personal = e2e_client.get(
+    response_without_personal = client.get(
         "/api/groups?include_personal=false",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert response_without_personal.status_code == 200
     without_personal = response_without_personal.json()
@@ -139,23 +138,23 @@ def test_list_groups_with_personal_flag_variations(e2e_client, sso_user_token):
     assert with_personal["total"] >= without_personal["total"]
 
     # Test default (should include personal by default)
-    response_default = e2e_client.get(
+    response_default = client.get(
         "/api/groups",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert response_default.status_code == 200
     default = response_default.json()
     assert default["total"] == with_personal["total"]
 
 
-def test_get_personal_group(e2e_client, sso_user_token):
+def test_get_personal_group(authenticated_sso_user_client):
     """
     Test getting a personal group by its ID
     """
+    client = authenticated_sso_user_client
+
     # List all groups to find the personal group
-    list_response = e2e_client.get(
+    list_response = client.get(
         "/api/groups?include_personal=true",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert list_response.status_code == 200
     all_groups = list_response.json()
@@ -167,9 +166,8 @@ def test_get_personal_group(e2e_client, sso_user_token):
     personal_group = personal_groups[0]
 
     # Get the personal group by ID
-    get_response = e2e_client.get(
+    get_response = client.get(
         f"/api/groups/{personal_group['id']}",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert get_response.status_code == 200
     retrieved = get_response.json()
@@ -178,23 +176,27 @@ def test_get_personal_group(e2e_client, sso_user_token):
     assert retrieved["user_id"] is not None
 
 
-def test_get_group_with_owners_and_members(e2e_client, sso_user_token):
+def test_get_group_with_owners_and_members(authenticated_sso_user_client):
     """
     Test that getting a group returns separate lists of owners and members
     """
+    client = authenticated_sso_user_client
+
+    # Get user ID for verification
+    user_response = client.get("/api/users/me")
+    user_id = user_response.json()["id"]
+
     # Step 1: Create a shared group (creator is automatically added as owner)
-    create_response = e2e_client.post(
+    create_response = client.post(
         "/api/groups/",
         json={"name": "Test Team"},
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert create_response.status_code == 201
     group_id = create_response.json()["id"]
 
     # Step 2: Get the group and verify the response structure includes owners/members
-    get_response = e2e_client.get(
+    get_response = client.get(
         f"/api/groups/{group_id}",
-        cookies={"access_token": sso_user_token["token"]},
     )
     assert get_response.status_code == 200
     group = get_response.json()
@@ -206,7 +208,7 @@ def test_get_group_with_owners_and_members(e2e_client, sso_user_token):
     assert isinstance(group["members"], list)
 
     # Verify the creator is in owners list
-    assert sso_user_token["user_id"] in group["owners"]
+    assert user_id in group["owners"]
 
     # Verify basic group info
     assert group["id"] == group_id
