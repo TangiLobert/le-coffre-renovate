@@ -2,8 +2,8 @@ from identity_access_management_context.application.commands import DeleteGroupC
 from identity_access_management_context.application.gateways import (
     GroupRepository,
     GroupMemberRepository,
-    PasswordOwnershipGateway,
 )
+from password_management_context.application.gateways import GroupAccessGateway
 from identity_access_management_context.domain.exceptions import (
     GroupNotFoundException,
     UserNotOwnerOfGroupException,
@@ -18,11 +18,11 @@ class DeleteGroupUseCase:
         self,
         group_repository: GroupRepository,
         group_member_repository: GroupMemberRepository,
-        password_ownership_gateway: PasswordOwnershipGateway,
+        group_access_gateway: GroupAccessGateway,
     ):
         self.group_repository = group_repository
         self.group_member_repository = group_member_repository
-        self.password_ownership_gateway = password_ownership_gateway
+        self.group_access_gateway = group_access_gateway
 
     def execute(self, command: DeleteGroupCommand) -> None:
         group = self.group_repository.get_by_id(command.group_id)
@@ -43,7 +43,7 @@ class DeleteGroupUseCase:
                 command.requesting_user.user_id, command.group_id
             )
 
-        if self.password_ownership_gateway.group_owns_passwords(command.group_id):
+        if self.group_access_gateway.group_owns_passwords(command.group_id):
             raise CannotDeleteGroupWithPasswordsException(command.group_id)
 
         self.group_member_repository.delete_by_group_id(command.group_id)

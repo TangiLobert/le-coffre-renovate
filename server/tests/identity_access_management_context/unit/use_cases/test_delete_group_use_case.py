@@ -5,9 +5,7 @@ from identity_access_management_context.application.gateways import (
     GroupRepository,
     GroupMemberRepository,
 )
-from identity_access_management_context.application.gateways.password_ownership_gateway import (
-    PasswordOwnershipGateway,
-)
+from password_management_context.application.gateways import GroupAccessGateway
 from identity_access_management_context.application.commands import DeleteGroupCommand
 from identity_access_management_context.application.use_cases import DeleteGroupUseCase
 from identity_access_management_context.domain.exceptions import (
@@ -17,28 +15,28 @@ from identity_access_management_context.domain.exceptions import (
     CannotDeleteGroupWithPasswordsException,
 )
 from identity_access_management_context.domain.entities import Group
-from tests.identity_access_management_context.unit.fakes.fake_password_ownership_gateway import (
-    FakePasswordOwnershipGateway,
+from tests.fakes.password_management_context.fake_group_access_gateway import (
+    FakeGroupAccessGateway,
 )
 from shared_kernel.authentication import AuthenticatedUser
 from shared_kernel.authentication.constants import ADMIN_ROLE
 
 
 @pytest.fixture
-def password_ownership_gateway():
-    return FakePasswordOwnershipGateway()
+def group_access_gateway():
+    return FakeGroupAccessGateway()
 
 
 @pytest.fixture
 def use_case(
     group_repository: GroupRepository,
     group_member_repository: GroupMemberRepository,
-    password_ownership_gateway: PasswordOwnershipGateway,
+    group_access_gateway: GroupAccessGateway,
 ):
     return DeleteGroupUseCase(
         group_repository=group_repository,
         group_member_repository=group_member_repository,
-        password_ownership_gateway=password_ownership_gateway,
+        group_access_gateway=group_access_gateway,
     )
 
 
@@ -153,7 +151,7 @@ def test_should_raise_error_when_group_owns_passwords(
     use_case: DeleteGroupUseCase,
     group_repository: GroupRepository,
     group_member_repository: GroupMemberRepository,
-    password_ownership_gateway: FakePasswordOwnershipGateway,
+    group_access_gateway: FakeGroupAccessGateway,
 ):
     # Arrange
     owner_id = UUID("123e4567-e89b-12d3-a456-426614174000")
@@ -168,7 +166,7 @@ def test_should_raise_error_when_group_owns_passwords(
     group_member_repository.add_member(group_id, owner_id, is_owner=True)
 
     # Simulate that this group owns passwords
-    password_ownership_gateway.add_group_with_passwords(group_id)
+    group_access_gateway.add_group_with_passwords(group_id)
 
     requesting_user = AuthenticatedUser(user_id=owner_id, roles=[])
     command = DeleteGroupCommand(
