@@ -10,7 +10,7 @@ from identity_access_management_context.domain.exceptions import (
     CannotDeletePersonalGroupException,
     CannotDeleteGroupStillUsedException,
 )
-from shared_kernel.authentication import AdminPermissionChecker
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class DeleteGroupUseCase:

@@ -15,8 +15,8 @@ from identity_access_management_context.domain.exceptions import (
     CannotDeleteGroupStillUsedException,
 )
 from identity_access_management_context.domain.entities import Group
-from shared_kernel.authentication import AuthenticatedUser
-from shared_kernel.authentication.constants import ADMIN_ROLE
+from shared_kernel.domain.entities import AuthenticatedUser
+from shared_kernel.domain.value_objects import ADMIN_ROLE
 
 
 @pytest.fixture
