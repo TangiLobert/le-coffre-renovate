@@ -57,25 +57,33 @@ class UpdatePasswordUseCase:
         ):
             raise UserNotOwnerOfGroupError(new_password.requester_id, owner_group_id)
 
+        # Track what changed
+        has_name_changed = False
+        has_password_changed = False
+        has_folder_changed = False
+
         if new_password.password:
             existing_password.encrypted_value = self.encryption_service.encrypt(
                 new_password.password
             )
+            has_password_changed = True
 
         if new_password.name:
             existing_password.name = new_password.name
+            has_name_changed = True
 
         if new_password.folder:
             existing_password.folder = new_password.folder
+            has_folder_changed = True
 
         self.password_repository.update(existing_password)
 
         # Publish domain event
         event = PasswordUpdatedEvent(
             password_id=existing_password.id,
-            password_name=existing_password.name,
             updated_by_user_id=new_password.requester_id,
-            owner_group_id=owner_group_id,
-            folder=existing_password.folder,
+            has_name_changed=has_name_changed,
+            has_password_changed=has_password_changed,
+            has_folder_changed=has_folder_changed,
         )
         self.event_publisher.publish(event)
