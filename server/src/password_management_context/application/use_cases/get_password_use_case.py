@@ -49,15 +49,11 @@ class GetPasswordUseCase:
             password_entity.encrypted_value
         )
 
-        # Find owner group for audit logging
-        owner_group_id = self._get_owner_group_id(command.password_id)
-
         # Publish domain event
         event = PasswordAccessedEvent(
             password_id=password_entity.id,
             password_name=password_entity.name,
             accessed_by_user_id=command.requester_id,
-            owner_group_id=owner_group_id,
         )
         self.event_publisher.publish(event)
 
@@ -89,15 +85,3 @@ class GetPasswordUseCase:
                     return True
 
         return False
-
-    def _get_owner_group_id(self, password_id: UUID) -> UUID:
-        """Get the owner group ID for a password"""
-        all_permissions = self.password_permissions_repository.list_all_permissions_for(
-            password_id
-        )
-        for group_id, (is_owner, _) in all_permissions.items():
-            if is_owner:
-                return group_id
-        # If no owner found, return UUID zero (for legacy data or tests)
-        # In production, this should ideally always have an owner
-        return UUID("00000000-0000-0000-0000-000000000000")

@@ -9,7 +9,6 @@ class PasswordAccessedEvent(DomainEvent):
         password_id: UUID,
         password_name: str,
         accessed_by_user_id: UUID,
-        owner_group_id: UUID,
         event_id: UUID | None = None,
         occurred_on: datetime | None = None,
     ):
@@ -21,4 +20,3 @@ class PasswordAccessedEvent(DomainEvent):
         self.password_id = password_id
         self.password_name = password_name
         self.accessed_by_user_id = accessed_by_user_id
-        self.owner_group_id = owner_group_id
