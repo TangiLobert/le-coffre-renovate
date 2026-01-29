@@ -10,7 +10,7 @@ from password_management_context.domain.exceptions import (
 )
 from ..fakes import (
     FakePasswordRepository,
-    FakeEncryptionService,
+    FakePasswordEncryptionGateway,
     FakePasswordPermissionsRepository,
     FakeGroupAccessGateway,
 )
@@ -20,14 +20,14 @@ from tests.fakes import FakeDomainEventPublisher
 @pytest.fixture
 def use_case(
     password_repository: FakePasswordRepository,
-    encryption_service: FakeEncryptionService,
+    password_encryption_gateway: FakePasswordEncryptionGateway,
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
     domain_event_publisher: FakeDomainEventPublisher,
 ):
     return UpdatePasswordUseCase(
         password_repository,
-        encryption_service,
+        password_encryption_gateway,
         password_permissions_repository,
         group_access_gateway,
         domain_event_publisher,

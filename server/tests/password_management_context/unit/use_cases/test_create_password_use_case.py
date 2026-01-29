@@ -3,7 +3,7 @@ from uuid import UUID
 
 from ..fakes import (
     FakePasswordRepository,
-    FakeEncryptionService,
+    FakePasswordEncryptionGateway,
     FakeGroupAccessGateway,
     FakePasswordPermissionsRepository,
 )
@@ -24,14 +24,14 @@ ANY_PASSWORD = "any_password"
 @pytest.fixture
 def use_case(
     password_repository: FakePasswordRepository,
-    encryption_service: FakeEncryptionService,
+    password_encryption_gateway: FakePasswordEncryptionGateway,
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
     domain_event_publisher: FakeEventPublisher,
 ):
     return CreatePasswordUseCase(
         password_repository,
-        encryption_service,
+        password_encryption_gateway,
         password_permissions_repository,
         group_access_gateway,
         domain_event_publisher,

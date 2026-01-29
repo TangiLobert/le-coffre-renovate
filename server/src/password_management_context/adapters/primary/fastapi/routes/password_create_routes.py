@@ -9,8 +9,9 @@ from password_management_context.adapters.primary.fastapi.app_dependencies impor
 from password_management_context.application.use_cases import CreatePasswordUseCase
 from password_management_context.application.commands import CreatePasswordCommand
 from password_management_context.domain.exceptions import PasswordManagementDomainError
-from shared_kernel.access_control.exceptions import AccessDeniedError
-from shared_kernel.authentication import ValidatedUser, get_current_user
+from shared_kernel.domain.exceptions import AccessDeniedError
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 router = APIRouter(prefix="/passwords", tags=["Password Management"])
 

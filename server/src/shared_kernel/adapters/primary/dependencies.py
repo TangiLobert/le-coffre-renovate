@@ -19,7 +19,7 @@ from identity_access_management_context.domain.exceptions import (
     SessionNotFoundException,
     UserNotFoundException,
 )
-from .models import ValidatedUser
+from shared_kernel.domain.entities import ValidatedUser
 from .exceptions import (
     MissingTokenError,
 )

@@ -4,7 +4,8 @@ from identity_access_management_context.application.use_cases import DeleteUserU
 from identity_access_management_context.application.commands import DeleteUserCommand
 from identity_access_management_context.domain.entities import User
 from ..fakes import FakeUserRepository
-from shared_kernel.authentication import AuthenticatedUser, NotAdminError
+from shared_kernel.domain.entities import AuthenticatedUser
+from shared_kernel.adapters.primary.exceptions import NotAdminError
 
 
 @pytest.fixture

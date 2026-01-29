@@ -6,9 +6,9 @@ from identity_access_management_context.application.use_cases import CreateUserU
 from identity_access_management_context.domain.exceptions import (
     UserAlreadyExistsError,
 )
-from shared_kernel.authentication.exceptions import NotAdminError
-from shared_kernel.authentication.constants import ADMIN_ROLE
-from shared_kernel.authentication.models import AuthenticatedUser
+from shared_kernel.adapters.primary.exceptions import NotAdminError
+from shared_kernel.domain.value_objects.constants import ADMIN_ROLE
+from shared_kernel.domain.entities import AuthenticatedUser
 from ..fakes import (
     FakeUserRepository,
     FakeUserPasswordRepository,

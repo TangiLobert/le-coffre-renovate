@@ -1,5 +1,3 @@
-from shared_kernel.encryption import EncryptionService
-
 from vault_management_context.application.use_cases import (
     EncryptUseCase,
     DecryptUseCase,
@@ -7,7 +5,7 @@ from vault_management_context.application.use_cases import (
 from vault_management_context.application.commands import EncryptCommand, DecryptCommand
 
 
-class EncryptionApi(EncryptionService):
+class EncryptionApi:
     def __init__(
         self, encrypt_use_case: EncryptUseCase, decrypt_use_case: DecryptUseCase
     ):

@@ -23,7 +23,10 @@ from config import (
     get_jwt_refresh_token_expiration_days,
 )
 
-from shared_kernel.time import UtcTimeProvider
+from shared_kernel.adapters.secondary import (
+    UtcTimeGateway,
+    InMemoryDomainEventPublisher,
+)
 from vault_management_context.adapters.primary.fastapi.routes import (
     get_vault_management_router,
 )
@@ -45,6 +48,7 @@ from password_management_context.adapters.primary.fastapi.routes import (
 from password_management_context.adapters.secondary import (
     SqlPasswordRepository,
     SqlPasswordPermissionsRepository,
+    PrivateApiPasswordEncryptionGateway,
 )
 
 from identity_access_management_context.adapters.secondary import (
@@ -55,6 +59,7 @@ from identity_access_management_context.adapters.secondary import (
     SqlSsoUserRepository,
     SqlSsoConfigurationRepository,
     OAuth2SsoGateway,
+    PrivateApiSsoEncryptionGateway,
 )
 from identity_access_management_context.adapters.secondary.sql import (
     SqlGroupRepository,
@@ -68,8 +73,6 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
     get_group_management_router,
 )
-
-from shared_kernel.pubsub import InMemoryDomainEventPublisher
 
 
 def run_migrations():
@@ -106,14 +109,20 @@ async def lifespan(app: FastAPI):
         password_permissions_repository = SqlPasswordPermissionsRepository(session)
         encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
         decrypt_use_case = DecryptUseCase(encryption_gateway, vault_session_gateway)
-        encryption_service = EncryptionApi(encrypt_use_case, decrypt_use_case)
+        encryption_api = EncryptionApi(encrypt_use_case, decrypt_use_case)
+        password_encryption_gateway = PrivateApiPasswordEncryptionGateway(
+            encryption_api
+        )
 
         app.state.password_repository = password_repository
         app.state.password_permissions_repository = password_permissions_repository
-        app.state.encryption_service = encryption_service
+        app.state.password_encryption_gateway = password_encryption_gateway
 
         # IAM dependencies
-        app.state.time_provider = UtcTimeProvider()
+        app.state.time_provider = UtcTimeGateway()
+        # IAM uses SSO encryption gateway (same underlying API)
+        sso_encryption_gateway = PrivateApiSsoEncryptionGateway(encryption_api)
+        app.state.sso_encryption_gateway = sso_encryption_gateway
 
         user_repository = SqlUserRepository(session)
         user_password_repository = SqlUserPasswordRepository(session)

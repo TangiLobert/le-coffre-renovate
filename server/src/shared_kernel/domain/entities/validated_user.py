@@ -2,11 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 from typing import List
 
-
-@dataclass
-class AuthenticatedUser:
-    user_id: UUID
-    roles: List[str]
+from .authenticated_user import AuthenticatedUser
 
 
 @dataclass

@@ -23,7 +23,7 @@ from <context>.application.commands import <UseCaseName>Command
 from <context>.application.gateways import Gateway1, Gateway2
 from <context>.domain.entities import Entity1
 from <context>.domain.exceptions import CustomError
-from shared_kernel.authentication import AdminPermissionChecker  # if needed
+from shared_kernel.domain.services import AdminPermissionChecker  # if needed
 
 class <UseCaseName>UseCase:
     def __init__(
@@ -55,7 +55,7 @@ Commands are dataclasses in `application/commands/`:
 ```python
 from dataclasses import dataclass
 from uuid import UUID
-from shared_kernel.authentication import AuthenticatedUser  # if permission check needed
+from shared_kernel.domain.entities import AuthenticatedUser  # if permission check needed
 
 @dataclass
 class CreateSomethingCommand:

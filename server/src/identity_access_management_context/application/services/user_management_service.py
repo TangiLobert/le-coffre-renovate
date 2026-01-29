@@ -14,7 +14,7 @@ from identity_access_management_context.domain.entities import User
 from identity_access_management_context.domain.exceptions import (
     AdminAlreadyExistsError,
 )
-from shared_kernel.authentication.constants import ADMIN_ROLE
+from shared_kernel.domain.value_objects.constants import ADMIN_ROLE
 
 
 class UserManagementService:

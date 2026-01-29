@@ -11,14 +11,14 @@ from identity_access_management_context.domain.exceptions import (
     InvalidRefreshTokenException,
 )
 from identity_access_management_context.domain.entities import User
-from ..fakes import FakeTokenGateway, FakeUserRepository, FakeTimeProvider
+from ..fakes import FakeTokenGateway, FakeUserRepository, FakeTimeGateway
 
 
 @pytest.fixture
 def use_case(
     token_gateway: FakeTokenGateway,
     user_repository: FakeUserRepository,
-    time_provider: FakeTimeProvider,
+    time_provider: FakeTimeGateway,
 ):
     return RefreshAccessTokenUseCase(
         token_gateway=token_gateway,

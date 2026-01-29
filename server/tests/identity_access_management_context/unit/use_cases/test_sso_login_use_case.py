@@ -20,11 +20,11 @@ from ..fakes import (
     FakeUserRepository,
     FakePasswordHashingGateway,
     FakeTokenGateway,
-    FakeTimeProvider,
+    FakeTimeGateway,
     FakeGroupRepository,
     FakeGroupMemberRepository,
     FakeSsoConfigurationRepository,
-    FakeEncryptionService,
+    FakeSsoEncryptionGateway,
 )
 
 
@@ -35,11 +35,11 @@ def use_case(
     user_repository: FakeUserRepository,
     password_hashing_gateway: FakePasswordHashingGateway,
     token_gateway: FakeTokenGateway,
-    time_provider: FakeTimeProvider,
+    time_provider: FakeTimeGateway,
     group_repository: FakeGroupRepository,
     group_member_repository: FakeGroupMemberRepository,
     sso_configuration_repository: FakeSsoConfigurationRepository,
-    encryption_service: FakeEncryptionService,
+    sso_encryption_gateway: FakeSsoEncryptionGateway,
 ):
     return SsoLoginUseCase(
         sso_gateway=sso_gateway,
@@ -51,7 +51,7 @@ def use_case(
         group_repository=group_repository,
         group_member_repository=group_member_repository,
         sso_configuration_repository=sso_configuration_repository,
-        encryption_service=encryption_service,
+        sso_encryption_gateway=sso_encryption_gateway,
     )
 
 

@@ -11,8 +11,8 @@ from password_management_context.domain.exceptions import (
     PasswordAccessDeniedError,
     CannotUnshareWithOwnerError,
 )
-from shared_kernel.authentication import ValidatedUser
-from shared_kernel.authentication.dependencies import get_current_user
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 router = APIRouter(prefix="/passwords", tags=["Password Management"])
 

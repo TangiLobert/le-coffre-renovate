@@ -1,9 +1,9 @@
 from typing import Protocol
 
 
-class EncryptionService(Protocol):
-    def encrypt(self, plaintext: str) -> str:
-        """Encrypts the given plaintext."""
+class PasswordEncryptionGateway(Protocol):
+    def encrypt(self, password: str) -> str:
+        """Encrypts the given password."""
         ...
 
     def decrypt(self, ciphertext: str) -> str:

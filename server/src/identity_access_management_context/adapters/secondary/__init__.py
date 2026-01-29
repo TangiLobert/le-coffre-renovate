@@ -5,6 +5,9 @@ from .sql.sql_sso_user_repository import SqlSsoUserRepository
 from .sql.sql_user_repository import SqlUserRepository
 from .sql.sql_user_password_repository import SqlUserPasswordRepository
 from .sql.sql_sso_configuration_repository import SqlSsoConfigurationRepository
+from .private_api.private_api_sso_encryption_gateway import (
+    PrivateApiSsoEncryptionGateway,
+)
 
 __all__ = [
     "BcryptHashingGateway",
@@ -14,4 +17,5 @@ __all__ = [
     "SqlUserRepository",
     "SqlUserPasswordRepository",
     "SqlSsoConfigurationRepository",
+    "PrivateApiSsoEncryptionGateway",
 ]

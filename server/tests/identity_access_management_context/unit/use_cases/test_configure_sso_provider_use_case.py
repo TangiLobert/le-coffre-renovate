@@ -6,9 +6,9 @@ from uuid import UUID
 from ..fakes import (
     FakeSsoGateway,
     FakeSsoConfigurationRepository,
-    FakeEncryptionService,
+    FakeSsoEncryptionGateway,
 )
-from shared_kernel.authentication import AuthenticatedUser
+from shared_kernel.domain.entities import AuthenticatedUser
 from identity_access_management_context.application.commands import (
     ConfigureSsoProviderCommand,
 )
@@ -18,7 +18,7 @@ from identity_access_management_context.application.use_cases.sso.configure_sso_
 from identity_access_management_context.domain.exceptions import (
     InvalidSsoSettingsException,
 )
-from shared_kernel.authentication.exceptions import NotAdminError
+from shared_kernel.adapters.primary.exceptions import NotAdminError
 
 
 @pytest.fixture
@@ -32,11 +32,11 @@ def admin_user():
 def use_case(
     sso_gateway: FakeSsoGateway,
     sso_configuration_repository: FakeSsoConfigurationRepository,
-    encryption_service: FakeEncryptionService,
+    sso_encryption_gateway: FakeSsoEncryptionGateway,
 ):
     """Use case configured for tests."""
     return ConfigureSsoProviderUseCase(
-        sso_gateway, sso_configuration_repository, encryption_service
+        sso_gateway, sso_configuration_repository, sso_encryption_gateway
     )
 
 

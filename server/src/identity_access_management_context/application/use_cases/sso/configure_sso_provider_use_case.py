@@ -6,13 +6,13 @@ from identity_access_management_context.application.commands import (
 from identity_access_management_context.application.gateways import (
     SsoGateway,
     SsoConfigurationRepository,
+    SsoEncryptionGateway,
 )
 from identity_access_management_context.domain.entities import SsoConfiguration
 from identity_access_management_context.domain.exceptions import (
     InvalidSsoSettingsException,
 )
-from shared_kernel.authentication import AdminPermissionChecker
-from shared_kernel.encryption import EncryptionService
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class ConfigureSsoProviderUseCase:
@@ -29,11 +29,11 @@ class ConfigureSsoProviderUseCase:
         self,
         sso_gateway: SsoGateway,
         sso_configuration_repository: SsoConfigurationRepository,
-        encryption_service: EncryptionService,
+        sso_encryption_gateway: SsoEncryptionGateway,
     ):
         self._sso_gateway = sso_gateway
         self._sso_configuration_repository = sso_configuration_repository
-        self._encryption_service = encryption_service
+        self._sso_encryption_gateway = sso_encryption_gateway
 
     async def execute(self, command: ConfigureSsoProviderCommand) -> None:
         """
@@ -49,9 +49,7 @@ class ConfigureSsoProviderUseCase:
             command.requesting_user, "configure SSO provider"
         )
 
-        if not all(
-            [command.client_id, command.client_secret, command.discovery_url]
-        ):
+        if not all([command.client_id, command.client_secret, command.discovery_url]):
             raise InvalidSsoSettingsException(
                 "Client ID, client secret, and discovery URL are required"
             )
@@ -65,7 +63,7 @@ class ConfigureSsoProviderUseCase:
             )
 
             # Step 2: Encrypt the client secret
-            encrypted_client_secret = self._encryption_service.encrypt(
+            encrypted_client_secret = self._sso_encryption_gateway.encrypt(
                 command.client_secret
             )
 

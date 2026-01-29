@@ -2,7 +2,7 @@ from password_management_context.application.commands import CheckAccessCommand
 from password_management_context.application.gateways import (
     PasswordPermissionsRepository,
 )
-from shared_kernel.access_control import AccessResult, Granted
+from shared_kernel.domain.value_objects import AccessResult, Granted
 
 
 class CheckAccessUseCase:

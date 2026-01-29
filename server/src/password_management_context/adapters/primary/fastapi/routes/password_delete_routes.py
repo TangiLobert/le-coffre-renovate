@@ -12,9 +12,9 @@ from password_management_context.domain.exceptions import (
     PasswordNotFoundError,
     NotPasswordOwnerError,
 )
-from shared_kernel.access_control.exceptions import AccessDeniedError
-from shared_kernel.authentication import ValidatedUser
-from shared_kernel.authentication.dependencies import get_current_user
+from shared_kernel.domain.exceptions import AccessDeniedError
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 router = APIRouter(prefix="/passwords", tags=["Password Management"])
 
@@ -38,7 +38,9 @@ def delete_password(
     Returns status code 204 (No Content) on successful deletion.
     """
     try:
-        command = DeletePasswordCommand(requester_id=current_user.user_id, password_id=password_id)
+        command = DeletePasswordCommand(
+            requester_id=current_user.user_id, password_id=password_id
+        )
         usecase.execute(command)
         return
     except (PasswordNotFoundError, NotPasswordOwnerError) as e:

@@ -6,7 +6,7 @@ from identity_access_management_context.domain.exceptions import (
     UserNotFoundError,
     UserAlreadyExistsError,
 )
-from shared_kernel.authentication.constants import ADMIN_ROLE
+from shared_kernel.domain.value_objects.constants import ADMIN_ROLE
 
 
 class FakeUserRepository(UserRepository):

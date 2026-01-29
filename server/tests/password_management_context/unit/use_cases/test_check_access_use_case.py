@@ -7,7 +7,7 @@ from password_management_context.application.use_cases import (
 )
 from ..fakes import FakePasswordPermissionsRepository
 from password_management_context.domain.value_objects import PasswordPermission
-from shared_kernel.access_control import Granted
+from shared_kernel.domain.value_objects import Granted
 
 # Test data constants
 USER_ID = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")

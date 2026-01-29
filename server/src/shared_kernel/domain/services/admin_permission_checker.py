@@ -1,6 +1,6 @@
-from .models import AuthenticatedUser
-from .exceptions import NotAdminError
-from .constants import ADMIN_ROLE
+from shared_kernel.domain.entities import AuthenticatedUser
+from shared_kernel.adapters.primary.exceptions import NotAdminError
+from shared_kernel.domain.value_objects import ADMIN_ROLE
 
 
 class AdminPermissionChecker:

@@ -11,8 +11,7 @@ from identity_access_management_context.application.gateways import (
 from identity_access_management_context.domain.exceptions import (
     InvalidRefreshTokenException,
 )
-from identity_access_management_context.domain.entities import AuthenticationSession
-from shared_kernel.time import TimeProvider
+from shared_kernel.application.gateways import TimeGateway
 
 
 class RefreshAccessTokenUseCase:
@@ -20,7 +19,7 @@ class RefreshAccessTokenUseCase:
         self,
         token_gateway: TokenGateway,
         user_repository: UserRepository,
-        time_provider: TimeProvider,
+        time_provider: TimeGateway,
     ):
         self.token_gateway = token_gateway
         self.user_repository = user_repository
