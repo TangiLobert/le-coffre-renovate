@@ -3,24 +3,24 @@ from uuid import UUID, uuid4
 from shared_kernel.pubsub import DomainEvent, EventPriority
 
 
-class PasswordCreatedEvent(DomainEvent):
+class PasswordUpdatedEvent(DomainEvent):
     def __init__(
         self,
         password_id: UUID,
-        password_name: str,
-        owner_group_id: UUID,
-        created_by_user_id: UUID,
-        folder: str | None = None,
+        updated_by_user_id: UUID,
+        has_name_changed: bool,
+        has_password_changed: bool,
+        has_folder_changed: bool,
         event_id: UUID | None = None,
         occurred_on: datetime | None = None,
     ):
         super().__init__(
             event_id=event_id or uuid4(),
             occurred_on=occurred_on or datetime.now(),
-            priority=EventPriority.HIGH,
+            priority=EventPriority.MEDIUM,
         )
         self.password_id = password_id
-        self.password_name = password_name
-        self.owner_group_id = owner_group_id
-        self.created_by_user_id = created_by_user_id
-        self.folder = folder
+        self.updated_by_user_id = updated_by_user_id
+        self.has_name_changed = has_name_changed
+        self.has_password_changed = has_password_changed
+        self.has_folder_changed = has_folder_changed

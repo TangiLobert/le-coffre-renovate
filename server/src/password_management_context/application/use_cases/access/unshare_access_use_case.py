@@ -11,6 +11,10 @@ from password_management_context.domain.exceptions import (
     UserNotOwnerOfGroupError,
     GroupNotFoundError,
 )
+from password_management_context.domain.events import (
+    PasswordUnsharedEvent,
+)
+from shared_kernel.pubsub.gateway.event_publisher_gateway import DomainEventPublisher
 
 
 class UnshareAccessUseCase:
@@ -19,10 +23,12 @@ class UnshareAccessUseCase:
         password_repository: PasswordRepository,
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
+        event_publisher: DomainEventPublisher,
     ):
         self.password_repository = password_repository
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
+        self.event_publisher = event_publisher
 
     def execute(self, command: UnshareResourceCommand):
         # Verify the password exists
@@ -62,3 +68,12 @@ class UnshareAccessUseCase:
         self.password_permissions_repository.revoke_access(
             command.group_id, command.password_id
         )
+
+        # Publish domain event
+        event = PasswordUnsharedEvent(
+            password_id=command.password_id,
+            owner_group_id=owner_group_id,
+            unshared_with_group_id=command.group_id,
+            unshared_by_user_id=command.owner_id,
+        )
+        self.event_publisher.publish(event)

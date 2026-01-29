@@ -14,6 +14,7 @@ from ..fakes import (
     FakePasswordPermissionsRepository,
     FakeGroupAccessGateway,
 )
+from tests.fakes import FakeDomainEventPublisher
 
 
 @pytest.fixture
@@ -22,12 +23,14 @@ def use_case(
     encryption_service: FakeEncryptionService,
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
+    domain_event_publisher: FakeDomainEventPublisher,
 ):
     return UpdatePasswordUseCase(
         password_repository,
         encryption_service,
         password_permissions_repository,
         group_access_gateway,
+        domain_event_publisher,
     )
 
 
