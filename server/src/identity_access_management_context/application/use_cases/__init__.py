@@ -12,6 +12,7 @@ from .add_owner_to_group_use_case import AddOwnerToGroupUseCase
 from .remove_user_from_group_use_case import RemoveUserFromGroupUseCase
 from .list_groups_use_case import ListGroupsUseCase
 from .get_group_use_case import GetGroupUseCase
+from .update_group_use_case import UpdateGroupUseCase
 from .sso.is_sso_config_set_use_case import IsSsoConfigSetUseCase
 
 # Import from subdirectories
@@ -38,6 +39,7 @@ __all__ = [
     "RemoveUserFromGroupUseCase",
     "ListGroupsUseCase",
     "GetGroupUseCase",
+    "UpdateGroupUseCase",
     "IsSsoConfigSetUseCase",
     "AdminLoginUseCase",
     "RegisterAdminWithPasswordUseCase",

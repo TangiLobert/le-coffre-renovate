@@ -15,6 +15,7 @@ from .list_groups_command import ListGroupsCommand
 from .add_user_to_group_command import AddUserToGroupCommand
 from .add_owner_to_group_command import AddOwnerToGroupCommand
 from .remove_user_from_group_command import RemoveUserFromGroupCommand
+from .update_group_command import UpdateGroupCommand
 from .get_sso_authorize_url_command import GetSsoAuthorizeUrlCommand
 from .is_sso_config_set_command import IsSsoConfigSetCommand
 from .configure_sso_provider_command import ConfigureSsoProviderCommand
@@ -37,6 +38,7 @@ __all__ = [
     "AddUserToGroupCommand",
     "AddOwnerToGroupCommand",
     "RemoveUserFromGroupCommand",
+    "UpdateGroupCommand",
     "GetSsoAuthorizeUrlCommand",
     "IsSsoConfigSetCommand",
     "ConfigureSsoProviderCommand",
