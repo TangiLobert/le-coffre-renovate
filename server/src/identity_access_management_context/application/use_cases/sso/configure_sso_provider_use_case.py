@@ -12,7 +12,7 @@ from identity_access_management_context.domain.entities import SsoConfiguration
 from identity_access_management_context.domain.exceptions import (
     InvalidSsoSettingsException,
 )
-from shared_kernel.authentication import AdminPermissionChecker
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class ConfigureSsoProviderUseCase:

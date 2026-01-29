@@ -23,7 +23,10 @@ from config import (
     get_jwt_refresh_token_expiration_days,
 )
 
-from shared_kernel.time import UtcTimeProvider
+from shared_kernel.adapters.secondary import (
+    UtcTimeGateway,
+    InMemoryDomainEventPublisher,
+)
 from vault_management_context.adapters.primary.fastapi.routes import (
     get_vault_management_router,
 )
@@ -71,8 +74,6 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_group_management_router,
 )
 
-from shared_kernel.pubsub import InMemoryDomainEventPublisher
-
 
 def run_migrations():
     """Run database migrations using Alembic."""
@@ -118,7 +119,7 @@ async def lifespan(app: FastAPI):
         app.state.password_encryption_gateway = password_encryption_gateway
 
         # IAM dependencies
-        app.state.time_provider = UtcTimeProvider()
+        app.state.time_provider = UtcTimeGateway()
         # IAM uses SSO encryption gateway (same underlying API)
         sso_encryption_gateway = PrivateApiSsoEncryptionGateway(encryption_api)
         app.state.sso_encryption_gateway = sso_encryption_gateway

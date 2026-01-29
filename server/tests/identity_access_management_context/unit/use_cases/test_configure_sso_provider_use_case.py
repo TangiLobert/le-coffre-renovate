@@ -8,7 +8,7 @@ from ..fakes import (
     FakeSsoConfigurationRepository,
     FakeSsoEncryptionGateway,
 )
-from shared_kernel.authentication import AuthenticatedUser
+from shared_kernel.domain.entities import AuthenticatedUser
 from identity_access_management_context.application.commands import (
     ConfigureSsoProviderCommand,
 )
@@ -18,7 +18,7 @@ from identity_access_management_context.application.use_cases.sso.configure_sso_
 from identity_access_management_context.domain.exceptions import (
     InvalidSsoSettingsException,
 )
-from shared_kernel.authentication.exceptions import NotAdminError
+from shared_kernel.adapters.primary.exceptions import NotAdminError
 
 
 @pytest.fixture

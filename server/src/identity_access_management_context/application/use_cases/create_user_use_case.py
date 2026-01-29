@@ -10,7 +10,7 @@ from identity_access_management_context.application.gateways import (
 )
 from identity_access_management_context.application.services import UserCreationService
 from identity_access_management_context.domain.entities import User, UserPassword
-from shared_kernel.authentication import AdminPermissionChecker
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class CreateUserUseCase:

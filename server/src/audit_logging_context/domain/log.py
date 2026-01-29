@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import TypeVar, Generic
-from shared_kernel.pubsub import DomainEvent
+from shared_kernel.domain.entities import DomainEvent
 
 T = TypeVar("T", bound=DomainEvent)
 

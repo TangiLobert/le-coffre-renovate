@@ -1,6 +1,5 @@
 from .entities import (
     User,
-    AuthenticationSession,
     SsoUser,
     UserPassword,
 )
@@ -20,7 +19,6 @@ from .exceptions import (
 __all__ = [
     # Entities
     "User",
-    "AuthenticationSession",
     "SsoUser",
     "UserPassword",
     # Value Objects

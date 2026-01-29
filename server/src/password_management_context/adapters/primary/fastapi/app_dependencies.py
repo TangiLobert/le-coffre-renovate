@@ -19,7 +19,7 @@ from password_management_context.application.use_cases import (
 from password_management_context.application.gateways.password_permissions_repository import (
     PasswordPermissionsRepository,
 )
-from shared_kernel.pubsub.gateway.event_publisher_gateway import DomainEventPublisher
+from shared_kernel.application.gateways import DomainEventPublisher
 
 
 def get_password_repository(request: Request) -> PasswordRepository:

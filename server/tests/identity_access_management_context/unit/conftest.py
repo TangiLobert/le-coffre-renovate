@@ -9,7 +9,7 @@ from .fakes import (
     FakeTokenGateway,
     FakeSsoGateway,
     FakeSsoConfigurationRepository,
-    FakeTimeProvider,
+    FakeTimeGateway,
     FakeGroupRepository,
     FakeGroupMemberRepository,
     FakeSsoUserRepository,
@@ -40,7 +40,7 @@ def token_gateway():
 
 @pytest.fixture
 def time_provider():
-    return FakeTimeProvider()
+    return FakeTimeGateway()
 
 
 @pytest.fixture

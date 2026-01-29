@@ -14,7 +14,7 @@ from ..fakes import (
     FakeUserPasswordRepository,
     FakePasswordHashingGateway,
     FakeTokenGateway,
-    FakeTimeProvider,
+    FakeTimeGateway,
 )
 
 
@@ -23,7 +23,7 @@ def use_case(
     user_password_repository: FakeUserPasswordRepository,
     password_hashing_gateway: FakePasswordHashingGateway,
     token_gateway: FakeTokenGateway,
-    time_provider: FakeTimeProvider,
+    time_provider: FakeTimeGateway,
 ):
     return AdminLoginUseCase(
         user_password_repository,

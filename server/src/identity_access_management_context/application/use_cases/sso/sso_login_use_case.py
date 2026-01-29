@@ -26,7 +26,7 @@ from identity_access_management_context.application.services import (
     SsoConfigurationDecryptingService,
 )
 from identity_access_management_context.domain.entities.sso_user import SsoUser
-from shared_kernel.time import TimeProvider
+from shared_kernel.application.gateways import TimeGateway
 
 
 class SsoLoginUseCase:
@@ -47,7 +47,7 @@ class SsoLoginUseCase:
         user_repository: UserRepository,
         password_hashing_gateway: PasswordHashingGateway,
         token_gateway: TokenGateway,
-        time_provider: TimeProvider,
+        time_provider: TimeGateway,
         group_repository: GroupRepository,
         group_member_repository: GroupMemberRepository,
         sso_configuration_repository: SsoConfigurationRepository,

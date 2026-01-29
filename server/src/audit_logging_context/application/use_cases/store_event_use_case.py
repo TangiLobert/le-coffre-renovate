@@ -1,5 +1,5 @@
 from audit_logging_context.application.gateways.event_repository import EventRepository
-from shared_kernel.pubsub.domain.domain_event import DomainEvent
+from shared_kernel.domain.entities import DomainEvent
 
 
 class StoreEventUseCase:

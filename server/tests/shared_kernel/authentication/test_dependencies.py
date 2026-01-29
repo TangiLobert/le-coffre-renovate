@@ -2,7 +2,7 @@ import pytest
 from uuid import UUID
 from unittest.mock import Mock, AsyncMock
 
-from shared_kernel.authentication.dependencies import get_current_user
+from shared_kernel.adapters.primary.dependencies import get_current_user
 from identity_access_management_context.application.responses import (
     ValidateUserTokenResponse,
 )

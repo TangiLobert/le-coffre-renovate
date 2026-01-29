@@ -13,9 +13,9 @@ from password_management_context.domain.exceptions import (
     PasswordNotFoundError,
     PasswordAccessDeniedError,
 )
-from shared_kernel.access_control.exceptions import AccessDeniedError
-from shared_kernel.authentication import ValidatedUser
-from shared_kernel.authentication.dependencies import get_current_user
+from shared_kernel.domain.exceptions import AccessDeniedError
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 router = APIRouter(prefix="/passwords", tags=["Password Management"])
 
@@ -45,7 +45,9 @@ def get_password(
     - **Authentication**: Requires authentication via access_token cookie
     """
     try:
-        command = GetPasswordCommand(requester_id=current_user.user_id, password_id=password_id)
+        command = GetPasswordCommand(
+            requester_id=current_user.user_id, password_id=password_id
+        )
         password_response = usecase.execute(command)
 
         return GetPasswordResponse(

@@ -58,7 +58,8 @@ class CreatePasswordResponse(BaseModel):
 
 **Pattern for Authenticated Routes**:
 ```python
-from shared_kernel.authentication import ValidatedUser, get_current_user
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.app_dependencies import get_current_user
 from fastapi import Depends
 
 def endpoint(

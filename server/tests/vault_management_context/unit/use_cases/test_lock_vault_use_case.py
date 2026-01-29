@@ -9,7 +9,8 @@ from vault_management_context.domain.exceptions import (
 from vault_management_context.application.use_cases import (
     LockVaultUseCase,
 )
-from shared_kernel.authentication import AuthenticatedUser, NotAdminError
+from shared_kernel.domain.entities import AuthenticatedUser
+from shared_kernel.adapters.primary.exceptions import NotAdminError
 from ..fakes import FakeVaultRepository, FakeVaultSessionGateway
 
 

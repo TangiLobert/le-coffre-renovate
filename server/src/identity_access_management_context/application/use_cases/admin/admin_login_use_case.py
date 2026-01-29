@@ -5,13 +5,12 @@ from identity_access_management_context.application.gateways import (
     PasswordHashingGateway,
     TokenGateway,
 )
-from identity_access_management_context.domain.entities import AuthenticationSession
 from identity_access_management_context.domain.exceptions import (
     InvalidCredentialsException,
     AdminNotFoundException,
 )
-from shared_kernel.authentication.constants import ADMIN_ROLE
-from shared_kernel.time import TimeProvider
+from shared_kernel.domain.value_objects.constants import ADMIN_ROLE
+from shared_kernel.application.gateways import TimeGateway
 
 
 class AdminLoginUseCase:
@@ -20,7 +19,7 @@ class AdminLoginUseCase:
         user_password_repository: UserPasswordRepository,
         password_hashing_gateway: PasswordHashingGateway,
         token_gateway: TokenGateway,
-        time_provider: TimeProvider,
+        time_provider: TimeGateway,
     ):
         self._user_password_repository = user_password_repository
         self._password_hashing_gateway = password_hashing_gateway

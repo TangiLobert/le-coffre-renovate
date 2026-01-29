@@ -5,7 +5,7 @@ from datetime import datetime
 from audit_logging_context.application.use_cases.list_event_use_case import (
     ListEventUseCase,
 )
-from shared_kernel.pubsub.domain.domain_event import DomainEvent
+from shared_kernel.domain.entities import DomainEvent
 
 
 @pytest.fixture

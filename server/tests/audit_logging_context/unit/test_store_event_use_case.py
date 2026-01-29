@@ -2,10 +2,8 @@ from uuid import uuid4
 from datetime import datetime
 import pytest
 
-from shared_kernel.pubsub.domain.domain_event import DomainEvent
-from audit_logging_context.application.use_cases.store_event_use_case import (
-    StoreEventUseCase,
-)
+from shared_kernel.domain.entities import DomainEvent
+from audit_logging_context.application.use_cases import StoreEventUseCase
 
 
 @pytest.fixture

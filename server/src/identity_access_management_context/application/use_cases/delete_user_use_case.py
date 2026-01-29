@@ -1,6 +1,6 @@
 from identity_access_management_context.application.gateways import UserRepository
 from identity_access_management_context.application.commands import DeleteUserCommand
-from shared_kernel.authentication import AdminPermissionChecker
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class DeleteUserUseCase:

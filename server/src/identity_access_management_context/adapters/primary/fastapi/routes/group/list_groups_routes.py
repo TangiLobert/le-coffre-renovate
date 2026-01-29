@@ -8,7 +8,9 @@ from identity_access_management_context.adapters.primary.fastapi.app_dependencie
 )
 from identity_access_management_context.application.commands import ListGroupsCommand
 from identity_access_management_context.application.use_cases import ListGroupsUseCase
-from shared_kernel.authentication import ValidatedUser, get_current_user
+
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 
 router = APIRouter(prefix="/groups", tags=["Group Management"])

@@ -7,7 +7,7 @@ from vault_management_context.domain.exceptions import (
     VaultNotSetupException,
     VaultLockedException,
 )
-from shared_kernel.authentication import AdminPermissionChecker
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class LockVaultUseCase:
@@ -21,9 +21,7 @@ class LockVaultUseCase:
 
     def execute(self, command: LockVaultCommand) -> None:
         """Lock the vault by clearing the decrypted key from memory"""
-        AdminPermissionChecker().ensure_admin(
-            command.requesting_user, "lock the vault"
-        )
+        AdminPermissionChecker().ensure_admin(command.requesting_user, "lock the vault")
 
         vault = self._vault_repository.get()
         if vault is None:

@@ -5,7 +5,7 @@ from identity_access_management_context.application.use_cases import ListUserUse
 
 from identity_access_management_context.domain.entities import User
 from ..fakes import FakeUserRepository
-from shared_kernel.authentication import AuthenticatedUser
+from shared_kernel.domain.entities import AuthenticatedUser
 
 
 @pytest.fixture

@@ -15,7 +15,7 @@ from password_management_context.domain.exceptions import (
 from password_management_context.domain.events import (
     PasswordCreatedEvent,
 )
-from shared_kernel.pubsub.gateway.event_publisher_gateway import DomainEventPublisher
+from shared_kernel.application.gateways import DomainEventPublisher
 
 
 class CreatePasswordUseCase:

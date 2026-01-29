@@ -12,9 +12,9 @@ from password_management_context.domain.exceptions import (
     PasswordManagementDomainError,
     FolderNotFoundError,
 )
-from shared_kernel.access_control.exceptions import AccessDeniedError
-from shared_kernel.authentication import ValidatedUser
-from shared_kernel.authentication.dependencies import get_current_user
+from shared_kernel.domain.exceptions import AccessDeniedError
+from shared_kernel.domain.entities import ValidatedUser
+from shared_kernel.adapters.primary.dependencies import get_current_user
 
 router = APIRouter(prefix="/passwords", tags=["Password Management"])
 

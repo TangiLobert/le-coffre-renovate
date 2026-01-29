@@ -124,11 +124,9 @@ server/
 │   ├── main.py                          # FastAPI app entry point
 │   ├── config.py                        # Configuration management
 │   ├── shared_kernel/                   # Cross-cutting concerns
-│   │   ├── authentication/              # Auth models, exceptions
-│   │   ├── encryption/                  # EncryptionService interface
-│   │   ├── access_control/              # Authorization logic
-│   │   ├── time/                        # TimeProvider interface
-│   │   └── pubsub/                      # Domain event publisher
+|   |   ├── adapters/
+|   |   ├── application/
+|   |   ├── domain/
 │   │
 │   └── <context>/                       # Per bounded context
 │       ├── adapters/
@@ -260,7 +258,7 @@ from <context>.domain.entities import SomeEntity
 from <context>.domain.exceptions import SomeError
 
 # Local - shared kernel
-from shared_kernel.authentication import ValidatedUser
+from shared_kernel.domain.entities import ValidatedUser
 ```
 
 **Rules**:

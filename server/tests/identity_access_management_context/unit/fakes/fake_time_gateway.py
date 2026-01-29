@@ -1,7 +1,7 @@
 from datetime import datetime, UTC
 
 
-class FakeTimeProvider:
+class FakeTimeGateway:
     def __init__(self, fixed_time: datetime | None = None):
         self._fixed_time = fixed_time or datetime.now(UTC)
 
