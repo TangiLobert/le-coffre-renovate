@@ -10,6 +10,7 @@ from ..fakes import (
     FakePasswordRepository,
     FakeGroupAccessGateway,
 )
+from tests.fakes import FakeDomainEventPublisher
 from password_management_context.domain.value_objects import PasswordPermission
 from password_management_context.domain.entities import Password
 from password_management_context.domain.exceptions import (
@@ -23,9 +24,13 @@ def use_case(
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
+    domain_event_publisher: FakeDomainEventPublisher,
 ):
     return ShareAccessUseCase(
-        password_repository, password_permissions_repository, group_access_gateway
+        password_repository,
+        password_permissions_repository,
+        group_access_gateway,
+        domain_event_publisher,
     )
 
 
