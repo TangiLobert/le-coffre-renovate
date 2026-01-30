@@ -6,11 +6,14 @@ import secrets
 from urllib.parse import quote, urlparse, parse_qs
 from fastapi.testclient import TestClient
 import oidc_provider_mock
+from sqlalchemy import create_engine, text
+from alembic.config import Config
+from alembic import command
 
 from main import app
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def env_vars():
     os.environ["JWT_SECRET_KEY"] = secrets.token_urlsafe(32)
     os.environ["JWT_ALGORITHM"] = "HS256"
@@ -19,19 +22,61 @@ def env_vars():
     del os.environ["JWT_ALGORITHM"]
 
 
-@pytest.fixture(scope="function")
-def database():
-    # Create a temporary file for the database
+@pytest.fixture(scope="session")
+def database_path():
+    """Create a temporary database file that persists for the entire test session."""
     db_fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(db_fd)  # Close the file descriptor, we just need the path
 
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
-    yield
+    yield db_path
+
+    # Cleanup at end of session
     try:
         os.unlink(db_path)
     except OSError:
         pass
     del os.environ["DATABASE_URL"]
+
+
+@pytest.fixture(scope="function")
+def database(database_path):
+    """
+    Function-scoped fixture that cleans the database before each test.
+    Uses the session-scoped database file but resets its content.
+    """
+
+    # Drop all tables and recreate schema for each test
+    engine = create_engine(f"sqlite:///{database_path}")
+
+    # Drop all tables
+    with engine.connect() as conn:
+        conn.execute(text("PRAGMA foreign_keys = OFF"))
+        conn.commit()
+
+        # Get all table names
+        result = conn.execute(
+            text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )
+        )
+        tables = [row[0] for row in result]
+
+        # Drop each table
+        for table in tables:
+            conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+
+        conn.execute(text("PRAGMA foreign_keys = ON"))
+        conn.commit()
+
+    # Run migrations to recreate schema
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("script_location", "alembic")
+    command.upgrade(alembic_cfg, "head")
+
+    yield database_path
+
+    # No cleanup needed - next test will clean before running
 
 
 @pytest.fixture
@@ -203,7 +248,9 @@ def register_and_login_admin(client):
         "display_name": "System Administrator",
     }
 
-    client.post("/api/auth/register-admin", json=admin_data)
+    # Register admin (should succeed since database is clean for each test)
+    register_response = client.post("/api/auth/register-admin", json=admin_data)
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/api/auth/login",
