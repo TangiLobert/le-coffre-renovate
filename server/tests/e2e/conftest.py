@@ -44,6 +44,11 @@ def database(database_path):
     """
     Function-scoped fixture that cleans the database before each test.
     Uses the session-scoped database file but resets its content.
+
+    This ensures complete test isolation by:
+    - Dropping all tables (including users, passwords, groups, SSO config, vault setup, etc.)
+    - Recreating the schema via Alembic migrations
+    - Providing a fresh database state for each test
     """
 
     # Drop all tables and recreate schema for each test
@@ -100,8 +105,25 @@ def oidc_server():
         }
 
 
+@pytest.fixture(scope="session")
+def sso_configuration_data(oidc_server):
+    """
+    Session-scoped fixture that provides SSO configuration data.
+    This doesn't configure SSO in the database, just provides the config values.
+    """
+    return {
+        "client_id": oidc_server["client_id"],
+        "client_secret": oidc_server["client_secret"],
+        "discovery_url": oidc_server["discovery_url"],
+    }
+
+
 @pytest.fixture
-def configured_sso(authenticated_admin_client, oidc_server, setup):
+def configured_sso(authenticated_admin_client, oidc_server, setup, database_path):
+    """
+    Function-scoped fixture that configures SSO for a test.
+    The configuration is cleaned up by the database fixture between tests.
+    """
     configure_response = authenticated_admin_client.post(
         "/api/auth/sso/configure",
         json={
