@@ -4,6 +4,7 @@ import {
   listGroupsGroupsGet,
   createGroupGroupsPost,
   updateGroupGroupsGroupIdPut,
+  deleteGroupGroupsGroupIdDelete,
   addMemberToGroupGroupsGroupIdMembersPost,
   removeMemberFromGroupGroupsGroupIdMembersUserIdDelete,
   getUserMeUsersMeGet
@@ -166,6 +167,20 @@ export const useGroupsStore = defineStore('groups', () => {
     }
   };
 
+  const deleteGroup = async (groupId: string) => {
+    try {
+      await deleteGroupGroupsGroupIdDelete({
+        path: { group_id: groupId }
+      });
+      // Invalidate cache to force refresh
+      invalidateCache();
+      await fetchAllGroups(true);
+    } catch (e) {
+      console.error('Error deleting group:', e);
+      throw e;
+    }
+  };
+
   const invalidateCache = () => {
     lastFetch.value = null;
   };
@@ -199,6 +214,7 @@ export const useGroupsStore = defineStore('groups', () => {
     updateGroup,
     addMemberToGroup,
     removeMemberFromGroup,
+    deleteGroup,
     invalidateCache,
     refresh
   };

@@ -1497,6 +1497,36 @@ export type RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses = {
 
 export type RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponse = RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses[keyof RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses];
 
+export type DeleteGroupGroupsGroupIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Group Id
+         */
+        group_id: string;
+    };
+    query?: never;
+    url: '/groups/{group_id}';
+};
+
+export type DeleteGroupGroupsGroupIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGroupGroupsGroupIdDeleteError = DeleteGroupGroupsGroupIdDeleteErrors[keyof DeleteGroupGroupsGroupIdDeleteErrors];
+
+export type DeleteGroupGroupsGroupIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteGroupGroupsGroupIdDeleteResponse = DeleteGroupGroupsGroupIdDeleteResponses[keyof DeleteGroupGroupsGroupIdDeleteResponses];
+
 export type GetGroupGroupsGroupIdGetData = {
     body?: never;
     path: {
