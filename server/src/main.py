@@ -9,9 +9,7 @@ from alembic import command
 from audit_logging_context.adapters.primary.all_events_subscriber import (
     AllEventsSubscriber,
 )
-from audit_logging_context.adapters.secondary.in_memory_event_repository import (
-    InMemoryEventRepository,
-)
+from audit_logging_context.adapters.secondary.sql import SqlEventRepository
 from audit_logging_context.application.use_cases.store_event_use_case import (
     StoreEventUseCase,
 )
@@ -165,7 +163,7 @@ async def lifespan(app: FastAPI):
         app.state.sso_user_repository = sso_user_repository
         app.state.sso_configuration_repository = sso_configuration_repository
 
-        app.state.event_repository = InMemoryEventRepository()
+        app.state.event_repository = SqlEventRepository(session)
 
         store_event_usecase = StoreEventUseCase(app.state.event_repository)
         # Domain event publisher
