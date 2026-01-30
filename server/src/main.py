@@ -15,6 +15,9 @@ from audit_logging_context.adapters.secondary.in_memory_event_repository import 
 from audit_logging_context.application.use_cases.store_event_use_case import (
     StoreEventUseCase,
 )
+from audit_logging_context.adapters.primary.fastapi.routes import (
+    get_audit_logging_router,
+)
 from config import (
     get_database_url,
     get_jwt_secret_key,
@@ -179,3 +182,4 @@ app.include_router(get_password_management_router())
 app.include_router(get_user_management_router())
 app.include_router(get_authentication_router())
 app.include_router(get_group_management_router())
+app.include_router(get_audit_logging_router())
