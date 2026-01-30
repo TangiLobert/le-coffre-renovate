@@ -66,6 +66,115 @@ jobs:
           pip install uv
           uv sync --frozen --no-cache
 
+      - name: Check Alembic Migrations
+        working-directory: server/
+        run: |
+          # Generate a new migration to check if schema is in sync
+          uv run alembic revision --autogenerate -m "CI check" > /tmp/migration_output.txt
+          
+          # Get the generated migration file
+          MIGRATION_FILE=$(ls -t alembic/versions/*.py | head -1)
+          
+          # Check if the migration contains any actual changes
+          # A migration with no changes will only have the boilerplate code
+          if grep -q "op.create_table\|op.drop_table\|op.add_column\|op.drop_column\|op.alter_column\|op.create_index\|op.drop_index\|op.create_constraint\|op.drop_constraint" "$MIGRATION_FILE"; then
+            echo "❌ ERROR: Database schema is not in sync with migrations!"
+            echo "The following migration file was generated:"
+            cat "$MIGRATION_FILE"
+            echo ""
+            echo "Please create a new Alembic migration for your schema changes:"
+            echo "  cd server"
+            echo "  uv run alembic revision --autogenerate -m 'Your migration description'"
+            exit 1
+          else
+            echo "✅ Database schema is in sync with migrations"
+          fi
+          
+          # Clean up the generated migration file
+          rm "$MIGRATION_FILE"
+
       - name: Run Unit Tests
+        if: success() || failure()
         working-directory: server/
         run: uv run pytest -n auto
+
+  openapi-sync-check:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install Python dependencies
+        working-directory: server/
+        run: |
+          pip install uv
+          uv sync --frozen --no-cache
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      - name: Install frontend dependencies
+        working-directory: frontend/
+        run: bun install --frozen-lockfile
+
+      - name: Start FastAPI server
+        working-directory: server/
+        run: |
+          # Start FastAPI in background
+          uv run fastapi dev src/main.py --host 0.0.0.0 --port 8000 &
+          FASTAPI_PID=$!
+          echo "FastAPI started with PID: $FASTAPI_PID"
+          
+          # Wait for the server to be ready
+          echo "Waiting for FastAPI to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/api/docs > /dev/null 2>&1; then
+              echo "✅ FastAPI is ready"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ FastAPI failed to start in time"
+              exit 1
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+
+      - name: Check OpenAPI client sync
+        working-directory: frontend/
+        run: |
+          # Generate the OpenAPI client
+          echo "Generating OpenAPI client..."
+          bun run openapi-ts
+          
+          # Check if any files changed
+          if [ -n "$(git status --porcelain src/client)" ]; then
+            echo "❌ ERROR: OpenAPI client is out of sync!"
+            echo ""
+            echo "The following files have changes:"
+            git status --short src/client
+            echo ""
+            echo "Diff:"
+            git diff src/client
+            echo ""
+            echo "Please regenerate the OpenAPI client and commit the changes:"
+            echo "  1. Make sure the backend is running: cd server && uv run fastapi dev src/main.py"
+            echo "  2. Generate the client: cd frontend && bun run openapi-ts"
+            echo "  3. Commit the changes: git add frontend/src/client && git commit"
+            exit 1
+          else
+            echo "✅ OpenAPI client is in sync"
+          fi
