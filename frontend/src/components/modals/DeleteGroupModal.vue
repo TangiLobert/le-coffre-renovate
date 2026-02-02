@@ -31,7 +31,7 @@ const deleteButtonLabel = computed(() => {
 // Start countdown when modal opens
 watch(visible, (newVisible) => {
   if (newVisible) {
-    countdown.value = 10;
+    countdown.value = 6;
     startCountdown();
   } else {
     stopCountdown();
