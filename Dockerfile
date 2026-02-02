@@ -97,11 +97,10 @@ server {
 }
 EOF
 
-# Configure supervisor
+# Configure supervisor to run as non-root
 COPY <<'EOF' /etc/supervisor/conf.d/supervisord.conf
 [supervisord]
 nodaemon=true
-user=root
 logfile=/dev/stdout
 logfile_maxbytes=0
 
@@ -112,6 +111,7 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 autorestart=true
+user=app
 
 [program:backend]
 command=/app/backend/.venv/bin/uvicorn src.main:app --host 127.0.0.1 --port 8000
@@ -127,7 +127,12 @@ EOF
 
 # Set permissions
 RUN chown -R app:app /app && \
-    chmod -R 755 /app
+    chmod -R 755 /app && \
+    chown -R app:app /var/log/nginx /var/lib/nginx /run && \
+    chmod -R 755 /var/log/nginx /var/lib/nginx
+
+# Switch to non-root user
+USER app
 
 # Expose port
 EXPOSE 8080
