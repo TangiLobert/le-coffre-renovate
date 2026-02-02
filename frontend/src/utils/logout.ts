@@ -4,10 +4,21 @@ import { useUserStore } from '@/stores/user';
  * Logout utility - clears all authentication cookies and localStorage
  */
 export function logout(): void {
-  // Clear the logged_in cookie by setting it to expire in the past
-  document.cookie = 'logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=lax';
+  // Clear all auth-related cookies by setting them to expire in the past
+  const cookiesToClear = ['logged_in', 'access_token', 'refresh_token'];
+  
+  cookiesToClear.forEach(cookieName => {
+    // Clear cookie with default path
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=lax`;
+    // Also try to clear with specific paths in case they were set differently
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/api; samesite=lax`;
+  });
+  
+  // Clear localStorage
+  localStorage.removeItem('login');
   
   // Clear user store
   const userStore = useUserStore();
   userStore.clearUser();
 }
+

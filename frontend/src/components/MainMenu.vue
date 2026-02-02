@@ -44,6 +44,7 @@ import { useToast } from 'primevue';
 import { storeToRefs } from 'pinia';
 import { usePasswordsStore } from '@/stores/passwords';
 import { useUserStore } from '@/stores/user';
+import { logout } from '@/utils/logout';
 
 const router = useRouter();
 const route = useRoute();
@@ -78,9 +79,17 @@ const goToAdmin = () => {
 };
 
 const handleLogout = () => {
-  localStorage.removeItem('login');
+  // Clear all authentication data (cookies, localStorage, store)
+  logout();
+  
+  // Navigate to login page
   router.push('/login').then(() => {
-    toast.add({ severity: 'success', summary: 'Logout Successful', detail: 'You have logged out successfully.', life: 5000 });
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Logout Successful', 
+      detail: 'You have been logged out successfully.', 
+      life: 5000 
+    });
   });
 };
 

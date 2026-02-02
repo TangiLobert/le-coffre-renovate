@@ -2,12 +2,17 @@
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue';
+import { useUserStore } from '@/stores/user';
 import BlankLayout from "../layouts/BlankLayout.vue";
 
 const route = useRoute();
 const toast = useToast();
+const userStore = useUserStore();
 
 onMounted(() => {
+  // Clear user store when arriving at login page
+  userStore.clearUser();
+  
   if (route.query.reason === 'no_token') {
     toast.add({
       severity: 'warn',

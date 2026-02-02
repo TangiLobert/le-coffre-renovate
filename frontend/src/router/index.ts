@@ -82,6 +82,8 @@ router.beforeEach(async (to) => {
   // Check for both JWT cookies (SSO login)
   const isLoggedIn = isAuthenticated();
   if (!isLoggedIn && to.name !== 'Login') {
+    // Clear user store when not authenticated
+    userStore.clearUser();
     return { name: 'Login' };
   }
 
