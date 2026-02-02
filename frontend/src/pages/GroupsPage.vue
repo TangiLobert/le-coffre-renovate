@@ -98,10 +98,24 @@ const handleSubmit = async () => {
     showCreateDialog.value = false;
   } catch (error) {
     console.error('Failed to save group:', error);
+
+    // Extract error message
+    let errorMessage = `Failed to ${isEditMode.value ? 'update' : 'create'} group`;
+    if (error instanceof Error && error.message) {
+      errorMessage = error.message;
+    } else if (error && typeof error === 'object') {
+      const err = error as Record<string, unknown>;
+      if (typeof err.detail === 'string') {
+        errorMessage = err.detail;
+      } else if (typeof err.message === 'string') {
+        errorMessage = err.message;
+      }
+    }
+
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: `Failed to ${isEditMode.value ? 'update' : 'create'} group`,
+      detail: errorMessage,
       life: 5000
     });
   }
