@@ -207,6 +207,28 @@ export type CreateVaultPostResponse = {
 };
 
 /**
+ * EventData
+ */
+export type EventData = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Type
+     */
+    event_type: string;
+    /**
+     * Occurred On
+     */
+    occurred_on: string;
+    /**
+     * Priority
+     */
+    priority: string;
+};
+
+/**
  * GetGroupResponse
  */
 export type GetGroupResponse = {
@@ -396,6 +418,16 @@ export type IsSsoConfigSetResponse = {
      * Is Set
      */
     is_set: boolean;
+};
+
+/**
+ * ListEventsResponse
+ */
+export type ListEventsResponse = {
+    /**
+     * Events
+     */
+    events: Array<EventData>;
 };
 
 /**
@@ -1618,3 +1650,19 @@ export type ListGroupsGroupsGetResponses = {
 };
 
 export type ListGroupsGroupsGetResponse = ListGroupsGroupsGetResponses[keyof ListGroupsGroupsGetResponses];
+
+export type ListEventsEventsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/events';
+};
+
+export type ListEventsEventsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ListEventsResponse;
+};
+
+export type ListEventsEventsGetResponse = ListEventsEventsGetResponses[keyof ListEventsEventsGetResponses];
