@@ -72,6 +72,12 @@ server {
         add_header Cache-Control "public, max-age=31536000, immutable";
     }
 
+    location /api/health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
     location /api {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
