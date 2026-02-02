@@ -22,6 +22,9 @@ RUN bun run build
 # =============================================================================
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS backend-builder
 
+# Update packages to patch vulnerabilities
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /backend
 
 # Copy backend dependency files
@@ -38,8 +41,11 @@ COPY server/ ./
 # =============================================================================
 FROM python:3.13-slim
 
-# Install nginx, supervisor, and curl for health checks
-RUN apt-get update && apt-get install -y \
+# Update all packages to latest versions to patch CVEs
+# This fixes CVE-2025-15467 (OpenSSL), CVE-2025-13836 (Python), and others
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
