@@ -19,6 +19,9 @@ from identity_access_management_context.domain.exceptions import (
 
 from identity_access_management_context.domain.entities import Group
 
+from shared_kernel.domain.entities import AuthenticatedUser
+from shared_kernel.domain.value_objects import ADMIN_ROLE
+
 
 @pytest.fixture
 def use_case(
@@ -49,7 +52,37 @@ def test_given_user_is_owner_when_updating_group_should_update_group_name(
     group_member_repository.add_member(group_id, requester_id, is_owner=True)
 
     command = UpdateGroupCommand(
-        requester_id=requester_id,
+        requesting_user=AuthenticatedUser(requester_id, []),
+        group_id=group_id,
+        name="New Name",
+    )
+
+    use_case.execute(command)
+
+    updated_group = group_repository.get_by_id(group_id)
+    assert updated_group is not None
+    assert updated_group.name == "New Name"
+
+
+def test_given_user_is_admin_when_updating_group_should_update_group_name(
+    use_case: UpdateGroupUseCase,
+    group_repository: GroupRepository,
+    group_member_repository: GroupMemberRepository,
+):
+    group_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
+
+    group = Group(
+        id=group_id,
+        name="Old Name",
+        is_personal=False,
+        user_id=None,
+    )
+    group_repository.save_group(group)
+    group_member_repository.add_member(group_id, requester_id, is_owner=True)
+
+    command = UpdateGroupCommand(
+        requesting_user=AuthenticatedUser(requester_id, [ADMIN_ROLE]),
         group_id=group_id,
         name="New Name",
     )
@@ -68,7 +101,7 @@ def test_given_group_not_exists_when_updating_group_should_raise_group_not_found
     requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
 
     command = UpdateGroupCommand(
-        requester_id=requester_id,
+        requesting_user=AuthenticatedUser(requester_id, []),
         group_id=non_existent_group_id,
         name="New Name",
     )
@@ -77,7 +110,7 @@ def test_given_group_not_exists_when_updating_group_should_raise_group_not_found
         use_case.execute(command)
 
 
-def test_given_user_not_owner_when_updating_group_should_raise_user_not_owner(
+def test_given_user_not_owner_nor_admin_when_updating_group_should_raise_user_not_owner(
     use_case: UpdateGroupUseCase,
     group_repository: GroupRepository,
     group_member_repository: GroupMemberRepository,
@@ -97,7 +130,7 @@ def test_given_user_not_owner_when_updating_group_should_raise_user_not_owner(
     group_member_repository.add_member(group_id, non_owner_id, is_owner=False)
 
     command = UpdateGroupCommand(
-        requester_id=non_owner_id,
+        requesting_user=AuthenticatedUser(non_owner_id, []),
         group_id=group_id,
         name="New Name",
     )
@@ -124,7 +157,7 @@ def test_given_personal_group_when_updating_group_should_raise_cannot_modify_per
     group_member_repository.add_member(group_id, requester_id, is_owner=True)
 
     command = UpdateGroupCommand(
-        requester_id=requester_id,
+        requesting_user=AuthenticatedUser(requester_id, []),
         group_id=group_id,
         name="New Name",
     )
