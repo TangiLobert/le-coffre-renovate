@@ -6,11 +6,14 @@ import secrets
 from urllib.parse import quote, urlparse, parse_qs
 from fastapi.testclient import TestClient
 import oidc_provider_mock
+from sqlalchemy import create_engine, text
+from alembic.config import Config
+from alembic import command
 
 from main import app
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def env_vars():
     os.environ["JWT_SECRET_KEY"] = secrets.token_urlsafe(32)
     os.environ["JWT_ALGORITHM"] = "HS256"
@@ -19,19 +22,64 @@ def env_vars():
     del os.environ["JWT_ALGORITHM"]
 
 
-@pytest.fixture(scope="function")
-def database():
-    # Create a temporary file for the database
+@pytest.fixture(scope="session")
+def database_path():
+    """Create a temporary database file that persists for the entire test session."""
     db_fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(db_fd)  # Close the file descriptor, we just need the path
 
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
-    yield
+    yield db_path
+
+    # Cleanup at end of session
     try:
         os.unlink(db_path)
     except OSError:
         pass
     del os.environ["DATABASE_URL"]
+
+
+@pytest.fixture(scope="function")
+def database(database_path):
+    """
+    Function-scoped fixture that cleans the database before each test.
+    Uses the session-scoped database file but resets its content.
+
+    This ensures complete test isolation by:
+    - Dropping all tables (including users, passwords, groups, SSO config, vault setup, etc.)
+    - Recreating the schema via Alembic migrations
+    - Providing a fresh database state for each test
+    """
+
+    # Drop all tables and recreate schema for each test
+    engine = create_engine(f"sqlite:///{database_path}")
+
+    # Drop all tables
+    with engine.connect() as conn:
+        conn.execute(text("PRAGMA foreign_keys = OFF"))
+        conn.commit()
+
+        # Get all table names
+        result = conn.execute(
+            text(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )
+        )
+        tables = [row[0] for row in result]
+
+        # Drop each table
+        for table in tables:
+            conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+
+        conn.execute(text("PRAGMA foreign_keys = ON"))
+        conn.commit()
+
+    # Run migrations to recreate schema
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("script_location", "alembic")
+    command.upgrade(alembic_cfg, "head")
+
+    yield database_path
 
 
 @pytest.fixture
@@ -55,8 +103,25 @@ def oidc_server():
         }
 
 
+@pytest.fixture(scope="session")
+def sso_configuration_data(oidc_server):
+    """
+    Session-scoped fixture that provides SSO configuration data.
+    This doesn't configure SSO in the database, just provides the config values.
+    """
+    return {
+        "client_id": oidc_server["client_id"],
+        "client_secret": oidc_server["client_secret"],
+        "discovery_url": oidc_server["discovery_url"],
+    }
+
+
 @pytest.fixture
-def configured_sso(authenticated_admin_client, oidc_server, setup):
+def configured_sso(authenticated_admin_client, oidc_server, setup, database_path):
+    """
+    Function-scoped fixture that configures SSO for a test.
+    The configuration is cleaned up by the database fixture between tests.
+    """
     configure_response = authenticated_admin_client.post(
         "/api/auth/sso/configure",
         json={
@@ -124,6 +189,7 @@ def create_sso_user_in_provider(oidc_server, email, name):
         f"{oidc_server['issuer_url']}/users/{quote(user_data['sub'])}",
         json=user_data,
     )
+    # PUT is idempotent, so 204 means success (created or already exists)
     assert response.status_code == 204, (
         f"Failed to create user {email} in OIDC provider: {response.text}"
     )
@@ -203,7 +269,9 @@ def register_and_login_admin(client):
         "display_name": "System Administrator",
     }
 
-    client.post("/api/auth/register-admin", json=admin_data)
+    # Register admin (should succeed since database is clean for each test)
+    register_response = client.post("/api/auth/register-admin", json=admin_data)
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/api/auth/login",
@@ -216,14 +284,37 @@ def register_and_login_admin(client):
     return login_response
 
 
+@pytest.fixture(scope="session")
+def session_vault_setup_data(database_path, env_vars):
+    """
+    Session-scoped vault setup that runs once.
+    Returns the setup configuration (shares, threshold).
+    """
+    return {
+        "nb_shares": 5,
+        "threshold": 3,
+    }
+
+
 @pytest.fixture
-def setup(authenticated_admin_client):
+def setup(authenticated_admin_client, session_vault_setup_data):
+    """
+    Function-scoped fixture that ensures vault is set up for the test.
+    Performs setup only once per test (fast if already done).
+    """
+    # Check if vault is already setup
+    status_response = authenticated_admin_client.get("/api/vault/status")
+
+    if status_response.status_code == 200:
+        status = status_response.json()
+        # If vault is already setup and validated, we're done
+        if status.get("is_setup") and not status.get("needs_validation"):
+            return
+
+    # Otherwise, perform setup
     response = authenticated_admin_client.post(
         "/api/vault/setup",
-        json={
-            "nb_shares": 5,
-            "threshold": 3,
-        },
+        json=session_vault_setup_data,
     )
     setup_data = response.json()
     setup_id = setup_data["setup_id"]

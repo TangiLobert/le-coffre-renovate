@@ -101,6 +101,20 @@ class CannotRemoveOwnerException(IdentityAccessManagementDomainError):
         super().__init__(f"Cannot remove owner '{user_id}' from group '{group_id}'")
 
 
+class CannotDeletePersonalGroupException(IdentityAccessManagementDomainError):
+    """Raised when attempting to delete a personal group"""
+
+    def __init__(self, group_id: UUID):
+        super().__init__(f"Cannot delete personal group '{group_id}'")
+
+
+class CannotDeleteGroupStillUsedException(IdentityAccessManagementDomainError):
+    """Raised when attempting to delete a group that is still in use"""
+
+    def __init__(self, group_id: UUID):
+        super().__init__(f"Cannot delete group '{group_id}' because it is still in use")
+
+
 # Admin-related exceptions
 class AdminNotFoundException(IdentityAccessManagementDomainError):
     pass

@@ -36,5 +36,9 @@ class FakeGroupRepository:
     def save_group(self, group: Group) -> None:
         self._groups[group.id] = group
 
+    def delete_group(self, group_id: UUID) -> None:
+        if group_id in self._groups:
+            del self._groups[group_id]
+
     def clear(self) -> None:
         self._groups.clear()

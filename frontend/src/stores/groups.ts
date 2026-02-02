@@ -4,7 +4,9 @@ import {
   listGroupsGroupsGet,
   createGroupGroupsPost,
   updateGroupGroupsGroupIdPut,
+  deleteGroupGroupsGroupIdDelete,
   addMemberToGroupGroupsGroupIdMembersPost,
+  addOwnerToGroupGroupsGroupIdOwnersPost,
   removeMemberFromGroupGroupsGroupIdMembersUserIdDelete,
   getUserMeUsersMeGet
 } from '@/client/sdk.gen';
@@ -166,6 +168,33 @@ export const useGroupsStore = defineStore('groups', () => {
     }
   };
 
+  const promoteToOwner = async (groupId: string, userId: string) => {
+    try {
+      const response = await addOwnerToGroupGroupsGroupIdOwnersPost({
+        path: { group_id: groupId },
+        body: { user_id: userId }
+      });
+      return response.data;
+    } catch (e) {
+      console.error('Error promoting member to owner:', e);
+      throw e;
+    }
+  };
+
+  const deleteGroup = async (groupId: string) => {
+    try {
+      await deleteGroupGroupsGroupIdDelete({
+        path: { group_id: groupId }
+      });
+      // Invalidate cache to force refresh
+      invalidateCache();
+      await fetchAllGroups(true);
+    } catch (e) {
+      console.error('Error deleting group:', e);
+      throw e;
+    }
+  };
+
   const invalidateCache = () => {
     lastFetch.value = null;
   };
@@ -199,6 +228,8 @@ export const useGroupsStore = defineStore('groups', () => {
     updateGroup,
     addMemberToGroup,
     removeMemberFromGroup,
+    promoteToOwner,
+    deleteGroup,
     invalidateCache,
     refresh
   };

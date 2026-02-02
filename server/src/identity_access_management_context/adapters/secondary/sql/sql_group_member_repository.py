@@ -89,3 +89,12 @@ class SqlGroupMemberRepository(GroupMemberRepository):
         )
         results = self._session.exec(statement).all()
         return len(results)
+
+    def delete_by_group_id(self, group_id: UUID) -> None:
+        statement = select(GroupMemberTable).where(
+            GroupMemberTable.group_id == group_id
+        )
+        members = self._session.exec(statement).all()
+        for member in members:
+            self._session.delete(member)
+        self._session.commit()

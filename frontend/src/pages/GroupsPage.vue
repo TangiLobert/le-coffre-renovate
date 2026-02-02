@@ -4,20 +4,36 @@ import { useToast } from 'primevue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { storeToRefs } from 'pinia';
 import { useGroupsStore } from '@/stores/groups';
+import { useUserStore } from '@/stores/user';
 import GroupDetailsModal from '@/components/modals/GroupDetailsModal.vue';
+import DeleteGroupModal from '@/components/modals/DeleteGroupModal.vue';
 import type { GroupItem } from '@/client/types.gen';
 
 const toast = useToast();
 const groupsStore = useGroupsStore();
+const userStore = useUserStore();
 const { sharedGroups, loading } = storeToRefs(groupsStore);
+const { isAdmin } = storeToRefs(userStore);
 
 // State
 const showCreateDialog = ref(false);
 const showGroupDetailsModal = ref(false);
+const showDeleteGroupModal = ref(false);
 const newGroupName = ref('');
 const selectedGroup = ref<GroupItem | null>(null);
 const isEditMode = ref(false);
 const editingGroupId = ref<string | null>(null);
+
+// Check if user can delete a group (admin or owner)
+const canDeleteGroup = (group: GroupItem) => {
+  if (isAdmin.value) return true;
+  if (!groupsStore.currentUserId) return false;
+  return group.owners.includes(groupsStore.currentUserId);
+};
+
+// Check if group has passwords (for now we'll show an error when trying to delete)
+// In a future iteration, we could fetch this info from the API
+const groupHasPasswords = ref(false);
 
 // Open group details modal
 const openGroupDetails = (group: GroupItem) => {
@@ -96,7 +112,71 @@ const handleMemberChanged = async () => {
   await groupsStore.refresh();
 };
 
-onMounted(() => {
+// Open delete group dialog
+const openDeleteGroupDialog = (group: GroupItem) => {
+  selectedGroup.value = group;
+  groupHasPasswords.value = false; // Reset - we'll get the actual error from API if there are passwords
+  showDeleteGroupModal.value = true;
+};
+
+// Delete group
+const handleDeleteGroup = async () => {
+  if (!selectedGroup.value) return;
+
+  try {
+    await groupsStore.deleteGroup(selectedGroup.value.id);
+    toast.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Group deleted successfully',
+      life: 5000
+    });
+    showDeleteGroupModal.value = false;
+    selectedGroup.value = null;
+  } catch (error: unknown) {
+    console.error('Failed to delete group:', error);
+
+    // Extract error message from various error structures
+    let errorMessage = 'Failed to delete group';
+
+    if (error && typeof error === 'object') {
+      const err = error as Record<string, unknown>;
+      if (typeof err.detail === 'string') {
+        errorMessage = err.detail;
+      } else if (Array.isArray(err.detail) && err.detail[0]?.msg) {
+        errorMessage = err.detail[0].msg;
+      } else if (typeof err.message === 'string') {
+        errorMessage = err.message;
+      } else if (err.error && typeof err.error === 'object') {
+        const nestedError = err.error as Record<string, unknown>;
+        if (typeof nestedError.detail === 'string') {
+          errorMessage = nestedError.detail;
+        }
+      }
+    }
+
+    if (errorMessage.includes('still in use') || errorMessage.includes('has passwords')) {
+      groupHasPasswords.value = true;
+      toast.add({
+        severity: 'error',
+        summary: 'Cannot Delete Group',
+        detail: 'This group contains passwords and cannot be deleted. Please remove all passwords first.',
+        life: 7000
+      });
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: errorMessage,
+        life: 5000
+      });
+      showDeleteGroupModal.value = false;
+    }
+  }
+};
+
+onMounted(async () => {
+  await userStore.fetchCurrentUser();
   groupsStore.fetchSharedGroupsOnly();
 });
 </script>
@@ -126,14 +206,12 @@ onMounted(() => {
                 <i class="pi pi-users text-primary"></i>
                 <span>{{ group.name }}</span>
               </div>
-              <Button 
-                icon="pi pi-pencil" 
-                text 
-                rounded 
-                severity="secondary"
-                size="small"
-                @click="openEditDialog(group)"
-              />
+              <div class="flex gap-1">
+                <Button icon="pi pi-pencil" text rounded severity="secondary" size="small"
+                  @click="openEditDialog(group)" />
+                <Button v-if="canDeleteGroup(group)" icon="pi pi-times" text rounded severity="danger" size="small"
+                  @click="openDeleteGroupDialog(group)" v-tooltip.top="'Delete group'" />
+              </div>
             </div>
           </template>
           <template #content>
@@ -172,6 +250,11 @@ onMounted(() => {
       <!-- Group Details Modal -->
       <GroupDetailsModal v-model:visible="showGroupDetailsModal" :group="selectedGroup"
         @member-added="handleMemberChanged" @member-removed="handleMemberChanged" />
+
+      <!-- Delete Group Modal -->
+      <DeleteGroupModal v-model:visible="showDeleteGroupModal" :group="selectedGroup"
+        :can-delete="selectedGroup ? canDeleteGroup(selectedGroup) : false" :has-passwords="groupHasPasswords"
+        @deleted="handleDeleteGroup" />
     </div>
   </MainLayout>
 </template>

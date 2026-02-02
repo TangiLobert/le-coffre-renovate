@@ -59,3 +59,28 @@ class FakePasswordPermissionsRepository:
     def clear(self) -> None:
         self._ownerships.clear()
         self._permissions.clear()
+
+    def has_any_password_for_group(self, group_id: UUID) -> bool:
+        """Check if a group has any password (as owner or with access)"""
+        # Check if group owns any password
+        for owner_id, _ in self._ownerships:
+            if owner_id == group_id:
+                return True
+
+        # Check if group has any permissions
+        for grp_id, _ in self._permissions:
+            if grp_id == group_id:
+                return True
+
+        return False
+
+    def revoke_all_access_for_password(self, password_id: UUID):
+        """Revoke all access (permissions and ownerships) for a specific password"""
+        # Revoke all permissions for the password
+        for grp_id, pwd_id in list(self._permissions.keys()):
+            if pwd_id == password_id:
+                del self._permissions[(grp_id, pwd_id)]
+
+        for grp_id, pwd_id in list(self._ownerships.keys()):
+            if pwd_id == password_id:
+                del self._ownerships[(grp_id, pwd_id)]

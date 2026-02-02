@@ -10,6 +10,7 @@ from .create_group_use_case import CreateGroupUseCase
 from .add_user_to_group_use_case import AddUserToGroupUseCase
 from .add_owner_to_group_use_case import AddOwnerToGroupUseCase
 from .remove_user_from_group_use_case import RemoveUserFromGroupUseCase
+from .delete_group_use_case import DeleteGroupUseCase
 from .list_groups_use_case import ListGroupsUseCase
 from .get_group_use_case import GetGroupUseCase
 from .update_group_use_case import UpdateGroupUseCase
@@ -37,6 +38,7 @@ __all__ = [
     "AddUserToGroupUseCase",
     "AddOwnerToGroupUseCase",
     "RemoveUserFromGroupUseCase",
+    "DeleteGroupUseCase",
     "ListGroupsUseCase",
     "GetGroupUseCase",
     "UpdateGroupUseCase",
