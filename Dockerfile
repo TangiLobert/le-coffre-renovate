@@ -17,6 +17,12 @@ RUN bun run build
 # =============================================================================
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS backend-builder
 
+# Install build dependencies for psycopg2
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app/backend
 
 # Force uv to create a local virtualenv
@@ -38,6 +44,7 @@ RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
     curl \
+    libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
