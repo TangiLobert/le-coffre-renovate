@@ -65,7 +65,6 @@ const onFormSubmit = async ({ valid, values }: { valid: boolean; values: typeof 
     } finally {
       loading.value = false;
     }
-    toast.add({ severity: 'success', summary: 'Login Successful', detail: 'You have logged in successfully.', life: 5000 });
 
     // Invalidate passwords cache to force refetch after login
     passwordsStore.invalidateCache();
