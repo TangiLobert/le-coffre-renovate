@@ -17,10 +17,10 @@ RUN bun run build
 # =============================================================================
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS backend-builder
 
-WORKDIR /backend
+WORKDIR /app/backend
 
 # Force uv to create a local virtualenv
-ENV UV_PROJECT_ENVIRONMENT=/backend/.venv
+ENV UV_PROJECT_ENVIRONMENT=/app/backend/.venv
 
 COPY server/pyproject.toml server/uv.lock ./
 RUN uv sync --frozen --no-dev --no-cache
@@ -46,7 +46,7 @@ WORKDIR /app
 RUN addgroup --system app && adduser --system --group app
 
 # Copy backend + venv
-COPY --from=backend-builder --chown=app:app /backend /app/backend
+COPY --from=backend-builder --chown=app:app /app/backend /app/backend
 
 # Copy frontend build
 COPY --from=frontend-builder --chown=app:app /frontend/dist /app/frontend/dist
