@@ -69,6 +69,9 @@ jobs:
       - name: Check Alembic Migrations
         working-directory: server/
         run: |
+          # First, upgrade the database to the current head
+          uv run alembic upgrade head
+          
           # Generate a new migration to check if schema is in sync
           uv run alembic revision --autogenerate -m "CI check" > /tmp/migration_output.txt
           
