@@ -27,7 +27,7 @@ WORKDIR /backend
 # Copy backend dependency files
 COPY server/pyproject.toml server/uv.lock ./
 
-# Install dependencies
+# Install dependencies in virtual environment
 RUN uv sync --frozen --no-dev --no-cache
 
 # Copy backend source
@@ -38,10 +38,11 @@ COPY server/ ./
 # =============================================================================
 FROM python:3.13-slim
 
-# Install nginx and supervisor
+# Install nginx, supervisor, and curl for health checks
 RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -49,12 +50,15 @@ WORKDIR /app
 # Create non-root user
 RUN addgroup --system app && adduser --system --group app
 
-# Copy backend from builder
+# Copy backend from builder (including .venv)
 COPY --from=backend-builder --chown=app:app /backend /app/backend
-COPY --from=backend-builder /root/.local /root/.local
 
 # Copy frontend build from builder
 COPY --from=frontend-builder --chown=app:app /frontend/dist /app/frontend/dist
+
+# Configure PATH to use the virtual environment
+ENV PATH="/app/backend/.venv/bin:$PATH"
+ENV VIRTUAL_ENV="/app/backend/.venv"
 
 # Configure nginx
 COPY <<'EOF' /etc/nginx/sites-available/default
@@ -104,9 +108,10 @@ stderr_logfile_maxbytes=0
 autorestart=true
 
 [program:backend]
-command=/root/.local/bin/uvicorn src.main:app --host 127.0.0.1 --port 8000
+command=/app/backend/.venv/bin/uvicorn src.main:app --host 127.0.0.1 --port 8000
 directory=/app/backend
 user=app
+environment=PATH="/app/backend/.venv/bin:%(ENV_PATH)s"
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
