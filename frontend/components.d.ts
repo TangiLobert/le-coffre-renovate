@@ -12,7 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
-    AuditLogsCard: typeof import('./src/components/AuditLogsCard.vue')['default']
+    AuditLogsCard: typeof import('./src/components/admin/AuditLogsCard.vue')['default']
     Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
@@ -64,7 +64,7 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     UnlockVaultModal: typeof import('./src/components/modals/UnlockVaultModal.vue')['default']
-    UsersManagementCard: typeof import('./src/components/UsersManagementCard.vue')['default']
+    UsersManagementCard: typeof import('./src/components/admin/UsersManagementCard.vue')['default']
     VaultManagementCard: typeof import('./src/components/admin/VaultManagementCard.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }

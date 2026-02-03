@@ -3,8 +3,8 @@ import { ref, reactive } from 'vue';
 import { useToast } from 'primevue';
 import { useConfirm } from 'primevue/useconfirm';
 import MainLayout from '../layouts/MainLayout.vue';
-import UsersManagementCard from '../components/UsersManagementCard.vue';
-import AuditLogsCard from '../components/AuditLogsCard.vue';
+import UsersManagementCard from '@/components/admin/UsersManagementCard.vue';
+import AuditLogsCard from '@/components/admin/AuditLogsCard.vue';
 import { configureSsoProviderAuthSsoConfigurePost, lockVaultVaultLockPost } from '@/client/sdk.gen';
 import { checkVaultStatus } from '@/plugins/vaultStatus';
 
