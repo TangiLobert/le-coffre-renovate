@@ -33,6 +33,7 @@ declare module 'vue' {
     LoginForm: typeof import('./src/components/LoginForm.vue')['default']
     MainMenu: typeof import('./src/components/MainMenu.vue')['default']
     Message: typeof import('primevue/message')['default']
+    MultiSelect: typeof import('primevue/multiselect')['default']
     Password: typeof import('primevue/password')['default']
     PasswordCard: typeof import('./src/components/passwords/PasswordCard.vue')['default']
     PasswordGenerator: typeof import('./src/components/passwords/PasswordGenerator.vue')['default']

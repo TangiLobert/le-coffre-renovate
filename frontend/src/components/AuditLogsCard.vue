@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'primevue';
 import { listEventsEventsGet } from '@/client/sdk.gen';
 import type { EventData } from '@/client/types.gen';
@@ -7,17 +7,35 @@ import type { EventData } from '@/client/types.gen';
 const toast = useToast();
 
 const events = ref<EventData[]>([]);
+const allEvents = ref<EventData[]>([]);
 const loadingEvents = ref(false);
+const selectedEventTypes = ref<string[]>([]);
+
+const availableEventTypes = computed(() => {
+  const uniqueTypes = new Set(allEvents.value.map(event => event.event_type));
+  return Array.from(uniqueTypes).sort();
+});
 
 const fetchEvents = async () => {
   loadingEvents.value = true;
   try {
-    const response = await listEventsEventsGet();
-    // Add priority_order field for proper sorting
-    events.value = (response.data?.events ?? []).map(event => ({
+    const response = await listEventsEventsGet({
+      query: {
+        event_type: selectedEventTypes.value.length > 0 ? selectedEventTypes.value : undefined
+      }
+    });
+    const fetchedEvents = (response.data?.events ?? []).map(event => ({
       ...event,
       priority_order: getPriorityOrder(event.priority)
     }));
+
+    // Store all events for building the filter list
+    if (selectedEventTypes.value.length === 0) {
+      allEvents.value = fetchedEvents;
+    }
+
+    // Add priority_order field for proper sorting
+    events.value = fetchedEvents;
   } catch (error) {
     console.error('Failed to fetch events:', error);
     toast.add({
@@ -88,6 +106,12 @@ onMounted(() => {
       <p class="text-muted-color mb-4">
         View all system events and audit trails.
       </p>
+
+      <div class="mb-4">
+        <label for="event-type-filter" class="block mb-2 font-medium">Filter by Event Type</label>
+        <MultiSelect id="event-type-filter" v-model="selectedEventTypes" :options="availableEventTypes"
+          placeholder="All Event Types" :maxSelectedLabels="3" class="w-full md:w-80" @change="fetchEvents" />
+      </div>
 
       <DataTable :value="events" :loading="loadingEvents" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
         stripedRows tableStyle="min-width: 50rem"

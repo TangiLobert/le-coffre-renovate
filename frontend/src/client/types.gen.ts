@@ -1654,9 +1654,25 @@ export type ListGroupsGroupsGetResponse = ListGroupsGroupsGetResponses[keyof Lis
 export type ListEventsEventsGetData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Event Type
+         *
+         * Filter by event types
+         */
+        event_type?: Array<string> | null;
+    };
     url: '/events';
 };
+
+export type ListEventsEventsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListEventsEventsGetError = ListEventsEventsGetErrors[keyof ListEventsEventsGetErrors];
 
 export type ListEventsEventsGetResponses = {
     /**
