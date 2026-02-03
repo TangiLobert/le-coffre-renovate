@@ -12,12 +12,15 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
+    AuditLogsCard: typeof import('./src/components/AuditLogsCard.vue')['default']
     Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
+    Column: typeof import('primevue/column')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     CreatePasswordModal: typeof import('./src/components/modals/CreatePasswordModal.vue')['default']
+    DataTable: typeof import('primevue/datatable')['default']
     DeleteGroupModal: typeof import('./src/components/modals/DeleteGroupModal.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
     Divider: typeof import('primevue/divider')['default']
@@ -53,6 +56,7 @@ declare module 'vue' {
     StepPanels: typeof import('primevue/steppanels')['default']
     Stepper: typeof import('primevue/stepper')['default']
     StepWelcome: typeof import('./src/components/setup/StepWelcome.vue')['default']
+    Tag: typeof import('primevue/tag')['default']
     ThemeSwitcher: typeof import('./src/components/ThemeSwitcher.vue')['default']
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']

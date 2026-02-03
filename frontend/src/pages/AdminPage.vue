@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import { useToast } from 'primevue';
 import { useConfirm } from 'primevue/useconfirm';
 import MainLayout from '../layouts/MainLayout.vue';
+import AuditLogsCard from '../components/AuditLogsCard.vue';
 import { configureSsoProviderAuthSsoConfigurePost, lockVaultVaultLockPost } from '@/client/sdk.gen';
 import { checkVaultStatus } from '@/plugins/vaultStatus';
 
@@ -205,6 +206,9 @@ const handleLockVault = () => {
           </form>
         </template>
       </Card>
+
+      <!-- Audit Logs Section -->
+      <AuditLogsCard class="mt-6" />
     </div>
   </MainLayout>
 </template>
