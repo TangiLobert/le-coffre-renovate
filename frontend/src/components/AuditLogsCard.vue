@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'primevue';
 import { listEventsEventsGet } from '@/client/sdk.gen';
 import type { EventData } from '@/client/types.gen';
@@ -7,17 +7,14 @@ import type { EventData } from '@/client/types.gen';
 const toast = useToast();
 
 const events = ref<EventData[]>([]);
+const allEvents = ref<EventData[]>([]);
 const loadingEvents = ref(false);
 const selectedEventTypes = ref<string[]>([]);
 
-const availableEventTypes = [
-  'PasswordCreatedEvent',
-  'PasswordUpdatedEvent',
-  'PasswordDeletedEvent',
-  'PasswordAccessedEvent',
-  'PasswordSharedEvent',
-  'PasswordUnsharedEvent'
-];
+const availableEventTypes = computed(() => {
+  const uniqueTypes = new Set(allEvents.value.map(event => event.event_type));
+  return Array.from(uniqueTypes).sort();
+});
 
 const fetchEvents = async () => {
   loadingEvents.value = true;
@@ -27,11 +24,18 @@ const fetchEvents = async () => {
         event_type: selectedEventTypes.value.length > 0 ? selectedEventTypes.value : undefined
       }
     });
-    // Add priority_order field for proper sorting
-    events.value = (response.data?.events ?? []).map(event => ({
+    const fetchedEvents = (response.data?.events ?? []).map(event => ({
       ...event,
       priority_order: getPriorityOrder(event.priority)
     }));
+
+    // Store all events for building the filter list
+    if (selectedEventTypes.value.length === 0) {
+      allEvents.value = fetchedEvents;
+    }
+
+    // Add priority_order field for proper sorting
+    events.value = fetchedEvents;
   } catch (error) {
     console.error('Failed to fetch events:', error);
     toast.add({
