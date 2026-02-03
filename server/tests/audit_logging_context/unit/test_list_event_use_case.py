@@ -57,3 +57,57 @@ def test_given_non_admin_user_when_listing_events_then_raise_not_admin_error(
         use_case.execute(command)
 
     assert "administrators" in str(exc_info.value).lower()
+
+
+def test_given_events_when_filtering_by_type_then_return_only_matching_events(
+    use_case, event_repository, admin_user
+):
+    # Create events with different types
+    event1 = DomainEvent(uuid4(), datetime.now())
+    event1.event_type = "PasswordCreatedEvent"
+    event2 = DomainEvent(uuid4(), datetime.now())
+    event2.event_type = "PasswordDeletedEvent"
+    event3 = DomainEvent(uuid4(), datetime.now())
+    event3.event_type = "PasswordCreatedEvent"
+
+    event_repository.append_event(event1)
+    event_repository.append_event(event2)
+    event_repository.append_event(event3)
+
+    # Filter by PasswordCreatedEvent only
+    command = ListEventCommand(
+        requesting_user=admin_user, event_types=["PasswordCreatedEvent"]
+    )
+
+    response = use_case.execute(command)
+
+    assert len(response.events) == 2
+    assert all(event.event_type == "PasswordCreatedEvent" for event in response.events)
+
+
+def test_given_events_when_filtering_by_multiple_types_then_return_all_matching(
+    use_case, event_repository, admin_user
+):
+    # Create events with different types
+    event1 = DomainEvent(uuid4(), datetime.now())
+    event1.event_type = "PasswordCreatedEvent"
+    event2 = DomainEvent(uuid4(), datetime.now())
+    event2.event_type = "PasswordDeletedEvent"
+    event3 = DomainEvent(uuid4(), datetime.now())
+    event3.event_type = "PasswordUpdatedEvent"
+
+    event_repository.append_event(event1)
+    event_repository.append_event(event2)
+    event_repository.append_event(event3)
+
+    # Filter by PasswordCreatedEvent and PasswordDeletedEvent
+    command = ListEventCommand(
+        requesting_user=admin_user,
+        event_types=["PasswordCreatedEvent", "PasswordDeletedEvent"],
+    )
+
+    response = use_case.execute(command)
+
+    assert len(response.events) == 2
+    event_types = {event.event_type for event in response.events}
+    assert event_types == {"PasswordCreatedEvent", "PasswordDeletedEvent"}

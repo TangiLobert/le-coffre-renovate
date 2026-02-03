@@ -8,11 +8,25 @@ const toast = useToast();
 
 const events = ref<EventData[]>([]);
 const loadingEvents = ref(false);
+const selectedEventTypes = ref<string[]>([]);
+
+const availableEventTypes = [
+  'PasswordCreatedEvent',
+  'PasswordUpdatedEvent',
+  'PasswordDeletedEvent',
+  'PasswordAccessedEvent',
+  'PasswordSharedEvent',
+  'PasswordUnsharedEvent'
+];
 
 const fetchEvents = async () => {
   loadingEvents.value = true;
   try {
-    const response = await listEventsEventsGet();
+    const response = await listEventsEventsGet({
+      query: {
+        event_type: selectedEventTypes.value.length > 0 ? selectedEventTypes.value : undefined
+      }
+    });
     // Add priority_order field for proper sorting
     events.value = (response.data?.events ?? []).map(event => ({
       ...event,
@@ -88,6 +102,12 @@ onMounted(() => {
       <p class="text-muted-color mb-4">
         View all system events and audit trails.
       </p>
+
+      <div class="mb-4">
+        <label for="event-type-filter" class="block mb-2 font-medium">Filter by Event Type</label>
+        <MultiSelect id="event-type-filter" v-model="selectedEventTypes" :options="availableEventTypes"
+          placeholder="All Event Types" :maxSelectedLabels="3" class="w-full md:w-80" @change="fetchEvents" />
+      </div>
 
       <DataTable :value="events" :loading="loadingEvents" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
         stripedRows tableStyle="min-width: 50rem"

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from datetime import datetime
 from uuid import UUID
@@ -36,6 +36,7 @@ class ListEventsResponse(BaseModel):
     summary="List all audit events",
 )
 def list_events(
+    event_type: list[str] | None = Query(None, description="Filter by event types"),
     current_user: ValidatedUser = Depends(get_current_user),
     usecase: ListEventUseCase = Depends(get_list_event_usecase),
 ):
@@ -44,13 +45,16 @@ def list_events(
 
     - **Authentication**: Requires authentication via access_token cookie
     - **Authorization**: Only administrators can access audit logs
+    - **event_type**: Optional list of event types to filter by (e.g., PasswordCreatedEvent, PasswordDeletedEvent)
 
     Returns a list of all domain events that have been logged in the system.
     """
     try:
         # Execute use case with command
         authenticated_user = current_user.to_authenticated_user()
-        command = ListEventCommand(requesting_user=authenticated_user)
+        command = ListEventCommand(
+            requesting_user=authenticated_user, event_types=event_type
+        )
         response = usecase.execute(command)
 
         # Convert domain events to response format
