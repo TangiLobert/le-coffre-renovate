@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import type { GroupItem } from '@/client/types.gen';
 
 const visible = defineModel<boolean>('visible', { required: true });
+const DELETE_CONFIRMATION_COUNTDOWN_SECONDS = 6;
 
 const props = defineProps<{
   group?: GroupItem | null;
@@ -14,7 +15,7 @@ const emit = defineEmits<{
   (e: 'deleted'): void;
 }>();
 
-const countdown = ref(6);
+const countdown = ref(DELETE_CONFIRMATION_COUNTDOWN_SECONDS);
 const isDeleting = ref(false);
 const countdownTimer = ref<number | null>(null);
 
@@ -31,7 +32,7 @@ const deleteButtonLabel = computed(() => {
 // Start countdown when modal opens
 watch(visible, (newVisible) => {
   if (newVisible) {
-    countdown.value = 6;
+    countdown.value = DELETE_CONFIRMATION_COUNTDOWN_SECONDS;
     startCountdown();
   } else {
     stopCountdown();
