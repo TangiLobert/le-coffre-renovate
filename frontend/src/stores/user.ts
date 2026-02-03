@@ -43,15 +43,16 @@ export const useUserStore = defineStore('user', {
         /**
          * Fetch current user information from the backend
          * Caches the result to avoid redundant API calls
+         * @param force - If true, bypass cache and fetch fresh data
          */
-        async fetchCurrentUser(): Promise<GetUserMeResponse | null> {
-            // Return cached value if already loaded
-            if (this.currentUser !== null) {
+        async fetchCurrentUser(force = false): Promise<GetUserMeResponse | null> {
+            // Return cached value if already loaded and not forcing refresh
+            if (!force && this.currentUser !== null) {
                 return this.currentUser;
             }
 
-            // If a request is already in flight, wait for it
-            if (this._pending) {
+            // If a request is already in flight, wait for it (unless forcing)
+            if (!force && this._pending) {
                 return this._pending;
             }
 

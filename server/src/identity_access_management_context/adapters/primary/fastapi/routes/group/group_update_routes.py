@@ -60,7 +60,7 @@ def update_group(
     """
     try:
         command = UpdateGroupCommand(
-            requester_id=current_user.user_id,
+            requesting_user=current_user.to_authenticated_user(),
             group_id=group_id,
             name=request.name,
         )

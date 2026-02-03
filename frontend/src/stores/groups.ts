@@ -112,11 +112,16 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { name }
       });
       
-      if (response.data) {
+      if (response.response.ok && response.data) {
         // Invalidate cache to force refresh
         invalidateCache();
         await fetchAllGroups(true);
         return response.data;
+      } else {
+        // If response is not ok, throw an error
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to create group';
+        throw new Error(errorMessage);
       }
     } catch (e) {
       console.error('Error creating group:', e);
@@ -131,11 +136,16 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { name }
       });
       
-      if (response.data) {
+      if (response.response.ok && response.data) {
         // Invalidate cache to force refresh
         invalidateCache();
         await fetchAllGroups(true);
         return response.data;
+      } else {
+        // If response is not ok, throw an error
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to update group';
+        throw new Error(errorMessage);
       }
     } catch (e) {
       console.error('Error updating group:', e);
@@ -149,7 +159,14 @@ export const useGroupsStore = defineStore('groups', () => {
         path: { group_id: groupId },
         body: { user_id: userId }
       });
-      return response.data;
+      
+      if (response.response.ok && response.data) {
+        return response.data;
+      } else {
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to add member to group';
+        throw new Error(errorMessage);
+      }
     } catch (e) {
       console.error('Error adding member to group:', e);
       throw e;
@@ -161,7 +178,14 @@ export const useGroupsStore = defineStore('groups', () => {
       const response = await removeMemberFromGroupGroupsGroupIdMembersUserIdDelete({
         path: { group_id: groupId, user_id: userId }
       });
-      return response.data;
+      
+      if (response.response.ok) {
+        return response.data;
+      } else {
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to remove member from group';
+        throw new Error(errorMessage);
+      }
     } catch (e) {
       console.error('Error removing member from group:', e);
       throw e;
@@ -174,7 +198,14 @@ export const useGroupsStore = defineStore('groups', () => {
         path: { group_id: groupId },
         body: { user_id: userId }
       });
-      return response.data;
+      
+      if (response.response.ok && response.data) {
+        return response.data;
+      } else {
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to promote member to owner';
+        throw new Error(errorMessage);
+      }
     } catch (e) {
       console.error('Error promoting member to owner:', e);
       throw e;
@@ -183,12 +214,19 @@ export const useGroupsStore = defineStore('groups', () => {
 
   const deleteGroup = async (groupId: string) => {
     try {
-      await deleteGroupGroupsGroupIdDelete({
+      const response = await deleteGroupGroupsGroupIdDelete({
         path: { group_id: groupId }
       });
-      // Invalidate cache to force refresh
-      invalidateCache();
-      await fetchAllGroups(true);
+      
+      if (response.response.ok) {
+        // Invalidate cache to force refresh
+        invalidateCache();
+        await fetchAllGroups(true);
+      } else {
+        const errorData = response.error as { detail?: string };
+        const errorMessage = errorData?.detail || 'Failed to delete group';
+        throw new Error(errorMessage);
+      }
     } catch (e) {
       console.error('Error deleting group:', e);
       throw e;

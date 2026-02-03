@@ -10,6 +10,7 @@ from identity_access_management_context.domain.exceptions import (
     UserNotOwnerOfGroupException,
     CannotModifyPersonalGroupException,
 )
+from shared_kernel.domain.services import AdminPermissionChecker
 
 
 class UpdateGroupUseCase:
@@ -30,9 +31,11 @@ class UpdateGroupUseCase:
             raise CannotModifyPersonalGroupException(command.group_id)
 
         if not self.group_member_repository.is_owner(
-            command.group_id, command.requester_id
-        ):
-            raise UserNotOwnerOfGroupException(command.requester_id, command.group_id)
+            command.group_id, command.requesting_user.user_id
+        ) and not AdminPermissionChecker().is_admin(command.requesting_user):
+            raise UserNotOwnerOfGroupException(
+                command.requesting_user.user_id, command.group_id
+            )
 
         group.name = command.name
         self.group_repository.save_group(group)

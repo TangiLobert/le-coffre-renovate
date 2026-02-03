@@ -4,12 +4,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue';
 import { ssoCallbackAuthSsoCallbackGet } from '@/client';
 import { usePasswordsStore } from '@/stores/passwords';
+import { useUserStore } from '@/stores/user';
 import BlankLayout from "../layouts/BlankLayout.vue";
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const passwordsStore = usePasswordsStore();
+const userStore = useUserStore();
 const loading = ref(true);
 const errorMessage = ref<string | null>(null);
 
@@ -68,8 +70,9 @@ onMounted(async () => {
         life: 3000
       });
 
-      // Invalidate passwords cache to force refetch after SSO login
+      // Invalidate caches to force refetch after SSO login
       passwordsStore.invalidateCache();
+      userStore.clearUser(); // Clear cached user data to fetch fresh data on navigation
 
       // Redirect to home page
       await router.push('/');

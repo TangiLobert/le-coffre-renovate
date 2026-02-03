@@ -12,7 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
-    AuditLogsCard: typeof import('./src/components/AuditLogsCard.vue')['default']
+    AuditLogsCard: typeof import('./src/components/admin/AuditLogsCard.vue')['default']
     Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Card: typeof import('primevue/card')['default']
@@ -20,6 +20,7 @@ declare module 'vue' {
     Column: typeof import('primevue/column')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     CreatePasswordModal: typeof import('./src/components/modals/CreatePasswordModal.vue')['default']
+    CreateUserModal: typeof import('./src/components/modals/CreateUserModal.vue')['default']
     DataTable: typeof import('primevue/datatable')['default']
     DeleteGroupModal: typeof import('./src/components/modals/DeleteGroupModal.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
@@ -49,6 +50,7 @@ declare module 'vue' {
     SharesModal: typeof import('./src/components/setup/shamir/SharesModal.vue')['default']
     Skeleton: typeof import('primevue/skeleton')['default']
     Slider: typeof import('primevue/slider')['default']
+    SsoConfigurationCard: typeof import('./src/components/admin/SsoConfigurationCard.vue')['default']
     Step: typeof import('primevue/step')['default']
     StepAdminAccountForm: typeof import('./src/components/setup/StepAdminAccountForm.vue')['default']
     StepGenerateMasterKey: typeof import('./src/components/setup/StepGenerateMasterKey.vue')['default']
@@ -62,6 +64,8 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     UnlockVaultModal: typeof import('./src/components/modals/UnlockVaultModal.vue')['default']
+    UsersManagementCard: typeof import('./src/components/admin/UsersManagementCard.vue')['default']
+    VaultManagementCard: typeof import('./src/components/admin/VaultManagementCard.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }
   export interface GlobalDirectives {
