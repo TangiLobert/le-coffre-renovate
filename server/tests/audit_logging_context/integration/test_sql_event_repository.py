@@ -163,11 +163,12 @@ def test_should_filter_events_by_multiple_types(sql_event_repository):
     sql_event_repository.append_event(deleted_event1)
     sql_event_repository.append_event(deleted_event2)
 
-    # Act - filter by PasswordDeletedEvent only
+    # Act - filter by both PasswordCreatedEvent and PasswordDeletedEvent
     filtered_events = sql_event_repository.list_events(
-        event_types=["PasswordDeletedEvent"]
+        event_types=["PasswordCreatedEvent", "PasswordDeletedEvent"]
     )
 
     # Assert
-    assert len(filtered_events) == 2
-    assert all(event.event_type == "PasswordDeletedEvent" for event in filtered_events)
+    assert len(filtered_events) == 3
+    event_types = {event.event_type for event in filtered_events}
+    assert event_types == {"PasswordCreatedEvent", "PasswordDeletedEvent"}
