@@ -20,6 +20,7 @@ from .update_group_command import UpdateGroupCommand
 from .is_sso_config_set_command import IsSsoConfigSetCommand
 from .get_sso_authorize_url_command import GetSsoAuthorizeUrlCommand
 from .configure_sso_provider_command import ConfigureSsoProviderCommand
+from .promote_admin_command import PromoteAdminCommand
 
 __all__ = [
     "CreateUserCommand",
@@ -44,4 +45,5 @@ __all__ = [
     "IsSsoConfigSetCommand",
     "GetSsoAuthorizeUrlCommand",
     "ConfigureSsoProviderCommand",
+    "PromoteAdminCommand",
 ]
