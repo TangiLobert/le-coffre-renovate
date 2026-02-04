@@ -10,6 +10,7 @@ const events = ref<EventData[]>([]);
 const allEvents = ref<EventData[]>([]);
 const loadingEvents = ref(false);
 const selectedEventTypes = ref<string[]>([]);
+const dateRange = ref<Date[]>([new Date(), new Date()]);
 
 const availableEventTypes = computed(() => {
   const uniqueTypes = new Set(allEvents.value.map(event => event.event_type));
@@ -19,9 +20,30 @@ const availableEventTypes = computed(() => {
 const fetchEvents = async () => {
   loadingEvents.value = true;
   try {
+    // Ensure we have a valid date range
+    if (!dateRange.value || dateRange.value.length < 2) {
+      return;
+    }
+
+    let [start, end] = dateRange.value;
+
+    // Ensure start date is before end date, swap if needed
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+
+    // Set date range for the selected dates
+    const startOfDay = new Date(start);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(end);
+    endOfDay.setHours(23, 59, 59, 999);
+
     const response = await listEventsEventsGet({
       query: {
-        event_type: selectedEventTypes.value.length > 0 ? selectedEventTypes.value : undefined
+        event_type: selectedEventTypes.value.length > 0 ? selectedEventTypes.value : undefined,
+        start_date: startOfDay.toISOString(),
+        end_date: endOfDay.toISOString()
       }
     });
     const fetchedEvents = (response.data?.events ?? []).map(event => ({
@@ -107,10 +129,17 @@ onMounted(() => {
         View all system events and audit trails.
       </p>
 
-      <div class="mb-4">
-        <label for="event-type-filter" class="block mb-2 font-medium">Filter by Event Type</label>
-        <MultiSelect id="event-type-filter" v-model="selectedEventTypes" :options="availableEventTypes"
-          placeholder="All Event Types" :maxSelectedLabels="3" class="w-full md:w-80" @change="fetchEvents" />
+      <div class="mb-4 flex flex-col gap-4 md:flex-row md:items-end">
+        <div class="flex-1">
+          <label for="date-range-filter" class="block mb-2 font-medium">Date Range</label>
+          <DatePicker id="date-range-filter" v-model="dateRange" selectionMode="range" dateFormat="yy-mm-dd" showIcon
+            iconDisplay="button" :manualInput="false" showButtonBar fluid @update:modelValue="fetchEvents" />
+        </div>
+        <div class="flex-1">
+          <label for="event-type-filter" class="block mb-2 font-medium">Filter by Event Type</label>
+          <MultiSelect id="event-type-filter" v-model="selectedEventTypes" :options="availableEventTypes"
+            placeholder="All Event Types" :maxSelectedLabels="2" class="w-full" @change="fetchEvents" />
+        </div>
       </div>
 
       <DataTable :value="events" :loading="loadingEvents" paginator :rows="10" :rowsPerPageOptions="[10, 25, 50]"
