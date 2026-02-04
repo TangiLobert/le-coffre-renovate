@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from sqlmodel import Session, create_engine
+from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
@@ -98,8 +99,9 @@ async def lifespan(app: FastAPI):
 
     engine = create_engine(get_database_url())
 
-    # Store the engine to create sessions per request
-    app.state.engine = engine
+    # Create session maker for creating sessions per request
+    SessionLocal = sessionmaker(bind=engine, class_=Session, expire_on_commit=False)
+    app.state.session_maker = SessionLocal
 
     # Stateless gateways that don't need a session
     shamir_gateway = CryptoShamirGateway()
@@ -152,7 +154,7 @@ async def lifespan(app: FastAPI):
 
     # Subscribe to all events with a callable that creates its own session
     def event_logger(event):
-        with Session(engine) as session:
+        with SessionLocal() as session:
             event_repository = SqlEventRepository(session)
             store_event_usecase = StoreEventUseCase(event_repository)
             command = StoreEventCommand(event=event)

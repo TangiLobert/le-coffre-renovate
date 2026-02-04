@@ -35,10 +35,10 @@ cookie_scheme = APIKeyCookie(
 def get_session(request: Request) -> Generator[Session, None, None]:
     """
     Dependency that provides a database session for each request.
-    Creates a new session from the engine stored in app.state.
+    Creates a new session from the session maker stored in app.state.
     """
-    engine = request.app.state.engine
-    with Session(engine) as session:
+    session_maker = request.app.state.session_maker
+    with session_maker() as session:
         yield session
 
 
