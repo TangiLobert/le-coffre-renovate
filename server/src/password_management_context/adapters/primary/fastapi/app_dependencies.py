@@ -2,6 +2,14 @@ from fastapi import Depends
 from starlette.requests import Request
 from sqlmodel import Session
 from identity_access_management_context.application.gateways import UserRepository
+from identity_access_management_context.adapters.secondary.sql import (
+    SqlGroupRepository,
+    SqlGroupMemberRepository,
+    SqlUserRepository,
+)
+from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
+    GroupAccessGatewayAdapter,
+)
 from password_management_context.application.gateways import (
     PasswordRepository,
     GroupAccessGateway,
@@ -43,14 +51,6 @@ def get_password_permissions_repository(
 
 
 def get_group_access_gateway(session: Session = Depends(get_session)) -> GroupAccessGateway:
-    from identity_access_management_context.adapters.secondary.sql import (
-        SqlGroupRepository,
-        SqlGroupMemberRepository,
-    )
-    from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
-        GroupAccessGatewayAdapter,
-    )
-    
     group_repository = SqlGroupRepository(session)
     group_member_repository = SqlGroupMemberRepository(session)
     return GroupAccessGatewayAdapter(group_repository, group_member_repository)
@@ -149,9 +149,6 @@ def get_delete_password_usecase(
 
 
 def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
-    from identity_access_management_context.adapters.secondary.sql import (
-        SqlUserRepository,
-    )
     return SqlUserRepository(session)
 
 

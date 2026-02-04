@@ -15,6 +15,10 @@ from identity_access_management_context.application.gateways import (
     TokenGateway,
     SsoUserRepository,
 )
+from identity_access_management_context.adapters.secondary.sql import (
+    SqlUserPasswordRepository,
+    SqlSsoUserRepository,
+)
 from identity_access_management_context.domain.exceptions import (
     InvalidTokenException,
     SessionNotFoundException,
@@ -46,11 +50,6 @@ def get_validate_token_usecase(
     request: Request,
     session: Session = Depends(get_session),
 ) -> ValidateUserTokenUseCase:
-    from identity_access_management_context.adapters.secondary.sql import (
-        SqlUserPasswordRepository,
-        SqlSsoUserRepository,
-    )
-    
     user_password_repository = SqlUserPasswordRepository(session)
     token_gateway: TokenGateway = request.app.state.token_gateway
     sso_user_repository = SqlSsoUserRepository(session)

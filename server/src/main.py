@@ -7,11 +7,9 @@ from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
-from audit_logging_context.adapters.secondary.sql import SqlEventRepository
-from audit_logging_context.application.use_cases.store_event_use_case import (
-    StoreEventUseCase,
+from audit_logging_context.adapters.primary.all_events_subscriber import (
+    AllEventsSubscriber,
 )
-from audit_logging_context.application.commands import StoreEventCommand
 from audit_logging_context.adapters.primary.fastapi.routes import (
     get_audit_logging_router,
 )
@@ -152,15 +150,8 @@ async def lifespan(app: FastAPI):
     domain_event_publisher = InMemoryDomainEventPublisher()
     app.state.domain_event_publisher = domain_event_publisher
 
-    # Subscribe to all events with a callable that creates its own session
-    def event_logger(event):
-        with SessionLocal() as session:
-            event_repository = SqlEventRepository(session)
-            store_event_usecase = StoreEventUseCase(event_repository)
-            command = StoreEventCommand(event=event)
-            store_event_usecase.execute(command)
-    
-    domain_event_publisher.subscribe_all(event_logger)
+    # Subscribe to all events with AllEventsSubscriber that creates its own session
+    domain_event_publisher.subscribe_all(AllEventsSubscriber(SessionLocal))
 
     yield
 
