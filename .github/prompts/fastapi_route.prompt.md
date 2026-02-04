@@ -236,6 +236,8 @@ app.include_router(get_<context>_management_router(), prefix="/api")
 ### Test Pattern (MANDATORY)
 
 **Complete Workflow Example**:
+ALWAYS write one test for the whole workflow, not multiples
+
 ```python
 def test_password_crud_workflow(e2e_client, setup):
     """
@@ -418,7 +420,7 @@ E2E Test Workflow:
 
 ### STEP 3: TEST Phase
 1. Create E2E workflow test in `tests/e2e/<context>/`
-2. Test complete workflow (not just single endpoint)
+2. Test complete workflow in one test
 3. Use appropriate fixtures (e2e_client, setup, client_factory)
 4. Assert state at each step
 5. Run test: `uv pytest tests/e2e/<context>/test_<feature>_workflow.py`
