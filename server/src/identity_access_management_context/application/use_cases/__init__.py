@@ -14,6 +14,7 @@ from .delete_group_use_case import DeleteGroupUseCase
 from .list_groups_use_case import ListGroupsUseCase
 from .get_group_use_case import GetGroupUseCase
 from .update_group_use_case import UpdateGroupUseCase
+from .promote_admin_use_case import PromoteAdminUseCase
 from .sso.is_sso_config_set_use_case import IsSsoConfigSetUseCase
 
 # Import from subdirectories
@@ -42,6 +43,7 @@ __all__ = [
     "ListGroupsUseCase",
     "GetGroupUseCase",
     "UpdateGroupUseCase",
+    "PromoteAdminUseCase",
     "IsSsoConfigSetUseCase",
     "AdminLoginUseCase",
     "RegisterAdminWithPasswordUseCase",

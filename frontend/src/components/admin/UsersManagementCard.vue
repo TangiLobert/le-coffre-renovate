@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useToast } from 'primevue';
 import CreateUserModal from '@/components/modals/CreateUserModal.vue';
-import { listUsersUsersGet } from '@/client/sdk.gen';
+import ConfirmationModal from '@/components/modals/ConfirmationModal.vue';
+import { listUsersUsersGet, promoteUserToAdminUsersUserIdPromoteAdminPost } from '@/client/sdk.gen';
 import type { ListUserResponse } from '@/client/types.gen';
 
 const toast = useToast();
@@ -11,6 +12,17 @@ const toast = useToast();
 const users = ref<ListUserResponse[]>([]);
 const loading = ref(false);
 const showCreateUserModal = ref(false);
+const showPromoteAdminModal = ref(false);
+const promotingUserId = ref<string | null>(null);
+const userToPromote = ref<ListUserResponse | null>(null);
+
+const promoteModalQuestion = computed(() => {
+  return `Are you sure you want to promote "${userToPromote.value?.username}" to ADMIN?`;
+});
+
+const promoteModalDescription = computed(() => {
+  return `This will grant them full administrative privileges.\nThey will be able to manage users, groups, and system settings.`;
+});
 
 // Fetch users
 const fetchUsers = async () => {
@@ -39,6 +51,66 @@ const fetchUsers = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Promote user to admin
+const showPromoteModal = (user: ListUserResponse) => {
+  userToPromote.value = user;
+  showPromoteAdminModal.value = true;
+};
+
+const handlePromoteConfirmed = async () => {
+  if (!userToPromote.value) return;
+
+  const userId = userToPromote.value.id;
+  const username = userToPromote.value.username;
+
+  promotingUserId.value = userId;
+  try {
+    const response = await promoteUserToAdminUsersUserIdPromoteAdminPost({
+      path: { user_id: userId }
+    });
+
+    if (response.response.ok) {
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: `User ${username} has been promoted to ADMIN`,
+        life: 5000
+      });
+      // Refresh the user list
+      await fetchUsers();
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to promote user',
+        life: 5000
+      });
+    }
+  } catch (error: unknown) {
+    console.error('Failed to promote user:', error);
+    const errorDetail = error && typeof error === 'object' && 'response' in error &&
+      error.response && typeof error.response === 'object' && 'data' in error.response &&
+      error.response.data && typeof error.response.data === 'object' && 'detail' in error.response.data
+      ? String(error.response.data.detail)
+      : 'Failed to promote user';
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: errorDetail,
+      life: 5000
+    });
+  } finally {
+    promotingUserId.value = null;
+    userToPromote.value = null;
+  }
+};
+
+// Check if user is already an admin
+const isAdmin = (user: ListUserResponse) => {
+  console.log(user.roles);
+  return user.roles?.includes('admin') || false;
 };
 
 // Handle user created
@@ -84,8 +156,10 @@ onMounted(() => {
         <Column field="username" header="Username" sortable>
           <template #body="slotProps">
             <div class="flex items-center gap-2">
-              <i class="pi pi-user text-muted-color"></i>
+              <i v-if="isAdmin(slotProps.data)" class="pi pi-shield text-red-500"></i>
+              <i v-else class="pi pi-user text-muted-color"></i>
               <span class="font-semibold">{{ slotProps.data.username }}</span>
+              <span v-if="isAdmin(slotProps.data)" class="text-red-500 text-xs font-semibold">(ADMIN)</span>
             </div>
           </template>
         </Column>
@@ -110,10 +184,31 @@ onMounted(() => {
             <span class="font-mono text-sm text-muted-color">{{ slotProps.data.id }}</span>
           </template>
         </Column>
+
+        <Column field="roles" header="Role" sortable>
+          <template #body="slotProps">
+            <Tag v-if="isAdmin(slotProps.data)" severity="danger" value="ADMIN" icon="pi pi-shield" />
+            <Tag v-else severity="secondary" value="USER" icon="pi pi-user" />
+          </template>
+        </Column>
+
+        <Column header="Actions" :exportable="false">
+          <template #body="slotProps">
+            <Button icon="pi pi-shield" label="Promote to Admin" size="small" severity="warning" outlined
+              :loading="promotingUserId === slotProps.data.id" :disabled="isAdmin(slotProps.data)"
+              @click="showPromoteModal(slotProps.data)" />
+          </template>
+        </Column>
       </DataTable>
 
       <!-- Create User Modal -->
       <CreateUserModal v-model:visible="showCreateUserModal" @created="handleUserCreated" />
+
+      <!-- Promote Admin Confirmation Modal -->
+      <ConfirmationModal v-model:visible="showPromoteAdminModal" title="Promote User to Admin"
+        :question="promoteModalQuestion" :description="promoteModalDescription" confirm-label="Promote to Admin"
+        cancel-label="Cancel" severity="warning" icon="pi pi-shield" :countdown-seconds="3"
+        @confirm="handlePromoteConfirmed" />
     </template>
   </Card>
 </template>

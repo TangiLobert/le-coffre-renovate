@@ -126,6 +126,13 @@ class AdminAlreadyExistsException(IdentityAccessManagementDomainError):
     pass
 
 
+class UserAlreadyAdminException(IdentityAccessManagementDomainError):
+    """Raised when attempting to promote a user who is already an admin"""
+
+    def __init__(self, user_id: UUID):
+        super().__init__(f"User '{user_id}' is already an admin")
+
+
 # Legacy aliases for backward compatibility during migration
 UserNotFoundError = UserNotFoundException
 UserAlreadyExistsError = UserAlreadyExistsException
