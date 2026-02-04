@@ -1,5 +1,6 @@
 from fastapi import Depends
 from starlette.requests import Request
+from sqlmodel import Session
 
 from identity_access_management_context.application.use_cases import (
     GetUserUseCase,
@@ -38,27 +39,59 @@ from identity_access_management_context.application.gateways import (
     GroupMemberRepository,
     GroupUsageGateway,
 )
+from identity_access_management_context.adapters.secondary.sql import (
+    SqlUserRepository,
+    SqlUserPasswordRepository,
+    SqlGroupRepository,
+    SqlGroupMemberRepository,
+    SqlSsoUserRepository,
+    SqlSsoConfigurationRepository,
+)
+from identity_access_management_context.adapters.secondary.private_api import (
+    PrivateApiGroupUsageGateway,
+)
+from password_management_context.adapters.secondary import (
+    SqlPasswordPermissionsRepository,
+)
+from password_management_context.application.use_cases import IsGroupUsedUseCase
+from password_management_context.adapters.primary.private_api import GroupUsageApi
 from shared_kernel.application.gateways import TimeGateway
+from shared_kernel.adapters.primary.dependencies import get_session
 
 
-def get_group_repository(request: Request) -> GroupRepository:
-    return request.app.state.group_repository
+def get_group_repository(session: Session = Depends(get_session)) -> GroupRepository:
+    return SqlGroupRepository(session)
 
 
-def get_group_member_repository(request: Request) -> GroupMemberRepository:
-    return request.app.state.group_member_repository
+def get_group_member_repository(session: Session = Depends(get_session)) -> GroupMemberRepository:
+    return SqlGroupMemberRepository(session)
 
 
-def get_group_usage_gateway(request: Request) -> GroupUsageGateway:
-    return request.app.state.group_usage_gateway
+def get_group_usage_gateway(session: Session = Depends(get_session)) -> GroupUsageGateway:
+    # Create the password permissions repository with session
+    password_permissions_repository = SqlPasswordPermissionsRepository(session)
+    # Create the use case
+    is_group_used_use_case = IsGroupUsedUseCase(password_permissions_repository)
+    # Create the API
+    group_usage_api = GroupUsageApi(is_group_used_use_case)
+    # Create and return the gateway
+    return PrivateApiGroupUsageGateway(group_usage_api)
 
 
-def get_user_repository(request: Request) -> UserRepository:
-    return request.app.state.user_repository
+def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
+    return SqlUserRepository(session)
 
 
-def get_user_password_repository(request: Request) -> UserPasswordRepository:
-    return request.app.state.user_password_repository
+def get_user_password_repository(session: Session = Depends(get_session)) -> UserPasswordRepository:
+    return SqlUserPasswordRepository(session)
+
+
+def get_sso_user_repository(session: Session = Depends(get_session)) -> SsoUserRepository:
+    return SqlSsoUserRepository(session)
+
+
+def get_sso_configuration_repository(session: Session = Depends(get_session)) -> SsoConfigurationRepository:
+    return SqlSsoConfigurationRepository(session)
 
 
 def get_password_hashing_gateway(request: Request) -> PasswordHashingGateway:
@@ -71,14 +104,6 @@ def get_token_gateway(request: Request) -> TokenGateway:
 
 def get_sso_gateway(request: Request) -> SsoGateway:
     return request.app.state.sso_gateway
-
-
-def get_sso_user_repository(request: Request) -> SsoUserRepository:
-    return request.app.state.sso_user_repository
-
-
-def get_sso_configuration_repository(request: Request) -> SsoConfigurationRepository:
-    return request.app.state.sso_configuration_repository
 
 
 def get_time_provider(request: Request) -> TimeGateway:

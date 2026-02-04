@@ -1,5 +1,6 @@
 from fastapi import Depends
 from starlette.requests import Request
+from sqlmodel import Session
 from identity_access_management_context.application.gateways import UserRepository
 from password_management_context.application.gateways import (
     PasswordRepository,
@@ -19,11 +20,16 @@ from password_management_context.application.use_cases import (
 from password_management_context.application.gateways.password_permissions_repository import (
     PasswordPermissionsRepository,
 )
+from password_management_context.adapters.secondary import (
+    SqlPasswordRepository,
+    SqlPasswordPermissionsRepository,
+)
 from shared_kernel.application.gateways import DomainEventPublisher
+from shared_kernel.adapters.primary.dependencies import get_session
 
 
-def get_password_repository(request: Request) -> PasswordRepository:
-    return request.app.state.password_repository
+def get_password_repository(session: Session = Depends(get_session)) -> PasswordRepository:
+    return SqlPasswordRepository(session)
 
 
 def get_password_encryption_gateway(request: Request) -> PasswordEncryptionGateway:
@@ -31,13 +37,23 @@ def get_password_encryption_gateway(request: Request) -> PasswordEncryptionGatew
 
 
 def get_password_permissions_repository(
-    request: Request,
+    session: Session = Depends(get_session),
 ) -> PasswordPermissionsRepository:
-    return request.app.state.password_permissions_repository
+    return SqlPasswordPermissionsRepository(session)
 
 
-def get_group_access_gateway(request: Request) -> GroupAccessGateway:
-    return request.app.state.group_access_gateway
+def get_group_access_gateway(session: Session = Depends(get_session)) -> GroupAccessGateway:
+    from identity_access_management_context.adapters.secondary.sql import (
+        SqlGroupRepository,
+        SqlGroupMemberRepository,
+    )
+    from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
+        GroupAccessGatewayAdapter,
+    )
+    
+    group_repository = SqlGroupRepository(session)
+    group_member_repository = SqlGroupMemberRepository(session)
+    return GroupAccessGatewayAdapter(group_repository, group_member_repository)
 
 
 def get_event_publisher(request: Request) -> DomainEventPublisher:
@@ -132,8 +148,11 @@ def get_delete_password_usecase(
     )
 
 
-def get_user_repository(request: Request) -> UserRepository:
-    return request.app.state.user_repository
+def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
+    from identity_access_management_context.adapters.secondary.sql import (
+        SqlUserRepository,
+    )
+    return SqlUserRepository(session)
 
 
 def get_share_access_usecase(

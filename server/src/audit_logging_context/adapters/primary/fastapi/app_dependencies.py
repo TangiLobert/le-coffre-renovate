@@ -1,13 +1,16 @@
 from fastapi import Depends
 from starlette.requests import Request
+from sqlmodel import Session
 
 from audit_logging_context.application.gateways import EventRepository
 from audit_logging_context.application.use_cases import ListEventUseCase
+from audit_logging_context.adapters.secondary.sql import SqlEventRepository
+from shared_kernel.adapters.primary.dependencies import get_session
 
 
-def get_event_repository(request: Request) -> EventRepository:
-    """Get event repository from app state."""
-    return request.app.state.event_repository
+def get_event_repository(session: Session = Depends(get_session)) -> EventRepository:
+    """Get event repository with session."""
+    return SqlEventRepository(session)
 
 
 def get_list_event_usecase(

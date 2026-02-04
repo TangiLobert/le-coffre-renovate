@@ -1,7 +1,8 @@
 from fastapi import Depends, HTTPException
 from fastapi.security.api_key import APIKeyCookie
-from typing import Optional
+from typing import Optional, Generator
 from starlette.requests import Request
+from sqlmodel import Session
 
 from identity_access_management_context.application.use_cases import (
     ValidateUserTokenUseCase,
@@ -31,12 +32,28 @@ cookie_scheme = APIKeyCookie(
 )
 
 
-def get_validate_token_usecase(request: Request) -> ValidateUserTokenUseCase:
-    user_password_repository: UserPasswordRepository = (
-        request.app.state.user_password_repository
+def get_session(request: Request) -> Generator[Session, None, None]:
+    """
+    Dependency that provides a database session for each request.
+    Creates a new session from the engine stored in app.state.
+    """
+    engine = request.app.state.engine
+    with Session(engine) as session:
+        yield session
+
+
+def get_validate_token_usecase(
+    request: Request,
+    session: Session = Depends(get_session),
+) -> ValidateUserTokenUseCase:
+    from identity_access_management_context.adapters.secondary.sql import (
+        SqlUserPasswordRepository,
+        SqlSsoUserRepository,
     )
+    
+    user_password_repository = SqlUserPasswordRepository(session)
     token_gateway: TokenGateway = request.app.state.token_gateway
-    sso_user_repository: SsoUserRepository = request.app.state.sso_user_repository
+    sso_user_repository = SqlSsoUserRepository(session)
 
     return ValidateUserTokenUseCase(
         user_password_repository,
