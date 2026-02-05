@@ -32,7 +32,6 @@ from vault_management_context.adapters.primary.private_api import EncryptionApi
 from vault_management_context.adapters.secondary import (
     CryptoShamirGateway,
     AesEncryptionGateway,
-    SqlVaultRepository,
     InMemoryVaultSessionGateway,
 )
 from vault_management_context.application.use_cases import (
@@ -43,33 +42,15 @@ from vault_management_context.application.use_cases import (
 from password_management_context.adapters.primary.fastapi.routes import (
     get_password_management_router,
 )
-from password_management_context.adapters.primary.private_api import GroupUsageApi
 from password_management_context.adapters.secondary import (
-    SqlPasswordRepository,
-    SqlPasswordPermissionsRepository,
     PrivateApiPasswordEncryptionGateway,
 )
-from password_management_context.application.use_cases import IsGroupUsedUseCase
 
 from identity_access_management_context.adapters.secondary import (
-    SqlUserRepository,
     BcryptHashingGateway,
     JwtTokenGateway,
-    SqlUserPasswordRepository,
-    SqlSsoUserRepository,
-    SqlSsoConfigurationRepository,
     OAuth2SsoGateway,
     PrivateApiSsoEncryptionGateway,
-)
-from identity_access_management_context.adapters.secondary.private_api import (
-    PrivateApiGroupUsageGateway,
-)
-from identity_access_management_context.adapters.secondary.sql import (
-    SqlGroupRepository,
-    SqlGroupMemberRepository,
-)
-from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
-    GroupAccessGatewayAdapter,
 )
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
@@ -114,9 +95,7 @@ async def lifespan(app: FastAPI):
     encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
     decrypt_use_case = DecryptUseCase(encryption_gateway, vault_session_gateway)
     encryption_api = EncryptionApi(encrypt_use_case, decrypt_use_case)
-    password_encryption_gateway = PrivateApiPasswordEncryptionGateway(
-        encryption_api
-    )
+    password_encryption_gateway = PrivateApiPasswordEncryptionGateway(encryption_api)
 
     app.state.password_encryption_gateway = password_encryption_gateway
 
