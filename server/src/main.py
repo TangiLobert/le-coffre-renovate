@@ -3,15 +3,12 @@ from pathlib import Path
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from sqlmodel import Session, create_engine
+from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
 from audit_logging_context.adapters.primary.all_events_subscriber import (
     AllEventsSubscriber,
-)
-from audit_logging_context.adapters.secondary.sql import SqlEventRepository
-from audit_logging_context.application.use_cases.store_event_use_case import (
-    StoreEventUseCase,
 )
 from audit_logging_context.adapters.primary.fastapi.routes import (
     get_audit_logging_router,
@@ -35,7 +32,6 @@ from vault_management_context.adapters.primary.private_api import EncryptionApi
 from vault_management_context.adapters.secondary import (
     CryptoShamirGateway,
     AesEncryptionGateway,
-    SqlVaultRepository,
     InMemoryVaultSessionGateway,
 )
 from vault_management_context.application.use_cases import (
@@ -46,33 +42,15 @@ from vault_management_context.application.use_cases import (
 from password_management_context.adapters.primary.fastapi.routes import (
     get_password_management_router,
 )
-from password_management_context.adapters.primary.private_api import GroupUsageApi
 from password_management_context.adapters.secondary import (
-    SqlPasswordRepository,
-    SqlPasswordPermissionsRepository,
     PrivateApiPasswordEncryptionGateway,
 )
-from password_management_context.application.use_cases import IsGroupUsedUseCase
 
 from identity_access_management_context.adapters.secondary import (
-    SqlUserRepository,
     BcryptHashingGateway,
     JwtTokenGateway,
-    SqlUserPasswordRepository,
-    SqlSsoUserRepository,
-    SqlSsoConfigurationRepository,
     OAuth2SsoGateway,
     PrivateApiSsoEncryptionGateway,
-)
-from identity_access_management_context.adapters.secondary.private_api import (
-    PrivateApiGroupUsageGateway,
-)
-from identity_access_management_context.adapters.secondary.sql import (
-    SqlGroupRepository,
-    SqlGroupMemberRepository,
-)
-from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
-    GroupAccessGatewayAdapter,
 )
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_user_management_router,
@@ -100,91 +78,61 @@ async def lifespan(app: FastAPI):
 
     engine = create_engine(get_database_url())
 
-    with Session(engine) as session:
-        # Vault management dependencies
-        vault_repository = SqlVaultRepository(session)
-        shamir_gateway = CryptoShamirGateway()
-        encryption_gateway = AesEncryptionGateway()
-        vault_session_gateway = InMemoryVaultSessionGateway()
+    # Create session maker for creating sessions per request
+    SessionLocal = sessionmaker(bind=engine, class_=Session, expire_on_commit=False)
+    app.state.session_maker = SessionLocal
 
-        app.state.vault_repository = vault_repository
-        app.state.shamir_gateway = shamir_gateway
-        app.state.encryption_gateway = encryption_gateway
-        app.state.vault_session_gateway = vault_session_gateway
+    # Stateless gateways that don't need a session
+    shamir_gateway = CryptoShamirGateway()
+    encryption_gateway = AesEncryptionGateway()
+    vault_session_gateway = InMemoryVaultSessionGateway()
 
-        # Password management dependencies
-        password_repository = SqlPasswordRepository(session)
-        password_permissions_repository = SqlPasswordPermissionsRepository(session)
-        encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
-        decrypt_use_case = DecryptUseCase(encryption_gateway, vault_session_gateway)
-        encryption_api = EncryptionApi(encrypt_use_case, decrypt_use_case)
-        password_encryption_gateway = PrivateApiPasswordEncryptionGateway(
-            encryption_api
-        )
+    app.state.shamir_gateway = shamir_gateway
+    app.state.encryption_gateway = encryption_gateway
+    app.state.vault_session_gateway = vault_session_gateway
 
-        app.state.password_repository = password_repository
-        app.state.password_permissions_repository = password_permissions_repository
-        app.state.password_encryption_gateway = password_encryption_gateway
+    # Encryption use cases and API (stateless)
+    encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
+    decrypt_use_case = DecryptUseCase(encryption_gateway, vault_session_gateway)
+    encryption_api = EncryptionApi(encrypt_use_case, decrypt_use_case)
+    password_encryption_gateway = PrivateApiPasswordEncryptionGateway(encryption_api)
 
-        # Group usage gateway chain (password management -> IAM)
-        is_group_used_use_case = IsGroupUsedUseCase(password_permissions_repository)
-        group_usage_api = GroupUsageApi(is_group_used_use_case)
-        group_usage_gateway = PrivateApiGroupUsageGateway(group_usage_api)
+    app.state.password_encryption_gateway = password_encryption_gateway
 
-        # IAM dependencies
-        app.state.time_provider = UtcTimeGateway()
-        # IAM uses SSO encryption gateway (same underlying API)
-        sso_encryption_gateway = PrivateApiSsoEncryptionGateway(encryption_api)
-        app.state.sso_encryption_gateway = sso_encryption_gateway
+    # IAM dependencies (stateless)
+    app.state.time_provider = UtcTimeGateway()
+    # IAM uses SSO encryption gateway (same underlying API)
+    sso_encryption_gateway = PrivateApiSsoEncryptionGateway(encryption_api)
+    app.state.sso_encryption_gateway = sso_encryption_gateway
 
-        user_repository = SqlUserRepository(session)
-        user_password_repository = SqlUserPasswordRepository(session)
-        group_repository = SqlGroupRepository(session)
-        group_member_repository = SqlGroupMemberRepository(session)
-        group_access_gateway = GroupAccessGatewayAdapter(
-            group_repository, group_member_repository
-        )
-        password_hashing_gateway = BcryptHashingGateway()
+    password_hashing_gateway = BcryptHashingGateway()
+    app.state.password_hashing_gateway = password_hashing_gateway
 
-        app.state.user_repository = user_repository
-        app.state.group_repository = group_repository
-        app.state.group_member_repository = group_member_repository
-        app.state.group_access_gateway = group_access_gateway
-        app.state.group_usage_gateway = group_usage_gateway
+    token_gateway = JwtTokenGateway(
+        secret_key=get_jwt_secret_key(),
+        algorithm=get_jwt_algorithm(),
+        access_token_expiration_minutes=get_jwt_access_token_expiration_minutes(),
+        refresh_token_expiration_days=get_jwt_refresh_token_expiration_days(),
+    )
+    app.state.token_gateway = token_gateway
 
-        token_gateway = JwtTokenGateway(
-            secret_key=get_jwt_secret_key(),
-            algorithm=get_jwt_algorithm(),
-            access_token_expiration_minutes=get_jwt_access_token_expiration_minutes(),
-            refresh_token_expiration_days=get_jwt_refresh_token_expiration_days(),
-        )
+    # SSO Gateway (stateless)
+    base_url = os.getenv("APP_BASE_URL", "http://localhost:8123")
+    sso_gateway = OAuth2SsoGateway(
+        redirect_uri=f"{base_url}/sso/callback",
+        scope="openid email profile",
+        provider="oauth2",
+    )
+    app.state.sso_gateway = sso_gateway
 
-        # SSO
-        sso_configuration_repository = SqlSsoConfigurationRepository(session)
-        base_url = os.getenv("APP_BASE_URL", "http://localhost:8123")
-        sso_gateway = OAuth2SsoGateway(
-            redirect_uri=f"{base_url}/sso/callback",
-            scope="openid email profile",
-            provider="oauth2",
-        )
-        sso_user_repository = SqlSsoUserRepository(session)
+    # Domain event publisher (stateless)
+    domain_event_publisher = InMemoryDomainEventPublisher()
+    app.state.domain_event_publisher = domain_event_publisher
 
-        app.state.user_password_repository = user_password_repository
-        app.state.password_hashing_gateway = password_hashing_gateway
-        app.state.token_gateway = token_gateway
-        app.state.sso_gateway = sso_gateway
-        app.state.sso_user_repository = sso_user_repository
-        app.state.sso_configuration_repository = sso_configuration_repository
+    # Subscribe to all events with AllEventsSubscriber that creates its own session
+    domain_event_publisher.subscribe_all(AllEventsSubscriber(SessionLocal))
 
-        app.state.event_repository = SqlEventRepository(session)
-
-        store_event_usecase = StoreEventUseCase(app.state.event_repository)
-        # Domain event publisher
-        domain_event_publisher = InMemoryDomainEventPublisher()
-        domain_event_publisher.subscribe_all(AllEventsSubscriber(store_event_usecase))
-        app.state.domain_event_publisher = domain_event_publisher
-
-        yield
+    yield
 
 
 app = FastAPI(lifespan=lifespan, root_path="/api")

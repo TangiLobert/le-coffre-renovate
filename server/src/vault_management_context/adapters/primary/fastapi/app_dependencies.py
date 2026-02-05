@@ -1,5 +1,6 @@
 from fastapi import Depends
 from starlette.requests import Request
+from sqlmodel import Session
 
 from vault_management_context.application.use_cases import (
     CreateVaultUseCase,
@@ -14,10 +15,14 @@ from vault_management_context.application.gateways import (
     EncryptionGateway,
     VaultSessionGateway,
 )
+from vault_management_context.adapters.secondary import (
+    SqlVaultRepository,
+)
+from shared_kernel.adapters.primary.dependencies import get_session
 
 
-def get_vault_repository(request: Request) -> VaultRepository:
-    return request.app.state.vault_repository
+def get_vault_repository(session: Session = Depends(get_session)) -> VaultRepository:
+    return SqlVaultRepository(session)
 
 
 def get_shamir_gateway(request: Request) -> ShamirGateway:
