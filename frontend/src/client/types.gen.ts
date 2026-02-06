@@ -751,6 +751,20 @@ export type UpdatePasswordRequest = {
 };
 
 /**
+ * UpdateUserPasswordRequest
+ */
+export type UpdateUserPasswordRequest = {
+    /**
+     * Old Password
+     */
+    old_password: string;
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
  * UpdateUserRequest
  */
 export type UpdateUserRequest = {
@@ -1280,6 +1294,31 @@ export type GetUserMeUsersMeGetResponses = {
 };
 
 export type GetUserMeUsersMeGetResponse = GetUserMeUsersMeGetResponses[keyof GetUserMeUsersMeGetResponses];
+
+export type UpdateUserPasswordUsersMePasswordPutData = {
+    body: UpdateUserPasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/users/me/password';
+};
+
+export type UpdateUserPasswordUsersMePasswordPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateUserPasswordUsersMePasswordPutError = UpdateUserPasswordUsersMePasswordPutErrors[keyof UpdateUserPasswordUsersMePasswordPutErrors];
+
+export type UpdateUserPasswordUsersMePasswordPutResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type UpdateUserPasswordUsersMePasswordPutResponse = UpdateUserPasswordUsersMePasswordPutResponses[keyof UpdateUserPasswordUsersMePasswordPutResponses];
 
 export type DeleteUserUsersUserIdDeleteData = {
     body?: never;

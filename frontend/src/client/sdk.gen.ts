@@ -350,6 +350,35 @@ export const getUserMeUsersMeGet = <ThrowOnError extends boolean = false>(option
 });
 
 /**
+ * Update current user's password
+ *
+ * Update the authenticated user's password.
+ *
+ * - **old_password**: Current password for verification
+ * - **new_password**: New password to set
+ * - **Authentication**: Requires authentication via access_token cookie
+ *
+ * Returns status code 204 (No Content) on successful password update.
+ *
+ * Raises:
+ * - 401: If old password is incorrect
+ * - 404: If user not found
+ */
+export const updateUserPasswordUsersMePasswordPut = <ThrowOnError extends boolean = false>(options: Options<UpdateUserPasswordUsersMePasswordPutData, ThrowOnError>) => (options.client ?? client).put<UpdateUserPasswordUsersMePasswordPutResponses, UpdateUserPasswordUsersMePasswordPutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/users/me/password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Delete a user by ID
  *
  * Delete a user by its ID.
