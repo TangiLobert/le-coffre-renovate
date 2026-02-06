@@ -29,7 +29,7 @@ const fetchUserInfo = async () => {
       user.value = response.data;
     }
   } catch (err) {
-    error.value = 'Erreur lors du chargement des informations utilisateur';
+    error.value = 'Error while getting user informations';
     console.error('Error fetching user info:', err);
   } finally {
     loading.value = false;
@@ -49,8 +49,8 @@ const updatePassword = async () => {
   if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
     toast.add({
       severity: 'error',
-      summary: 'Erreur',
-      detail: 'Tous les champs sont requis',
+      summary: 'Error',
+      detail: 'All fields are required',
       life: 3000
     });
     return;
@@ -59,8 +59,8 @@ const updatePassword = async () => {
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
     toast.add({
       severity: 'error',
-      summary: 'Erreur',
-      detail: 'Les mots de passe ne correspondent pas',
+      summary: 'Error',
+      detail: 'Passwords don\'t match',
       life: 3000
     });
     return;
@@ -69,8 +69,8 @@ const updatePassword = async () => {
   if (passwordForm.value.newPassword.length < 8) {
     toast.add({
       severity: 'error',
-      summary: 'Erreur',
-      detail: 'Le nouveau mot de passe doit contenir au moins 8 caractères',
+      summary: 'Error',
+      detail: 'New password needs at least 8 characters',
       life: 3000
     });
     return;
@@ -87,10 +87,10 @@ const updatePassword = async () => {
 
     if (response.error) {
       const errorData = response.error as { detail?: string };
-      const errorMessage = errorData?.detail || 'Erreur lors de la mise à jour du mot de passe';
+      const errorMessage = errorData?.detail || 'Error while updating password';
       toast.add({
         severity: 'error',
-        summary: 'Erreur',
+        summary: 'Error',
         detail: errorMessage,
         life: 3000
       });
@@ -99,8 +99,8 @@ const updatePassword = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Succès',
-      detail: 'Mot de passe mis à jour avec succès',
+      summary: 'Success',
+      detail: 'Password updated successfully',
       life: 3000
     });
 
@@ -110,8 +110,8 @@ const updatePassword = async () => {
     console.error('Error updating password:', err);
     toast.add({
       severity: 'error',
-      summary: 'Erreur',
-      detail: 'Une erreur inattendue est survenue',
+      summary: 'Error',
+      detail: 'An unexpected error occurred',
       life: 3000
     });
   } finally {
@@ -151,7 +151,7 @@ onMounted(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium mb-1">
-              Nom d'utilisateur
+              Username
             </label>
             <p>{{ user.username }}</p>
           </div>
@@ -186,45 +186,45 @@ onMounted(() => {
         <!-- Password Update Section -->
         <div class="border-t pt-4 mt-6">
           <h3 class="text-lg font-semibold mb-4">Sécurité</h3>
-          <Button label="Changer mon mot de passe" icon="pi pi-key" @click="showPasswordDialog = true"
+          <Button label="Change Password" icon="pi pi-key" @click="showPasswordDialog = true"
             class="p-button-outlined" />
         </div>
       </div>
 
       <!-- Password Update Dialog -->
-      <Dialog v-model:visible="showPasswordDialog" header="Changer mon mot de passe" :modal="true" :closable="true"
+      <Dialog v-model:visible="showPasswordDialog" header="Change Password" :modal="true" :closable="true"
         :style="{ width: '450px' }" @hide="resetPasswordForm">
         <div class="space-y-4">
           <div>
             <label for="oldPassword" class="block text-sm font-medium mb-2">
-              Mot de passe actuel
+              Current Password
             </label>
             <Password id="oldPassword" v-model="passwordForm.oldPassword" :feedback="false" toggleMask
-              placeholder="Entrez votre mot de passe actuel" class="w-full" inputClass="w-full" />
+              placeholder="Enter your current password" class="w-full" inputClass="w-full" />
           </div>
 
           <div>
             <label for="newPassword" class="block text-sm font-medium mb-2">
-              Nouveau mot de passe
+              New Password
             </label>
-            <Password id="newPassword" v-model="passwordForm.newPassword" toggleMask
-              placeholder="Entrez votre nouveau mot de passe" class="w-full" inputClass="w-full" />
-            <small class="text-muted-color">Minimum 8 caractères</small>
+            <Password id="newPassword" v-model="passwordForm.newPassword" toggleMask placeholder="Enter new password"
+              class="w-full" inputClass="w-full" />
+            <small class="text-muted-color">Minimum 8 characters</small>
           </div>
 
           <div>
             <label for="confirmPassword" class="block text-sm font-medium mb-2">
-              Confirmer le nouveau mot de passe
+              Confirm new Password
             </label>
             <Password id="confirmPassword" v-model="passwordForm.confirmPassword" :feedback="false" toggleMask
-              placeholder="Confirmez votre nouveau mot de passe" class="w-full" inputClass="w-full" />
+              placeholder="Confirm new password" class="w-full" inputClass="w-full" />
           </div>
         </div>
 
         <template #footer>
-          <Button label="Annuler" icon="pi pi-times" @click="showPasswordDialog = false" class="p-button-text"
+          <Button label="Cancel" icon="pi pi-times" @click="showPasswordDialog = false" class="p-button-text"
             :disabled="passwordLoading" />
-          <Button label="Mettre à jour" icon="pi pi-check" @click="updatePassword" :loading="passwordLoading" />
+          <Button label="Update" icon="pi pi-check" @click="updatePassword" :loading="passwordLoading" />
         </template>
       </Dialog>
     </div>
