@@ -21,18 +21,9 @@
       </div>
 
       <!-- Expanded folder content -->
-      <div 
-        v-if="isOpen"
-        class="mt-4 pt-4 border-t border-surface space-y-"
-      >
-        <PasswordCard
-          v-for="password in folder.passwords"
-          :key="password.id"
-          :password="password"
-          @edit="handleEdit"
-          @share="handleShare"
-          @deleted="handleDeleted"
-        />
+      <div v-if="isOpen" class="mt-4 pt-4 border-t border-surface space-y-">
+        <PasswordCard v-for="password in folder.passwords" :key="password.id" :password="password" @edit="handleEdit"
+          @share="handleShare" @history="handleHistory" @deleted="handleDeleted" />
       </div>
     </template>
   </Card>
@@ -55,6 +46,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'edit', password: GetPasswordListResponse): void;
   (e: 'share', password: GetPasswordListResponse): void;
+  (e: 'history', password: GetPasswordListResponse): void;
   (e: 'deleted'): void;
 }>();
 
@@ -70,6 +62,10 @@ const handleEdit = (password: GetPasswordListResponse) => {
 
 const handleShare = (password: GetPasswordListResponse) => {
   emit('share', password);
+};
+
+const handleHistory = (password: GetPasswordListResponse) => {
+  emit('history', password);
 };
 
 const handleDeleted = () => {

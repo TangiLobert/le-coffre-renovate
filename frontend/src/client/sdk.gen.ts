@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddMemberToGroupGroupsGroupIdMembersPostData, AddMemberToGroupGroupsGroupIdMembersPostErrors, AddMemberToGroupGroupsGroupIdMembersPostResponses, AddOwnerToGroupGroupsGroupIdOwnersPostData, AddOwnerToGroupGroupsGroupIdOwnersPostErrors, AddOwnerToGroupGroupsGroupIdOwnersPostResponses, AdminLoginAuthLoginPostData, AdminLoginAuthLoginPostErrors, AdminLoginAuthLoginPostResponses, ConfigureSsoProviderAuthSsoConfigurePostData, ConfigureSsoProviderAuthSsoConfigurePostErrors, ConfigureSsoProviderAuthSsoConfigurePostResponses, CreateGroupGroupsPostData, CreateGroupGroupsPostErrors, CreateGroupGroupsPostResponses, CreatePasswordPasswordsPostData, CreatePasswordPasswordsPostErrors, CreatePasswordPasswordsPostResponses, CreateUserUsersPostData, CreateUserUsersPostErrors, CreateUserUsersPostResponses, CreateVaultVaultSetupPostData, CreateVaultVaultSetupPostErrors, CreateVaultVaultSetupPostResponses, DeleteGroupGroupsGroupIdDeleteData, DeleteGroupGroupsGroupIdDeleteErrors, DeleteGroupGroupsGroupIdDeleteResponses, DeletePasswordPasswordsPasswordIdDeleteData, DeletePasswordPasswordsPasswordIdDeleteErrors, DeletePasswordPasswordsPasswordIdDeleteResponses, DeleteUserUsersUserIdDeleteData, DeleteUserUsersUserIdDeleteErrors, DeleteUserUsersUserIdDeleteResponses, GetGroupGroupsGroupIdGetData, GetGroupGroupsGroupIdGetErrors, GetGroupGroupsGroupIdGetResponses, GetPasswordPasswordsPasswordIdGetData, GetPasswordPasswordsPasswordIdGetErrors, GetPasswordPasswordsPasswordIdGetResponses, GetSsoUrlAuthSsoUrlGetData, GetSsoUrlAuthSsoUrlGetResponses, GetUserMeUsersMeGetData, GetUserMeUsersMeGetResponses, GetUserUsersUserIdGetData, GetUserUsersUserIdGetErrors, GetUserUsersUserIdGetResponses, GetVaultStatusVaultStatusGetData, GetVaultStatusVaultStatusGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, IsSsoConfigSetAuthSsoIsConfiguredGetData, IsSsoConfigSetAuthSsoIsConfiguredGetResponses, ListEventsEventsGetData, ListEventsEventsGetErrors, ListEventsEventsGetResponses, ListGroupsGroupsGetData, ListGroupsGroupsGetErrors, ListGroupsGroupsGetResponses, ListPasswordAccessPasswordsPasswordIdAccessGetData, ListPasswordAccessPasswordsPasswordIdAccessGetErrors, ListPasswordAccessPasswordsPasswordIdAccessGetResponses, ListPasswordsPasswordsListGetData, ListPasswordsPasswordsListGetErrors, ListPasswordsPasswordsListGetResponses, ListUsersUsersGetData, ListUsersUsersGetResponses, LockVaultVaultLockPostData, LockVaultVaultLockPostResponses, PromoteUserToAdminUsersUserIdPromoteAdminPostData, PromoteUserToAdminUsersUserIdPromoteAdminPostErrors, PromoteUserToAdminUsersUserIdPromoteAdminPostResponses, RefreshAccessTokenAuthRefreshTokenPostData, RefreshAccessTokenAuthRefreshTokenPostErrors, RefreshAccessTokenAuthRefreshTokenPostResponses, RegisterAdminAuthRegisterAdminPostData, RegisterAdminAuthRegisterAdminPostErrors, RegisterAdminAuthRegisterAdminPostResponses, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteData, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteErrors, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses, SharePasswordPasswordsPasswordIdSharePostData, SharePasswordPasswordsPasswordIdSharePostErrors, SharePasswordPasswordsPasswordIdSharePostResponses, SsoCallbackAuthSsoCallbackGetData, SsoCallbackAuthSsoCallbackGetErrors, SsoCallbackAuthSsoCallbackGetResponses, UnlockVaultVaultUnlockPostData, UnlockVaultVaultUnlockPostErrors, UnlockVaultVaultUnlockPostResponses, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteData, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteErrors, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteResponses, UpdateGroupGroupsGroupIdPutData, UpdateGroupGroupsGroupIdPutErrors, UpdateGroupGroupsGroupIdPutResponses, UpdatePasswordPasswordsPasswordIdPutData, UpdatePasswordPasswordsPasswordIdPutErrors, UpdatePasswordPasswordsPasswordIdPutResponses, UpdateUserUsersUserIdPutData, UpdateUserUsersUserIdPutErrors, UpdateUserUsersUserIdPutResponses, ValidateVaultSetupVaultValidateSetupPostData, ValidateVaultSetupVaultValidateSetupPostErrors, ValidateVaultSetupVaultValidateSetupPostResponses } from './types.gen';
+import type { AddMemberToGroupGroupsGroupIdMembersPostData, AddMemberToGroupGroupsGroupIdMembersPostErrors, AddMemberToGroupGroupsGroupIdMembersPostResponses, AddOwnerToGroupGroupsGroupIdOwnersPostData, AddOwnerToGroupGroupsGroupIdOwnersPostErrors, AddOwnerToGroupGroupsGroupIdOwnersPostResponses, AdminLoginAuthLoginPostData, AdminLoginAuthLoginPostErrors, AdminLoginAuthLoginPostResponses, ConfigureSsoProviderAuthSsoConfigurePostData, ConfigureSsoProviderAuthSsoConfigurePostErrors, ConfigureSsoProviderAuthSsoConfigurePostResponses, CreateGroupGroupsPostData, CreateGroupGroupsPostErrors, CreateGroupGroupsPostResponses, CreatePasswordPasswordsPostData, CreatePasswordPasswordsPostErrors, CreatePasswordPasswordsPostResponses, CreateUserUsersPostData, CreateUserUsersPostErrors, CreateUserUsersPostResponses, CreateVaultVaultSetupPostData, CreateVaultVaultSetupPostErrors, CreateVaultVaultSetupPostResponses, DeleteGroupGroupsGroupIdDeleteData, DeleteGroupGroupsGroupIdDeleteErrors, DeleteGroupGroupsGroupIdDeleteResponses, DeletePasswordPasswordsPasswordIdDeleteData, DeletePasswordPasswordsPasswordIdDeleteErrors, DeletePasswordPasswordsPasswordIdDeleteResponses, DeleteUserUsersUserIdDeleteData, DeleteUserUsersUserIdDeleteErrors, DeleteUserUsersUserIdDeleteResponses, GetGroupGroupsGroupIdGetData, GetGroupGroupsGroupIdGetErrors, GetGroupGroupsGroupIdGetResponses, GetPasswordPasswordsPasswordIdGetData, GetPasswordPasswordsPasswordIdGetErrors, GetPasswordPasswordsPasswordIdGetResponses, GetSsoUrlAuthSsoUrlGetData, GetSsoUrlAuthSsoUrlGetResponses, GetUserMeUsersMeGetData, GetUserMeUsersMeGetResponses, GetUserUsersUserIdGetData, GetUserUsersUserIdGetErrors, GetUserUsersUserIdGetResponses, GetVaultStatusVaultStatusGetData, GetVaultStatusVaultStatusGetResponses, IsSsoConfigSetAuthSsoIsConfiguredGetData, IsSsoConfigSetAuthSsoIsConfiguredGetResponses, ListGroupsGroupsGetData, ListGroupsGroupsGetErrors, ListGroupsGroupsGetResponses, ListPasswordAccessPasswordsPasswordIdAccessGetData, ListPasswordAccessPasswordsPasswordIdAccessGetErrors, ListPasswordAccessPasswordsPasswordIdAccessGetResponses, ListPasswordEventsPasswordsPasswordIdEventsGetData, ListPasswordEventsPasswordsPasswordIdEventsGetErrors, ListPasswordEventsPasswordsPasswordIdEventsGetResponses, ListPasswordsPasswordsListGetData, ListPasswordsPasswordsListGetErrors, ListPasswordsPasswordsListGetResponses, ListUsersUsersGetData, ListUsersUsersGetResponses, LockVaultVaultLockPostData, LockVaultVaultLockPostResponses, PromoteUserToAdminUsersUserIdPromoteAdminPostData, PromoteUserToAdminUsersUserIdPromoteAdminPostErrors, PromoteUserToAdminUsersUserIdPromoteAdminPostResponses, RefreshAccessTokenAuthRefreshTokenPostData, RefreshAccessTokenAuthRefreshTokenPostErrors, RefreshAccessTokenAuthRefreshTokenPostResponses, RegisterAdminAuthRegisterAdminPostData, RegisterAdminAuthRegisterAdminPostErrors, RegisterAdminAuthRegisterAdminPostResponses, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteData, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteErrors, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses, SharePasswordPasswordsPasswordIdSharePostData, SharePasswordPasswordsPasswordIdSharePostErrors, SharePasswordPasswordsPasswordIdSharePostResponses, SsoCallbackAuthSsoCallbackGetData, SsoCallbackAuthSsoCallbackGetErrors, SsoCallbackAuthSsoCallbackGetResponses, UnlockVaultVaultUnlockPostData, UnlockVaultVaultUnlockPostErrors, UnlockVaultVaultUnlockPostResponses, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteData, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteErrors, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteResponses, UpdateGroupGroupsGroupIdPutData, UpdateGroupGroupsGroupIdPutErrors, UpdateGroupGroupsGroupIdPutResponses, UpdatePasswordPasswordsPasswordIdPutData, UpdatePasswordPasswordsPasswordIdPutErrors, UpdatePasswordPasswordsPasswordIdPutResponses, UpdateUserUsersUserIdPutData, UpdateUserUsersUserIdPutErrors, UpdateUserUsersUserIdPutResponses, ValidateVaultSetupVaultValidateSetupPostData, ValidateVaultSetupVaultValidateSetupPostErrors, ValidateVaultSetupVaultValidateSetupPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -149,6 +149,29 @@ export const listPasswordsPasswordsListGet = <ThrowOnError extends boolean = fal
             type: 'apiKey'
         }],
     url: '/passwords/list',
+    ...options
+});
+
+/**
+ * List events for a password
+ *
+ * Retrieve the event history for a specific password.
+ *
+ * Requires READ permission on the password.
+ *
+ * - **password_id**: The ID of the password
+ * - **event_type**: Optional filter by event types
+ * - **start_date**: Optional filter from this date
+ * - **end_date**: Optional filter until this date
+ * - **Authentication**: Requires authentication via access_token cookie
+ */
+export const listPasswordEventsPasswordsPasswordIdEventsGet = <ThrowOnError extends boolean = false>(options: Options<ListPasswordEventsPasswordsPasswordIdEventsGetData, ThrowOnError>) => (options.client ?? client).get<ListPasswordEventsPasswordsPasswordIdEventsGetResponses, ListPasswordEventsPasswordsPasswordIdEventsGetErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/passwords/{password_id}/events',
     ...options
 });
 
@@ -782,24 +805,6 @@ export const listGroupsGroupsGet = <ThrowOnError extends boolean = false>(option
 });
 
 /**
- * List all audit events
- *
- * List all audit events from the system.
- *
- * - **Authentication**: Requires authentication via access_token cookie
- * - **Authorization**: Only administrators can access audit logs
- * - **event_type**: Optional list of event types to filter by (e.g., PasswordCreatedEvent, PasswordDeletedEvent)
- * - **start_date**: Optional start date to filter events (ISO 8601 format)
- * - **end_date**: Optional end date to filter events (ISO 8601 format)
- *
- * Returns a list of all domain events that have been logged in the system.
+ * Health Check
  */
-export const listEventsEventsGet = <ThrowOnError extends boolean = false>(options?: Options<ListEventsEventsGetData, ThrowOnError>) => (options?.client ?? client).get<ListEventsEventsGetResponses, ListEventsEventsGetErrors, ThrowOnError>({
-    security: [{
-            in: 'cookie',
-            name: 'access_token',
-            type: 'apiKey'
-        }],
-    url: '/events',
-    ...options
-});
+export const healthCheckHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });

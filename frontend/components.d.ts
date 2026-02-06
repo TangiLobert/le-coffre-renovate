@@ -40,6 +40,7 @@ declare module 'vue' {
     Password: typeof import('primevue/password')['default']
     PasswordCard: typeof import('./src/components/passwords/PasswordCard.vue')['default']
     PasswordGenerator: typeof import('./src/components/passwords/PasswordGenerator.vue')['default']
+    PasswordHistoryModal: typeof import('./src/components/modals/PasswordHistoryModal.vue')['default']
     PasswordsList: typeof import('./src/components/passwords/PasswordsList.vue')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     PromoteAdminModal: typeof import('./src/components/modals/PromoteAdminModal.vue')['default']

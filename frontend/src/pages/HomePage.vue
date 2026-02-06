@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import MainLayout from "../layouts/MainLayout.vue";
 import CreatePasswordModal from "@/components/modals/CreatePasswordModal.vue";
 import SharePasswordModal from "@/components/modals/SharePasswordModal.vue";
+import PasswordHistoryModal from "@/components/modals/PasswordHistoryModal.vue";
 import PasswordsList from "@/components/passwords/PasswordsList.vue";
 import type { GetPasswordListResponse } from '@/client/types.gen';
 import { usePasswordsStore } from '@/stores/passwords';
@@ -16,8 +17,10 @@ const { passwords, loading, error } = storeToRefs(passwordsStore);
 const selectedFolder = ref<string | null>(null);
 const showCreateModal = ref(false);
 const showShareModal = ref(false);
+const showHistoryModal = ref(false);
 const editingPassword = ref<GetPasswordListResponse | null>(null);
 const sharingPassword = ref<GetPasswordListResponse | null>(null);
+const historyPassword = ref<GetPasswordListResponse | null>(null);
 
 const folderFilter = computed(() => route.query.folder as string | undefined);
 
@@ -39,6 +42,11 @@ const handleEdit = (password: GetPasswordListResponse) => {
 const handleShare = (password: GetPasswordListResponse) => {
   sharingPassword.value = password;
   showShareModal.value = true;
+};
+
+const handleHistory = (password: GetPasswordListResponse) => {
+  historyPassword.value = password;
+  showHistoryModal.value = true;
 };
 
 const handleDeleted = async () => {
@@ -70,6 +78,13 @@ watch(showShareModal, (isVisible) => {
   }
 });
 
+// Watch for history modal visibility changes to reset history state
+watch(showHistoryModal, (isVisible) => {
+  if (!isVisible) {
+    historyPassword.value = null;
+  }
+});
+
 // Watch for route changes to reload/filter
 watch(() => route.query.folder, (folderQuery) => {
   selectedFolder.value = folderQuery as string | null;
@@ -81,7 +96,7 @@ onMounted(async () => {
   if (folderQuery) {
     selectedFolder.value = folderQuery;
   }
-  
+
   // Fetch passwords
   passwordsStore.fetchPasswords();
 });
@@ -94,33 +109,21 @@ onMounted(async () => {
         <h1 class="text-3xl font-bold">Password Manager</h1>
         <Button label="New Password" icon="pi pi-plus" @click="showCreateModal = true" />
       </div>
-      
-      <PasswordsList 
-        :passwords="passwords"
-        :loading="loading"
-        :error="error"
-        :selectedFolder="selectedFolder"
-        :folderFilter="folderFilter"
-        @edit="handleEdit"
-        @share="handleShare"
-        @deleted="handleDeleted"
-      />
+
+      <PasswordsList :passwords="passwords" :loading="loading" :error="error" :selectedFolder="selectedFolder"
+        :folderFilter="folderFilter" @edit="handleEdit" @share="handleShare" @history="handleHistory"
+        @deleted="handleDeleted" />
     </div>
-    
+
     <!-- Create/Edit Password Modal -->
-    <CreatePasswordModal 
-      v-model:visible="showCreateModal" 
-      :editPassword="editingPassword"
-      @created="handlePasswordCreated"
-      @updated="handlePasswordUpdated"
-    />
+    <CreatePasswordModal v-model:visible="showCreateModal" :editPassword="editingPassword"
+      @created="handlePasswordCreated" @updated="handlePasswordUpdated" />
 
     <!-- Share Password Modal -->
-    <SharePasswordModal 
-      v-model:visible="showShareModal" 
-      :password="sharingPassword"
-      @shared="handleShared"
-      @unshared="handleUnshared"
-    />
+    <SharePasswordModal v-model:visible="showShareModal" :password="sharingPassword" @shared="handleShared"
+      @unshared="handleUnshared" />
+
+    <!-- Password History Modal -->
+    <PasswordHistoryModal v-model:visible="showHistoryModal" :password="historyPassword" />
   </MainLayout>
 </template>
