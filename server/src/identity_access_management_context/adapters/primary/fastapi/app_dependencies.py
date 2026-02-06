@@ -197,8 +197,9 @@ def get_list_user_usecase(
 
 def get_get_user_me_usecase(
     user_repository: UserRepository = Depends(get_user_repository),
+    sso_user_repository: SsoUserRepository = Depends(get_sso_user_repository),
 ):
-    return GetUserMeUseCase(user_repository)
+    return GetUserMeUseCase(user_repository, sso_user_repository)
 
 
 # Authentication Use Cases
