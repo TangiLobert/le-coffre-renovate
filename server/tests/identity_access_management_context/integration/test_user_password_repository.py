@@ -55,15 +55,18 @@ def test_update_user(sql_user_password_repository):
     )
     sql_user_password_repository.save(user_password)
 
-    # Update the user password
-    user_password.email = "updated@toto.com"
-    user_password.password_hash = b"newhashedpassword123"
-    user_password.display_name = "Updated Toto"
-    sql_user_password_repository.update(user_password)
+    new_password = b"newhashedpassword123"
+    sql_user_password_repository.update_password(user_password.id, new_password)
 
     # Retrieve the updated user password
     updated_user_password = sql_user_password_repository.get_by_id(user_password.id)
     assert updated_user_password is not None
-    assert updated_user_password.email == "updated@toto.com"
-    assert updated_user_password.password_hash == b"newhashedpassword123"
-    assert updated_user_password.display_name == "Updated Toto"
+    assert updated_user_password.email == user_password.email
+    assert updated_user_password.password_hash == new_password
+    assert updated_user_password.display_name == user_password.display_name
+
+
+def test_update_missing_user_does_nothing(sql_user_password_repository):
+    sql_user_password_repository.update_password(
+        UUID("12345678-1234-5678-1234-567812345678"), b"new_password_hashed"
+    )

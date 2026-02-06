@@ -31,6 +31,7 @@ class UpdateUserPasswordUseCase:
             raise InvalidCredentialsException("Invalid old password")
 
         new_password_hash = self.password_hashing_gateway.hash(command.new_password)
-        user_password.password_hash = new_password_hash
 
-        self.user_password_repository.update(user_password)
+        self.user_password_repository.update_password(
+            command.user_id, new_password_hash
+        )

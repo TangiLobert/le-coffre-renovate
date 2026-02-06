@@ -22,14 +22,12 @@ class SqlUserPasswordRepository(SQLBaseRepository):
         self._session.add(user_password_table)
         self.commit()
 
-    def update(self, user_password: UserPassword) -> None:
+    def update_password(self, user_id: UUID, new_hashed_password: bytes) -> None:
         user_password_table = self._session.exec(
-            select(UserPasswordTable).where(UserPasswordTable.id == user_password.id)
+            select(UserPasswordTable).where(UserPasswordTable.id == user_id)
         ).first()
         if user_password_table:
-            user_password_table.email = user_password.email
-            user_password_table.password_hash = user_password.password_hash
-            user_password_table.display_name = user_password.display_name
+            user_password_table.password_hash = new_hashed_password
             self._session.add(user_password_table)
             self.commit()
 
