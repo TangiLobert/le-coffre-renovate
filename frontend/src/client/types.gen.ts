@@ -1803,5 +1803,3 @@ export type HealthCheckHealthGetResponses = {
      */
     200: unknown;
 };
-
-export type HealthCheckHealthGetResponse = HealthCheckHealthGetResponses[keyof HealthCheckHealthGetResponses];
