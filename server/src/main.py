@@ -141,18 +141,20 @@ async def lifespan(app: FastAPI):
 # root_path="/api" ensures OpenAPI docs are served at /api/openapi.json
 app = FastAPI(lifespan=lifespan, root_path="/api")
 
-# Health check endpoint for Kubernetes (at root level)
-@app.get("/api/health")
+# Health check endpoint for Kubernetes
+# Note: With root_path="/api", this will be accessible at /api/health
+@app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
-# Include API routers with /api prefix
-app.include_router(get_vault_management_router(), prefix="/api")
-app.include_router(get_password_management_router(), prefix="/api")
-app.include_router(get_user_management_router(), prefix="/api")
-app.include_router(get_authentication_router(), prefix="/api")
-app.include_router(get_group_management_router(), prefix="/api")
-app.include_router(get_audit_logging_router(), prefix="/api")
+# Include API routers without additional prefix
+# root_path="/api" already makes all routes accessible under /api
+app.include_router(get_vault_management_router())
+app.include_router(get_password_management_router())
+app.include_router(get_user_management_router())
+app.include_router(get_authentication_router())
+app.include_router(get_group_management_router())
+app.include_router(get_audit_logging_router())
 
 # Mount static files for frontend if they exist
 frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
