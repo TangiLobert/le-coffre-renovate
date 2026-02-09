@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddMemberToGroupGroupsGroupIdMembersPostData, AddMemberToGroupGroupsGroupIdMembersPostErrors, AddMemberToGroupGroupsGroupIdMembersPostResponses, AddOwnerToGroupGroupsGroupIdOwnersPostData, AddOwnerToGroupGroupsGroupIdOwnersPostErrors, AddOwnerToGroupGroupsGroupIdOwnersPostResponses, AdminLoginAuthLoginPostData, AdminLoginAuthLoginPostErrors, AdminLoginAuthLoginPostResponses, ConfigureSsoProviderAuthSsoConfigurePostData, ConfigureSsoProviderAuthSsoConfigurePostErrors, ConfigureSsoProviderAuthSsoConfigurePostResponses, CreateGroupGroupsPostData, CreateGroupGroupsPostErrors, CreateGroupGroupsPostResponses, CreatePasswordPasswordsPostData, CreatePasswordPasswordsPostErrors, CreatePasswordPasswordsPostResponses, CreateUserUsersPostData, CreateUserUsersPostErrors, CreateUserUsersPostResponses, CreateVaultVaultSetupPostData, CreateVaultVaultSetupPostErrors, CreateVaultVaultSetupPostResponses, DeleteGroupGroupsGroupIdDeleteData, DeleteGroupGroupsGroupIdDeleteErrors, DeleteGroupGroupsGroupIdDeleteResponses, DeletePasswordPasswordsPasswordIdDeleteData, DeletePasswordPasswordsPasswordIdDeleteErrors, DeletePasswordPasswordsPasswordIdDeleteResponses, DeleteUserUsersUserIdDeleteData, DeleteUserUsersUserIdDeleteErrors, DeleteUserUsersUserIdDeleteResponses, GetGroupGroupsGroupIdGetData, GetGroupGroupsGroupIdGetErrors, GetGroupGroupsGroupIdGetResponses, GetPasswordPasswordsPasswordIdGetData, GetPasswordPasswordsPasswordIdGetErrors, GetPasswordPasswordsPasswordIdGetResponses, GetSsoUrlAuthSsoUrlGetData, GetSsoUrlAuthSsoUrlGetResponses, GetUserMeUsersMeGetData, GetUserMeUsersMeGetResponses, GetUserUsersUserIdGetData, GetUserUsersUserIdGetErrors, GetUserUsersUserIdGetResponses, GetVaultStatusVaultStatusGetData, GetVaultStatusVaultStatusGetResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, IsSsoConfigSetAuthSsoIsConfiguredGetData, IsSsoConfigSetAuthSsoIsConfiguredGetResponses, ListEventsEventsGetData, ListEventsEventsGetErrors, ListEventsEventsGetResponses, ListGroupsGroupsGetData, ListGroupsGroupsGetErrors, ListGroupsGroupsGetResponses, ListPasswordAccessPasswordsPasswordIdAccessGetData, ListPasswordAccessPasswordsPasswordIdAccessGetErrors, ListPasswordAccessPasswordsPasswordIdAccessGetResponses, ListPasswordsPasswordsListGetData, ListPasswordsPasswordsListGetErrors, ListPasswordsPasswordsListGetResponses, ListUsersUsersGetData, ListUsersUsersGetResponses, LockVaultVaultLockPostData, LockVaultVaultLockPostResponses, PromoteUserToAdminUsersUserIdPromoteAdminPostData, PromoteUserToAdminUsersUserIdPromoteAdminPostErrors, PromoteUserToAdminUsersUserIdPromoteAdminPostResponses, RefreshAccessTokenAuthRefreshTokenPostData, RefreshAccessTokenAuthRefreshTokenPostErrors, RefreshAccessTokenAuthRefreshTokenPostResponses, RegisterAdminAuthRegisterAdminPostData, RegisterAdminAuthRegisterAdminPostErrors, RegisterAdminAuthRegisterAdminPostResponses, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteData, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteErrors, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses, SharePasswordPasswordsPasswordIdSharePostData, SharePasswordPasswordsPasswordIdSharePostErrors, SharePasswordPasswordsPasswordIdSharePostResponses, SsoCallbackAuthSsoCallbackGetData, SsoCallbackAuthSsoCallbackGetErrors, SsoCallbackAuthSsoCallbackGetResponses, UnlockVaultVaultUnlockPostData, UnlockVaultVaultUnlockPostErrors, UnlockVaultVaultUnlockPostResponses, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteData, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteErrors, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteResponses, UpdateGroupGroupsGroupIdPutData, UpdateGroupGroupsGroupIdPutErrors, UpdateGroupGroupsGroupIdPutResponses, UpdatePasswordPasswordsPasswordIdPutData, UpdatePasswordPasswordsPasswordIdPutErrors, UpdatePasswordPasswordsPasswordIdPutResponses, UpdateUserUsersUserIdPutData, UpdateUserUsersUserIdPutErrors, UpdateUserUsersUserIdPutResponses, ValidateVaultSetupVaultValidateSetupPostData, ValidateVaultSetupVaultValidateSetupPostErrors, ValidateVaultSetupVaultValidateSetupPostResponses } from './types.gen';
+import type { AddMemberToGroupApiGroupsGroupIdMembersPostData, AddMemberToGroupApiGroupsGroupIdMembersPostErrors, AddMemberToGroupApiGroupsGroupIdMembersPostResponses, AddOwnerToGroupApiGroupsGroupIdOwnersPostData, AddOwnerToGroupApiGroupsGroupIdOwnersPostErrors, AddOwnerToGroupApiGroupsGroupIdOwnersPostResponses, AdminLoginApiAuthLoginPostData, AdminLoginApiAuthLoginPostErrors, AdminLoginApiAuthLoginPostResponses, ConfigureSsoProviderApiAuthSsoConfigurePostData, ConfigureSsoProviderApiAuthSsoConfigurePostErrors, ConfigureSsoProviderApiAuthSsoConfigurePostResponses, CreateGroupApiGroupsPostData, CreateGroupApiGroupsPostErrors, CreateGroupApiGroupsPostResponses, CreatePasswordApiPasswordsPostData, CreatePasswordApiPasswordsPostErrors, CreatePasswordApiPasswordsPostResponses, CreateUserApiUsersPostData, CreateUserApiUsersPostErrors, CreateUserApiUsersPostResponses, CreateVaultApiVaultSetupPostData, CreateVaultApiVaultSetupPostErrors, CreateVaultApiVaultSetupPostResponses, DeleteGroupApiGroupsGroupIdDeleteData, DeleteGroupApiGroupsGroupIdDeleteErrors, DeleteGroupApiGroupsGroupIdDeleteResponses, DeletePasswordApiPasswordsPasswordIdDeleteData, DeletePasswordApiPasswordsPasswordIdDeleteErrors, DeletePasswordApiPasswordsPasswordIdDeleteResponses, DeleteUserApiUsersUserIdDeleteData, DeleteUserApiUsersUserIdDeleteErrors, DeleteUserApiUsersUserIdDeleteResponses, GetGroupApiGroupsGroupIdGetData, GetGroupApiGroupsGroupIdGetErrors, GetGroupApiGroupsGroupIdGetResponses, GetPasswordApiPasswordsPasswordIdGetData, GetPasswordApiPasswordsPasswordIdGetErrors, GetPasswordApiPasswordsPasswordIdGetResponses, GetSsoUrlApiAuthSsoUrlGetData, GetSsoUrlApiAuthSsoUrlGetResponses, GetUserApiUsersUserIdGetData, GetUserApiUsersUserIdGetErrors, GetUserApiUsersUserIdGetResponses, GetUserMeApiUsersMeGetData, GetUserMeApiUsersMeGetResponses, GetVaultStatusApiVaultStatusGetData, GetVaultStatusApiVaultStatusGetResponses, HealthCheckApiHealthGetData, HealthCheckApiHealthGetResponses, IsSsoConfigSetApiAuthSsoIsConfiguredGetData, IsSsoConfigSetApiAuthSsoIsConfiguredGetResponses, ListEventsApiEventsGetData, ListEventsApiEventsGetErrors, ListEventsApiEventsGetResponses, ListGroupsApiGroupsGetData, ListGroupsApiGroupsGetErrors, ListGroupsApiGroupsGetResponses, ListPasswordAccessApiPasswordsPasswordIdAccessGetData, ListPasswordAccessApiPasswordsPasswordIdAccessGetErrors, ListPasswordAccessApiPasswordsPasswordIdAccessGetResponses, ListPasswordsApiPasswordsListGetData, ListPasswordsApiPasswordsListGetErrors, ListPasswordsApiPasswordsListGetResponses, ListUsersApiUsersGetData, ListUsersApiUsersGetResponses, LockVaultApiVaultLockPostData, LockVaultApiVaultLockPostResponses, PromoteUserToAdminApiUsersUserIdPromoteAdminPostData, PromoteUserToAdminApiUsersUserIdPromoteAdminPostErrors, PromoteUserToAdminApiUsersUserIdPromoteAdminPostResponses, RefreshAccessTokenApiAuthRefreshTokenPostData, RefreshAccessTokenApiAuthRefreshTokenPostErrors, RefreshAccessTokenApiAuthRefreshTokenPostResponses, RegisterAdminApiAuthRegisterAdminPostData, RegisterAdminApiAuthRegisterAdminPostErrors, RegisterAdminApiAuthRegisterAdminPostResponses, RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteData, RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteErrors, RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteResponses, SharePasswordApiPasswordsPasswordIdSharePostData, SharePasswordApiPasswordsPasswordIdSharePostErrors, SharePasswordApiPasswordsPasswordIdSharePostResponses, SsoCallbackApiAuthSsoCallbackGetData, SsoCallbackApiAuthSsoCallbackGetErrors, SsoCallbackApiAuthSsoCallbackGetResponses, UnlockVaultApiVaultUnlockPostData, UnlockVaultApiVaultUnlockPostErrors, UnlockVaultApiVaultUnlockPostResponses, UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteData, UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteErrors, UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteResponses, UpdateGroupApiGroupsGroupIdPutData, UpdateGroupApiGroupsGroupIdPutErrors, UpdateGroupApiGroupsGroupIdPutResponses, UpdatePasswordApiPasswordsPasswordIdPutData, UpdatePasswordApiPasswordsPasswordIdPutErrors, UpdatePasswordApiPasswordsPasswordIdPutResponses, UpdateUserApiUsersUserIdPutData, UpdateUserApiUsersUserIdPutErrors, UpdateUserApiUsersUserIdPutResponses, ValidateVaultSetupApiVaultValidateSetupPostData, ValidateVaultSetupApiVaultValidateSetupPostErrors, ValidateVaultSetupApiVaultValidateSetupPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -19,6 +19,11 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
+ * Health Check
+ */
+export const healthCheckApiHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckApiHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckApiHealthGetResponses, unknown, ThrowOnError>({ url: '/api/health', ...options });
+
+/**
  * Create a new vault in pending state
  *
  * Create a new vault with Shamir's Secret Sharing in pending state.
@@ -28,8 +33,8 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  *
  * Returns shares and a setup_id for validation.
  */
-export const createVaultVaultSetupPost = <ThrowOnError extends boolean = false>(options: Options<CreateVaultVaultSetupPostData, ThrowOnError>) => (options.client ?? client).post<CreateVaultVaultSetupPostResponses, CreateVaultVaultSetupPostErrors, ThrowOnError>({
-    url: '/vault/setup',
+export const createVaultApiVaultSetupPost = <ThrowOnError extends boolean = false>(options: Options<CreateVaultApiVaultSetupPostData, ThrowOnError>) => (options.client ?? client).post<CreateVaultApiVaultSetupPostResponses, CreateVaultApiVaultSetupPostErrors, ThrowOnError>({
+    url: '/api/vault/setup',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -44,8 +49,8 @@ export const createVaultVaultSetupPost = <ThrowOnError extends boolean = false>(
  *
  * - **setup_id**: The unique identifier returned from the initial setup
  */
-export const validateVaultSetupVaultValidateSetupPost = <ThrowOnError extends boolean = false>(options: Options<ValidateVaultSetupVaultValidateSetupPostData, ThrowOnError>) => (options.client ?? client).post<ValidateVaultSetupVaultValidateSetupPostResponses, ValidateVaultSetupVaultValidateSetupPostErrors, ThrowOnError>({
-    url: '/vault/validate-setup',
+export const validateVaultSetupApiVaultValidateSetupPost = <ThrowOnError extends boolean = false>(options: Options<ValidateVaultSetupApiVaultValidateSetupPostData, ThrowOnError>) => (options.client ?? client).post<ValidateVaultSetupApiVaultValidateSetupPostResponses, ValidateVaultSetupApiVaultValidateSetupPostErrors, ThrowOnError>({
+    url: '/api/vault/validate-setup',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -63,8 +68,8 @@ export const validateVaultSetupVaultValidateSetupPost = <ThrowOnError extends bo
  *
  * - **shares**: List of share secrets (hex strings with embedded index in format "index:hexsecret")
  */
-export const unlockVaultVaultUnlockPost = <ThrowOnError extends boolean = false>(options: Options<UnlockVaultVaultUnlockPostData, ThrowOnError>) => (options.client ?? client).post<UnlockVaultVaultUnlockPostResponses, UnlockVaultVaultUnlockPostErrors, ThrowOnError>({
-    url: '/vault/unlock',
+export const unlockVaultApiVaultUnlockPost = <ThrowOnError extends boolean = false>(options: Options<UnlockVaultApiVaultUnlockPostData, ThrowOnError>) => (options.client ?? client).post<UnlockVaultApiVaultUnlockPostResponses, UnlockVaultApiVaultUnlockPostErrors, ThrowOnError>({
+    url: '/api/vault/unlock',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -82,13 +87,13 @@ export const unlockVaultVaultUnlockPost = <ThrowOnError extends boolean = false>
  *
  * - **Authorization**: Requires authentication via access_token cookie
  */
-export const lockVaultVaultLockPost = <ThrowOnError extends boolean = false>(options?: Options<LockVaultVaultLockPostData, ThrowOnError>) => (options?.client ?? client).post<LockVaultVaultLockPostResponses, unknown, ThrowOnError>({
+export const lockVaultApiVaultLockPost = <ThrowOnError extends boolean = false>(options?: Options<LockVaultApiVaultLockPostData, ThrowOnError>) => (options?.client ?? client).post<LockVaultApiVaultLockPostResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/vault/lock',
+    url: '/api/vault/lock',
     ...options
 });
 
@@ -100,7 +105,7 @@ export const lockVaultVaultLockPost = <ThrowOnError extends boolean = false>(opt
  * This endpoint provides information about the vault's operational state,
  * NOT_SETUP, LOCKED or UNLOCKED.
  */
-export const getVaultStatusVaultStatusGet = <ThrowOnError extends boolean = false>(options?: Options<GetVaultStatusVaultStatusGetData, ThrowOnError>) => (options?.client ?? client).get<GetVaultStatusVaultStatusGetResponses, unknown, ThrowOnError>({ url: '/vault/status', ...options });
+export const getVaultStatusApiVaultStatusGet = <ThrowOnError extends boolean = false>(options?: Options<GetVaultStatusApiVaultStatusGetData, ThrowOnError>) => (options?.client ?? client).get<GetVaultStatusApiVaultStatusGetResponses, unknown, ThrowOnError>({ url: '/api/vault/status', ...options });
 
 /**
  * Create a new password
@@ -113,13 +118,13 @@ export const getVaultStatusVaultStatusGet = <ThrowOnError extends boolean = fals
  * - **group_id**: Optional group ID. If not provided, uses the user's personal group
  * - **Authentication**: Requires authentication via access_token cookie
  */
-export const createPasswordPasswordsPost = <ThrowOnError extends boolean = false>(options: Options<CreatePasswordPasswordsPostData, ThrowOnError>) => (options.client ?? client).post<CreatePasswordPasswordsPostResponses, CreatePasswordPasswordsPostErrors, ThrowOnError>({
+export const createPasswordApiPasswordsPost = <ThrowOnError extends boolean = false>(options: Options<CreatePasswordApiPasswordsPostData, ThrowOnError>) => (options.client ?? client).post<CreatePasswordApiPasswordsPostResponses, CreatePasswordApiPasswordsPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/',
+    url: '/api/passwords/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -137,13 +142,13 @@ export const createPasswordPasswordsPost = <ThrowOnError extends boolean = false
  *
  * Returns a list of passwords accessible by the user.
  */
-export const listPasswordsPasswordsListGet = <ThrowOnError extends boolean = false>(options?: Options<ListPasswordsPasswordsListGetData, ThrowOnError>) => (options?.client ?? client).get<ListPasswordsPasswordsListGetResponses, ListPasswordsPasswordsListGetErrors, ThrowOnError>({
+export const listPasswordsApiPasswordsListGet = <ThrowOnError extends boolean = false>(options?: Options<ListPasswordsApiPasswordsListGetData, ThrowOnError>) => (options?.client ?? client).get<ListPasswordsApiPasswordsListGetResponses, ListPasswordsApiPasswordsListGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/list',
+    url: '/api/passwords/list',
     ...options
 });
 
@@ -157,13 +162,13 @@ export const listPasswordsPasswordsListGet = <ThrowOnError extends boolean = fal
  *
  * Returns status code 204 (No Content) on successful deletion.
  */
-export const deletePasswordPasswordsPasswordIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeletePasswordPasswordsPasswordIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeletePasswordPasswordsPasswordIdDeleteResponses, DeletePasswordPasswordsPasswordIdDeleteErrors, ThrowOnError>({
+export const deletePasswordApiPasswordsPasswordIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeletePasswordApiPasswordsPasswordIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeletePasswordApiPasswordsPasswordIdDeleteResponses, DeletePasswordApiPasswordsPasswordIdDeleteErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}',
+    url: '/api/passwords/{password_id}',
     ...options
 });
 
@@ -175,13 +180,13 @@ export const deletePasswordPasswordsPasswordIdDelete = <ThrowOnError extends boo
  * - **password_id**: The ID of the password to retrieve
  * - **Authentication**: Requires authentication via access_token cookie
  */
-export const getPasswordPasswordsPasswordIdGet = <ThrowOnError extends boolean = false>(options: Options<GetPasswordPasswordsPasswordIdGetData, ThrowOnError>) => (options.client ?? client).get<GetPasswordPasswordsPasswordIdGetResponses, GetPasswordPasswordsPasswordIdGetErrors, ThrowOnError>({
+export const getPasswordApiPasswordsPasswordIdGet = <ThrowOnError extends boolean = false>(options: Options<GetPasswordApiPasswordsPasswordIdGetData, ThrowOnError>) => (options.client ?? client).get<GetPasswordApiPasswordsPasswordIdGetResponses, GetPasswordApiPasswordsPasswordIdGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}',
+    url: '/api/passwords/{password_id}',
     ...options
 });
 
@@ -196,13 +201,13 @@ export const getPasswordPasswordsPasswordIdGet = <ThrowOnError extends boolean =
  * - **folder**: Optional folder to organize the password
  * - **Authentication**: Requires authentication via access_token cookie
  */
-export const updatePasswordPasswordsPasswordIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdatePasswordPasswordsPasswordIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdatePasswordPasswordsPasswordIdPutResponses, UpdatePasswordPasswordsPasswordIdPutErrors, ThrowOnError>({
+export const updatePasswordApiPasswordsPasswordIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdatePasswordApiPasswordsPasswordIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdatePasswordApiPasswordsPasswordIdPutResponses, UpdatePasswordApiPasswordsPasswordIdPutErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}',
+    url: '/api/passwords/{password_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -221,13 +226,13 @@ export const updatePasswordPasswordsPasswordIdPut = <ThrowOnError extends boolea
  *
  * Returns status code 201 on successful sharing.
  */
-export const sharePasswordPasswordsPasswordIdSharePost = <ThrowOnError extends boolean = false>(options: Options<SharePasswordPasswordsPasswordIdSharePostData, ThrowOnError>) => (options.client ?? client).post<SharePasswordPasswordsPasswordIdSharePostResponses, SharePasswordPasswordsPasswordIdSharePostErrors, ThrowOnError>({
+export const sharePasswordApiPasswordsPasswordIdSharePost = <ThrowOnError extends boolean = false>(options: Options<SharePasswordApiPasswordsPasswordIdSharePostData, ThrowOnError>) => (options.client ?? client).post<SharePasswordApiPasswordsPasswordIdSharePostResponses, SharePasswordApiPasswordsPasswordIdSharePostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}/share',
+    url: '/api/passwords/{password_id}/share',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -248,13 +253,13 @@ export const sharePasswordPasswordsPasswordIdSharePost = <ThrowOnError extends b
  *
  * Note: Cannot unshare with the owner group of the password.
  */
-export const unsharePasswordPasswordsPasswordIdShareGroupIdDelete = <ThrowOnError extends boolean = false>(options: Options<UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteResponses, UnsharePasswordPasswordsPasswordIdShareGroupIdDeleteErrors, ThrowOnError>({
+export const unsharePasswordApiPasswordsPasswordIdShareGroupIdDelete = <ThrowOnError extends boolean = false>(options: Options<UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteResponses, UnsharePasswordApiPasswordsPasswordIdShareGroupIdDeleteErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}/share/{group_id}',
+    url: '/api/passwords/{password_id}/share/{group_id}',
     ...options
 });
 
@@ -269,13 +274,13 @@ export const unsharePasswordPasswordsPasswordIdShareGroupIdDelete = <ThrowOnErro
  * Returns a list of users with their permissions and ownership status.
  * Only the owner of the password can list who has access to it.
  */
-export const listPasswordAccessPasswordsPasswordIdAccessGet = <ThrowOnError extends boolean = false>(options: Options<ListPasswordAccessPasswordsPasswordIdAccessGetData, ThrowOnError>) => (options.client ?? client).get<ListPasswordAccessPasswordsPasswordIdAccessGetResponses, ListPasswordAccessPasswordsPasswordIdAccessGetErrors, ThrowOnError>({
+export const listPasswordAccessApiPasswordsPasswordIdAccessGet = <ThrowOnError extends boolean = false>(options: Options<ListPasswordAccessApiPasswordsPasswordIdAccessGetData, ThrowOnError>) => (options.client ?? client).get<ListPasswordAccessApiPasswordsPasswordIdAccessGetResponses, ListPasswordAccessApiPasswordsPasswordIdAccessGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/passwords/{password_id}/access',
+    url: '/api/passwords/{password_id}/access',
     ...options
 });
 
@@ -288,13 +293,13 @@ export const listPasswordAccessPasswordsPasswordIdAccessGet = <ThrowOnError exte
  *
  * Returns the current user's profile including id, username, email, name, roles, and personal_group_id.
  */
-export const getUserMeUsersMeGet = <ThrowOnError extends boolean = false>(options?: Options<GetUserMeUsersMeGetData, ThrowOnError>) => (options?.client ?? client).get<GetUserMeUsersMeGetResponses, unknown, ThrowOnError>({
+export const getUserMeApiUsersMeGet = <ThrowOnError extends boolean = false>(options?: Options<GetUserMeApiUsersMeGetData, ThrowOnError>) => (options?.client ?? client).get<GetUserMeApiUsersMeGetResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/me',
+    url: '/api/users/me',
     ...options
 });
 
@@ -307,13 +312,13 @@ export const getUserMeUsersMeGet = <ThrowOnError extends boolean = false>(option
  *
  * Returns status code 204 (No Content) on successful deletion.
  */
-export const deleteUserUsersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteUserUsersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteUserUsersUserIdDeleteResponses, DeleteUserUsersUserIdDeleteErrors, ThrowOnError>({
+export const deleteUserApiUsersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteUserApiUsersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteUserApiUsersUserIdDeleteResponses, DeleteUserApiUsersUserIdDeleteErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/{user_id}',
+    url: '/api/users/{user_id}',
     ...options
 });
 
@@ -326,13 +331,13 @@ export const deleteUserUsersUserIdDelete = <ThrowOnError extends boolean = false
  *
  * - **Authentication**: Requires authentication via access_token cookie
  */
-export const getUserUsersUserIdGet = <ThrowOnError extends boolean = false>(options: Options<GetUserUsersUserIdGetData, ThrowOnError>) => (options.client ?? client).get<GetUserUsersUserIdGetResponses, GetUserUsersUserIdGetErrors, ThrowOnError>({
+export const getUserApiUsersUserIdGet = <ThrowOnError extends boolean = false>(options: Options<GetUserApiUsersUserIdGetData, ThrowOnError>) => (options.client ?? client).get<GetUserApiUsersUserIdGetResponses, GetUserApiUsersUserIdGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/{user_id}',
+    url: '/api/users/{user_id}',
     ...options
 });
 
@@ -350,13 +355,13 @@ export const getUserUsersUserIdGet = <ThrowOnError extends boolean = false>(opti
  *
  * Returns the updated user ID.
  */
-export const updateUserUsersUserIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateUserUsersUserIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateUserUsersUserIdPutResponses, UpdateUserUsersUserIdPutErrors, ThrowOnError>({
+export const updateUserApiUsersUserIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateUserApiUsersUserIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateUserApiUsersUserIdPutResponses, UpdateUserApiUsersUserIdPutErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/{user_id}',
+    url: '/api/users/{user_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -373,13 +378,13 @@ export const updateUserUsersUserIdPut = <ThrowOnError extends boolean = false>(o
  *
  * Returns a list of all users in the system.
  */
-export const listUsersUsersGet = <ThrowOnError extends boolean = false>(options?: Options<ListUsersUsersGetData, ThrowOnError>) => (options?.client ?? client).get<ListUsersUsersGetResponses, unknown, ThrowOnError>({
+export const listUsersApiUsersGet = <ThrowOnError extends boolean = false>(options?: Options<ListUsersApiUsersGetData, ThrowOnError>) => (options?.client ?? client).get<ListUsersApiUsersGetResponses, unknown, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/',
+    url: '/api/users/',
     ...options
 });
 
@@ -395,13 +400,13 @@ export const listUsersUsersGet = <ThrowOnError extends boolean = false>(options?
  * - **Authentication**: Requires authentication via access_token cookie
  * - **Authorization**: Admin only
  */
-export const createUserUsersPost = <ThrowOnError extends boolean = false>(options: Options<CreateUserUsersPostData, ThrowOnError>) => (options.client ?? client).post<CreateUserUsersPostResponses, CreateUserUsersPostErrors, ThrowOnError>({
+export const createUserApiUsersPost = <ThrowOnError extends boolean = false>(options: Options<CreateUserApiUsersPostData, ThrowOnError>) => (options.client ?? client).post<CreateUserApiUsersPostResponses, CreateUserApiUsersPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/',
+    url: '/api/users/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -425,13 +430,13 @@ export const createUserUsersPost = <ThrowOnError extends boolean = false>(option
  * - 404: If target user does not exist
  * - 400: If user is already an admin
  */
-export const promoteUserToAdminUsersUserIdPromoteAdminPost = <ThrowOnError extends boolean = false>(options: Options<PromoteUserToAdminUsersUserIdPromoteAdminPostData, ThrowOnError>) => (options.client ?? client).post<PromoteUserToAdminUsersUserIdPromoteAdminPostResponses, PromoteUserToAdminUsersUserIdPromoteAdminPostErrors, ThrowOnError>({
+export const promoteUserToAdminApiUsersUserIdPromoteAdminPost = <ThrowOnError extends boolean = false>(options: Options<PromoteUserToAdminApiUsersUserIdPromoteAdminPostData, ThrowOnError>) => (options.client ?? client).post<PromoteUserToAdminApiUsersUserIdPromoteAdminPostResponses, PromoteUserToAdminApiUsersUserIdPromoteAdminPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/users/{user_id}/promote-admin',
+    url: '/api/users/{user_id}/promote-admin',
     ...options
 });
 
@@ -445,8 +450,8 @@ export const promoteUserToAdminUsersUserIdPromoteAdminPost = <ThrowOnError exten
  *
  * Returns admin information and sets an HTTP-only secure cookie with the JWT token.
  */
-export const adminLoginAuthLoginPost = <ThrowOnError extends boolean = false>(options: Options<AdminLoginAuthLoginPostData, ThrowOnError>) => (options.client ?? client).post<AdminLoginAuthLoginPostResponses, AdminLoginAuthLoginPostErrors, ThrowOnError>({
-    url: '/auth/login',
+export const adminLoginApiAuthLoginPost = <ThrowOnError extends boolean = false>(options: Options<AdminLoginApiAuthLoginPostData, ThrowOnError>) => (options.client ?? client).post<AdminLoginApiAuthLoginPostResponses, AdminLoginApiAuthLoginPostErrors, ThrowOnError>({
+    url: '/api/auth/login',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -465,8 +470,8 @@ export const adminLoginAuthLoginPost = <ThrowOnError extends boolean = false>(op
  *
  * Returns the created admin information with generated ID.
  */
-export const registerAdminAuthRegisterAdminPost = <ThrowOnError extends boolean = false>(options: Options<RegisterAdminAuthRegisterAdminPostData, ThrowOnError>) => (options.client ?? client).post<RegisterAdminAuthRegisterAdminPostResponses, RegisterAdminAuthRegisterAdminPostErrors, ThrowOnError>({
-    url: '/auth/register-admin',
+export const registerAdminApiAuthRegisterAdminPost = <ThrowOnError extends boolean = false>(options: Options<RegisterAdminApiAuthRegisterAdminPostData, ThrowOnError>) => (options.client ?? client).post<RegisterAdminApiAuthRegisterAdminPostResponses, RegisterAdminApiAuthRegisterAdminPostErrors, ThrowOnError>({
+    url: '/api/auth/register-admin',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -500,13 +505,13 @@ export const registerAdminAuthRegisterAdminPost = <ThrowOnError extends boolean 
  * Auto-discovery retrieves all necessary endpoints from the OpenID Connect configuration URL,
  * ensuring compatibility with the standard.
  */
-export const configureSsoProviderAuthSsoConfigurePost = <ThrowOnError extends boolean = false>(options: Options<ConfigureSsoProviderAuthSsoConfigurePostData, ThrowOnError>) => (options.client ?? client).post<ConfigureSsoProviderAuthSsoConfigurePostResponses, ConfigureSsoProviderAuthSsoConfigurePostErrors, ThrowOnError>({
+export const configureSsoProviderApiAuthSsoConfigurePost = <ThrowOnError extends boolean = false>(options: Options<ConfigureSsoProviderApiAuthSsoConfigurePostData, ThrowOnError>) => (options.client ?? client).post<ConfigureSsoProviderApiAuthSsoConfigurePostResponses, ConfigureSsoProviderApiAuthSsoConfigurePostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/auth/sso/configure',
+    url: '/api/auth/sso/configure',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -521,7 +526,7 @@ export const configureSsoProviderAuthSsoConfigurePost = <ThrowOnError extends bo
  *
  * Returns the SSO authorization URL.
  */
-export const getSsoUrlAuthSsoUrlGet = <ThrowOnError extends boolean = false>(options?: Options<GetSsoUrlAuthSsoUrlGetData, ThrowOnError>) => (options?.client ?? client).get<GetSsoUrlAuthSsoUrlGetResponses, unknown, ThrowOnError>({ url: '/auth/sso/url', ...options });
+export const getSsoUrlApiAuthSsoUrlGet = <ThrowOnError extends boolean = false>(options?: Options<GetSsoUrlApiAuthSsoUrlGetData, ThrowOnError>) => (options?.client ?? client).get<GetSsoUrlApiAuthSsoUrlGetResponses, unknown, ThrowOnError>({ url: '/api/auth/sso/url', ...options });
 
 /**
  * SSO callback endpoint
@@ -536,7 +541,7 @@ export const getSsoUrlAuthSsoUrlGet = <ThrowOnError extends boolean = false>(opt
  *
  * Returns user information and sets HTTP-only secure cookies with JWT tokens.
  */
-export const ssoCallbackAuthSsoCallbackGet = <ThrowOnError extends boolean = false>(options: Options<SsoCallbackAuthSsoCallbackGetData, ThrowOnError>) => (options.client ?? client).get<SsoCallbackAuthSsoCallbackGetResponses, SsoCallbackAuthSsoCallbackGetErrors, ThrowOnError>({ url: '/auth/sso/callback', ...options });
+export const ssoCallbackApiAuthSsoCallbackGet = <ThrowOnError extends boolean = false>(options: Options<SsoCallbackApiAuthSsoCallbackGetData, ThrowOnError>) => (options.client ?? client).get<SsoCallbackApiAuthSsoCallbackGetResponses, SsoCallbackApiAuthSsoCallbackGetErrors, ThrowOnError>({ url: '/api/auth/sso/callback', ...options });
 
 /**
  * Check if SSO is configured
@@ -550,7 +555,7 @@ export const ssoCallbackAuthSsoCallbackGet = <ThrowOnError extends boolean = fal
  *
  * **Note**: Only administrators can check SSO configuration status.
  */
-export const isSsoConfigSetAuthSsoIsConfiguredGet = <ThrowOnError extends boolean = false>(options?: Options<IsSsoConfigSetAuthSsoIsConfiguredGetData, ThrowOnError>) => (options?.client ?? client).get<IsSsoConfigSetAuthSsoIsConfiguredGetResponses, unknown, ThrowOnError>({ url: '/auth/sso/is-configured', ...options });
+export const isSsoConfigSetApiAuthSsoIsConfiguredGet = <ThrowOnError extends boolean = false>(options?: Options<IsSsoConfigSetApiAuthSsoIsConfiguredGetData, ThrowOnError>) => (options?.client ?? client).get<IsSsoConfigSetApiAuthSsoIsConfiguredGetResponses, unknown, ThrowOnError>({ url: '/api/auth/sso/is-configured', ...options });
 
 /**
  * Refresh access token
@@ -568,7 +573,7 @@ export const isSsoConfigSetAuthSsoIsConfiguredGet = <ThrowOnError extends boolea
  * - **400**: Invalid or expired refresh token, or user no longer exists
  * - **500**: Internal server error
  */
-export const refreshAccessTokenAuthRefreshTokenPost = <ThrowOnError extends boolean = false>(options?: Options<RefreshAccessTokenAuthRefreshTokenPostData, ThrowOnError>) => (options?.client ?? client).post<RefreshAccessTokenAuthRefreshTokenPostResponses, RefreshAccessTokenAuthRefreshTokenPostErrors, ThrowOnError>({ url: '/auth/refresh-token', ...options });
+export const refreshAccessTokenApiAuthRefreshTokenPost = <ThrowOnError extends boolean = false>(options?: Options<RefreshAccessTokenApiAuthRefreshTokenPostData, ThrowOnError>) => (options?.client ?? client).post<RefreshAccessTokenApiAuthRefreshTokenPostResponses, RefreshAccessTokenApiAuthRefreshTokenPostErrors, ThrowOnError>({ url: '/api/auth/refresh-token', ...options });
 
 /**
  * Create a new group
@@ -581,13 +586,13 @@ export const refreshAccessTokenAuthRefreshTokenPost = <ThrowOnError extends bool
  * The authenticated user will be automatically set as the group owner.
  * Returns the created group information with generated ID.
  */
-export const createGroupGroupsPost = <ThrowOnError extends boolean = false>(options: Options<CreateGroupGroupsPostData, ThrowOnError>) => (options.client ?? client).post<CreateGroupGroupsPostResponses, CreateGroupGroupsPostErrors, ThrowOnError>({
+export const createGroupApiGroupsPost = <ThrowOnError extends boolean = false>(options: Options<CreateGroupApiGroupsPostData, ThrowOnError>) => (options.client ?? client).post<CreateGroupApiGroupsPostResponses, CreateGroupApiGroupsPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/',
+    url: '/api/groups/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -609,13 +614,13 @@ export const createGroupGroupsPost = <ThrowOnError extends boolean = false>(opti
  * Cannot add members to personal groups.
  * Operation is idempotent - adding an existing member has no effect.
  */
-export const addMemberToGroupGroupsGroupIdMembersPost = <ThrowOnError extends boolean = false>(options: Options<AddMemberToGroupGroupsGroupIdMembersPostData, ThrowOnError>) => (options.client ?? client).post<AddMemberToGroupGroupsGroupIdMembersPostResponses, AddMemberToGroupGroupsGroupIdMembersPostErrors, ThrowOnError>({
+export const addMemberToGroupApiGroupsGroupIdMembersPost = <ThrowOnError extends boolean = false>(options: Options<AddMemberToGroupApiGroupsGroupIdMembersPostData, ThrowOnError>) => (options.client ?? client).post<AddMemberToGroupApiGroupsGroupIdMembersPostResponses, AddMemberToGroupApiGroupsGroupIdMembersPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}/members',
+    url: '/api/groups/{group_id}/members',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -637,13 +642,13 @@ export const addMemberToGroupGroupsGroupIdMembersPost = <ThrowOnError extends bo
  * Cannot add owners to personal groups.
  * Operation is idempotent - promoting an existing owner has no effect.
  */
-export const addOwnerToGroupGroupsGroupIdOwnersPost = <ThrowOnError extends boolean = false>(options: Options<AddOwnerToGroupGroupsGroupIdOwnersPostData, ThrowOnError>) => (options.client ?? client).post<AddOwnerToGroupGroupsGroupIdOwnersPostResponses, AddOwnerToGroupGroupsGroupIdOwnersPostErrors, ThrowOnError>({
+export const addOwnerToGroupApiGroupsGroupIdOwnersPost = <ThrowOnError extends boolean = false>(options: Options<AddOwnerToGroupApiGroupsGroupIdOwnersPostData, ThrowOnError>) => (options.client ?? client).post<AddOwnerToGroupApiGroupsGroupIdOwnersPostResponses, AddOwnerToGroupApiGroupsGroupIdOwnersPostErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}/owners',
+    url: '/api/groups/{group_id}/owners',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -665,13 +670,13 @@ export const addOwnerToGroupGroupsGroupIdOwnersPost = <ThrowOnError extends bool
  * Cannot modify personal groups.
  * The user to be removed must be a member of the group.
  */
-export const removeMemberFromGroupGroupsGroupIdMembersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteResponses, RemoveMemberFromGroupGroupsGroupIdMembersUserIdDeleteErrors, ThrowOnError>({
+export const removeMemberFromGroupApiGroupsGroupIdMembersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteResponses, RemoveMemberFromGroupApiGroupsGroupIdMembersUserIdDeleteErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}/members/{user_id}',
+    url: '/api/groups/{group_id}/members/{user_id}',
     ...options
 });
 
@@ -687,13 +692,13 @@ export const removeMemberFromGroupGroupsGroupIdMembersUserIdDelete = <ThrowOnErr
  * Personal groups cannot be deleted.
  * Groups that are still in use (have passwords) cannot be deleted.
  */
-export const deleteGroupGroupsGroupIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGroupGroupsGroupIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGroupGroupsGroupIdDeleteResponses, DeleteGroupGroupsGroupIdDeleteErrors, ThrowOnError>({
+export const deleteGroupApiGroupsGroupIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteGroupApiGroupsGroupIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteGroupApiGroupsGroupIdDeleteResponses, DeleteGroupApiGroupsGroupIdDeleteErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}',
+    url: '/api/groups/{group_id}',
     ...options
 });
 
@@ -713,13 +718,13 @@ export const deleteGroupGroupsGroupIdDelete = <ThrowOnError extends boolean = fa
  * - owners: List of user IDs who are owners of the group
  * - members: List of user IDs who are members of the group
  */
-export const getGroupGroupsGroupIdGet = <ThrowOnError extends boolean = false>(options: Options<GetGroupGroupsGroupIdGetData, ThrowOnError>) => (options.client ?? client).get<GetGroupGroupsGroupIdGetResponses, GetGroupGroupsGroupIdGetErrors, ThrowOnError>({
+export const getGroupApiGroupsGroupIdGet = <ThrowOnError extends boolean = false>(options: Options<GetGroupApiGroupsGroupIdGetData, ThrowOnError>) => (options.client ?? client).get<GetGroupApiGroupsGroupIdGetResponses, GetGroupApiGroupsGroupIdGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}',
+    url: '/api/groups/{group_id}',
     ...options
 });
 
@@ -736,13 +741,13 @@ export const getGroupGroupsGroupIdGet = <ThrowOnError extends boolean = false>(o
  * Cannot update personal groups.
  * Returns the updated group information.
  */
-export const updateGroupGroupsGroupIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateGroupGroupsGroupIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateGroupGroupsGroupIdPutResponses, UpdateGroupGroupsGroupIdPutErrors, ThrowOnError>({
+export const updateGroupApiGroupsGroupIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateGroupApiGroupsGroupIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateGroupApiGroupsGroupIdPutResponses, UpdateGroupApiGroupsGroupIdPutErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups/{group_id}',
+    url: '/api/groups/{group_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -766,13 +771,13 @@ export const updateGroupGroupsGroupIdPut = <ThrowOnError extends boolean = false
  * - user_id: The owner user ID (for personal groups) or null (for shared groups)
  * - owners: List of user IDs who are owners of this group
  */
-export const listGroupsGroupsGet = <ThrowOnError extends boolean = false>(options?: Options<ListGroupsGroupsGetData, ThrowOnError>) => (options?.client ?? client).get<ListGroupsGroupsGetResponses, ListGroupsGroupsGetErrors, ThrowOnError>({
+export const listGroupsApiGroupsGet = <ThrowOnError extends boolean = false>(options?: Options<ListGroupsApiGroupsGetData, ThrowOnError>) => (options?.client ?? client).get<ListGroupsApiGroupsGetResponses, ListGroupsApiGroupsGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/groups',
+    url: '/api/groups',
     ...options
 });
 
@@ -789,17 +794,12 @@ export const listGroupsGroupsGet = <ThrowOnError extends boolean = false>(option
  *
  * Returns a list of all domain events that have been logged in the system.
  */
-export const listEventsEventsGet = <ThrowOnError extends boolean = false>(options?: Options<ListEventsEventsGetData, ThrowOnError>) => (options?.client ?? client).get<ListEventsEventsGetResponses, ListEventsEventsGetErrors, ThrowOnError>({
+export const listEventsApiEventsGet = <ThrowOnError extends boolean = false>(options?: Options<ListEventsApiEventsGetData, ThrowOnError>) => (options?.client ?? client).get<ListEventsApiEventsGetResponses, ListEventsApiEventsGetErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
             name: 'access_token',
             type: 'apiKey'
         }],
-    url: '/events',
+    url: '/api/events',
     ...options
 });
-
-/**
- * Health Check
- */
-export const healthCheckHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
