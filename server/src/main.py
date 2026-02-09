@@ -138,7 +138,8 @@ async def lifespan(app: FastAPI):
 
 
 # Create the main app with lifespan
-app = FastAPI(lifespan=lifespan)
+# root_path="/api" ensures OpenAPI docs are served at /api/openapi.json
+app = FastAPI(lifespan=lifespan, root_path="/api")
 
 # Health check endpoint for Kubernetes (at root level)
 @app.get("/api/health")
