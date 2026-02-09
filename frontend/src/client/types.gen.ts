@@ -350,6 +350,10 @@ export type GetUserMeResponse = {
      * Personal Group Id
      */
     personal_group_id?: string | null;
+    /**
+     * Is Sso
+     */
+    is_sso: boolean;
 };
 
 /**
