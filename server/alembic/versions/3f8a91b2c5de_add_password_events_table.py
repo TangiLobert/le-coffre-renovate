@@ -1,7 +1,7 @@
 """add password_events table
 
 Revision ID: 3f8a91b2c5de
-Revises: 728072a081f9
+Revises: 67daeaee83eb
 Create Date: 2026-01-30 12:00:00.000000
 
 """
@@ -14,7 +14,7 @@ import sqlmodel
 
 # revision identifiers, used by Alembic.
 revision: str = "3f8a91b2c5de"
-down_revision: Union[str, Sequence[str], None] = "728072a081f9"
+down_revision: Union[str, Sequence[str], None] = "67daeaee83eb"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
