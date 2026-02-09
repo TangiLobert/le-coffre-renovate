@@ -1815,46 +1815,16 @@ export type ListGroupsGroupsGetResponses = {
 
 export type ListGroupsGroupsGetResponse = ListGroupsGroupsGetResponses[keyof ListGroupsGroupsGetResponses];
 
-export type ListEventsEventsGetData = {
+export type HealthCheckHealthGetData = {
     body?: never;
     path?: never;
-    query?: {
-        /**
-         * Event Type
-         *
-         * Filter by event types
-         */
-        event_type?: Array<string> | null;
-        /**
-         * Start Date
-         *
-         * Filter events from this date (inclusive)
-         */
-        start_date?: string | null;
-        /**
-         * End Date
-         *
-         * Filter events until this date (inclusive)
-         */
-        end_date?: string | null;
-    };
-    url: '/events';
+    query?: never;
+    url: '/health';
 };
 
-export type ListEventsEventsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListEventsEventsGetError = ListEventsEventsGetErrors[keyof ListEventsEventsGetErrors];
-
-export type ListEventsEventsGetResponses = {
+export type HealthCheckHealthGetResponses = {
     /**
      * Successful Response
      */
-    200: ListEventsResponse;
+    200: unknown;
 };
-
-export type ListEventsEventsGetResponse = ListEventsEventsGetResponses[keyof ListEventsEventsGetResponses];
