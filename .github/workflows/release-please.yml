@@ -21,6 +21,5 @@ jobs:
       - name: Release PR info
         if: ${{ steps.release.outputs.pr }}
         run: |
-          echo "📝 Release PR created/updated: ${{ steps.release.outputs.pr }}"
-          echo "📦 Version will be: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
+          echo "📝 Release PR created/updated successfully!"
           echo "ℹ️  Merge the PR to automatically create the GitHub release with CHANGELOG content"
