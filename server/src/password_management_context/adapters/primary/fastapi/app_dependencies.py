@@ -16,9 +16,6 @@ from password_management_context.application.gateways import (
     PasswordEncryptionGateway,
     PasswordEventRepository,
 )
-from password_management_context.application.services import (
-    PasswordEventStorageService,
-)
 from password_management_context.application.use_cases import (
     GetPasswordUseCase,
     UpdatePasswordUseCase,
@@ -64,14 +61,6 @@ def get_password_event_repository(
     return SqlPasswordEventRepository(session)
 
 
-def get_password_event_storage_service(
-    password_event_repository: PasswordEventRepository = Depends(
-        get_password_event_repository
-    ),
-) -> PasswordEventStorageService:
-    return PasswordEventStorageService(password_event_repository)
-
-
 def get_group_access_gateway(
     session: Session = Depends(get_session),
 ) -> GroupAccessGateway:
@@ -94,8 +83,8 @@ def get_create_password_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return CreatePasswordUseCase(
@@ -104,7 +93,7 @@ def get_create_password_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 
@@ -118,8 +107,8 @@ def get_get_password_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return GetPasswordUseCase(
@@ -128,7 +117,7 @@ def get_get_password_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 
@@ -142,8 +131,8 @@ def get_update_password_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return UpdatePasswordUseCase(
@@ -152,7 +141,7 @@ def get_update_password_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 
@@ -175,8 +164,8 @@ def get_delete_password_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return DeletePasswordUseCase(
@@ -184,7 +173,7 @@ def get_delete_password_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 
@@ -199,8 +188,8 @@ def get_share_access_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return ShareAccessUseCase(
@@ -208,7 +197,7 @@ def get_share_access_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 
@@ -219,8 +208,8 @@ def get_unshare_access_usecase(
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
-    event_storage_service: PasswordEventStorageService = Depends(
-        get_password_event_storage_service
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
     ),
 ):
     return UnshareAccessUseCase(
@@ -228,7 +217,7 @@ def get_unshare_access_usecase(
         password_permissions_repository,
         group_access_gateway,
         event_publisher,
-        event_storage_service,
+        password_event_repository,
     )
 
 

@@ -6,6 +6,7 @@ from password_management_context.application.gateways import (
     PasswordPermissionsRepository,
     GroupAccessGateway,
     PasswordEncryptionGateway,
+    PasswordEventRepository,
 )
 from password_management_context.application.services import (
     PasswordEventStorageService,
@@ -29,14 +30,14 @@ class CreatePasswordUseCase:
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
         event_publisher: DomainEventPublisher,
-        event_storage_service: PasswordEventStorageService,
+        password_event_repository: PasswordEventRepository,
     ):
         self.password_repository = password_repository
         self.password_encryption_gateway = password_encryption_gateway
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
         self.event_publisher = event_publisher
-        self.event_storage_service = event_storage_service
+        self.password_event_repository = password_event_repository
 
     def execute(self, command: CreatePasswordCommand) -> UUID:
         if not self.group_access_gateway.group_exists(command.group_id):
@@ -69,6 +70,9 @@ class CreatePasswordUseCase:
             created_by_user_id=command.user_id,
             folder=password.folder,
         )
-        self.event_storage_service.store_event(event)
+        event_storage_service = PasswordEventStorageService(
+            self.password_event_repository
+        )
+        event_storage_service.store_event(event)
 
         return password.id

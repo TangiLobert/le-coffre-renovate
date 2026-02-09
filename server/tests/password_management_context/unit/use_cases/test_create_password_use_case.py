@@ -28,7 +28,7 @@ def use_case(
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
     domain_event_publisher: FakeEventPublisher,
-    password_event_storage_service,
+    password_event_repository: FakePasswordEventRepository,
 ):
     return CreatePasswordUseCase(
         password_repository,
@@ -36,7 +36,7 @@ def use_case(
         password_permissions_repository,
         group_access_gateway,
         domain_event_publisher,
-        password_event_storage_service,
+        password_event_repository,
     )
 
 

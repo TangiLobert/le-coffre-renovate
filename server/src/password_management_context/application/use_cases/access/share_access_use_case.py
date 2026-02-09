@@ -3,6 +3,7 @@ from password_management_context.application.gateways import (
     PasswordRepository,
     PasswordPermissionsRepository,
     GroupAccessGateway,
+    PasswordEventRepository,
 )
 from password_management_context.application.services import (
     PasswordEventStorageService,
@@ -27,13 +28,13 @@ class ShareAccessUseCase:
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
         event_publisher: DomainEventPublisher,
-        event_storage_service: PasswordEventStorageService,
+        password_event_repository: PasswordEventRepository,
     ):
         self.password_repository = password_repository
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
         self.event_publisher = event_publisher
-        self.event_storage_service = event_storage_service
+        self.password_event_repository = password_event_repository
 
     def execute(self, command: ShareResourceCommand):
         # Verify the password exists
@@ -77,4 +78,7 @@ class ShareAccessUseCase:
             shared_with_group_id=command.group_id,
             shared_by_user_id=command.owner_id,
         )
-        self.event_storage_service.store_event(event)
+        event_storage_service = PasswordEventStorageService(
+            self.password_event_repository
+        )
+        event_storage_service.store_event(event)
