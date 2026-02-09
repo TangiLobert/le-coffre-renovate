@@ -17,6 +17,7 @@ jobs:
         with:
           release-type: simple
           skip-github-release: false
+          token: ${{ secrets.GH_PAT }}
 
       # Output release PR information
       - name: Release PR info
