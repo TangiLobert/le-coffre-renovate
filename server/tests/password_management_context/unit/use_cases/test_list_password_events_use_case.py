@@ -20,7 +20,13 @@ from ..fakes import (
     FakePasswordPermissionsRepository,
     FakeGroupAccessGateway,
     FakePasswordEventRepository,
+    FakeUserInfoGateway,
 )
+
+
+@pytest.fixture
+def user_info_gateway():
+    return FakeUserInfoGateway()
 
 
 @pytest.fixture
@@ -29,12 +35,14 @@ def use_case(
     password_permissions_repository: FakePasswordPermissionsRepository,
     group_access_gateway: FakeGroupAccessGateway,
     password_event_repository: FakePasswordEventRepository,
+    user_info_gateway: FakeUserInfoGateway,
 ):
     return ListPasswordEventsUseCase(
         password_repository,
         password_permissions_repository,
         group_access_gateway,
         password_event_repository,
+        user_info_gateway,
     )
 
 

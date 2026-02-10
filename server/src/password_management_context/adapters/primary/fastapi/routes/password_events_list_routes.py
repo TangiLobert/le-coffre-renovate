@@ -30,6 +30,7 @@ class PasswordEventResponse(BaseModel):
     event_type: str
     occurred_on: str
     actor_user_id: str
+    actor_email: str | None
     event_data: dict
 
 
@@ -83,6 +84,7 @@ def list_password_events(
                     event_type=event.event_type,
                     occurred_on=event.occurred_on,
                     actor_user_id=event.actor_user_id,
+                    actor_email=event.actor_email,
                     event_data=event.event_data,
                 )
                 for event in response.events

@@ -10,11 +10,15 @@ from identity_access_management_context.adapters.secondary.sql import (
 from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
     GroupAccessGatewayAdapter,
 )
+from identity_access_management_context.adapters.secondary.user_info_gateway_adapter import (
+    UserInfoGatewayAdapter,
+)
 from password_management_context.application.gateways import (
     PasswordRepository,
     GroupAccessGateway,
     PasswordEncryptionGateway,
     PasswordEventRepository,
+    UserInfoGateway,
 )
 from password_management_context.application.use_cases import (
     GetPasswordUseCase,
@@ -67,6 +71,13 @@ def get_group_access_gateway(
     group_repository = SqlGroupRepository(session)
     group_member_repository = SqlGroupMemberRepository(session)
     return GroupAccessGatewayAdapter(group_repository, group_member_repository)
+
+
+def get_user_info_gateway(
+    session: Session = Depends(get_session),
+) -> UserInfoGateway:
+    user_repository = SqlUserRepository(session)
+    return UserInfoGatewayAdapter(user_repository)
 
 
 def get_event_publisher(request: Request) -> DomainEventPublisher:
@@ -242,10 +253,12 @@ def get_list_password_events_usecase(
     password_event_repository: PasswordEventRepository = Depends(
         get_password_event_repository
     ),
+    user_info_gateway: UserInfoGateway = Depends(get_user_info_gateway),
 ):
     return ListPasswordEventsUseCase(
         password_repository,
         password_permissions_repository,
         group_access_gateway,
         password_event_repository,
+        user_info_gateway,
     )

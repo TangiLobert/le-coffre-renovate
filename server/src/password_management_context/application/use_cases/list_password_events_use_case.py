@@ -8,6 +8,7 @@ from password_management_context.application.gateways import (
     PasswordPermissionsRepository,
     GroupAccessGateway,
     PasswordEventRepository,
+    UserInfoGateway,
 )
 from password_management_context.application.responses import (
     ListPasswordEventsResponse,
@@ -26,11 +27,13 @@ class ListPasswordEventsUseCase:
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
         password_event_repository: PasswordEventRepository,
+        user_info_gateway: UserInfoGateway,
     ):
         self.password_repository = password_repository
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
         self.password_event_repository = password_event_repository
+        self.user_info_gateway = user_info_gateway
 
     def execute(self, command: ListPasswordEventsCommand) -> ListPasswordEventsResponse:
         password_entity = self.password_repository.get_by_id(command.password_id)
@@ -60,6 +63,9 @@ class ListPasswordEventsUseCase:
                 if hasattr(event["occurred_on"], "isoformat")
                 else event["occurred_on"],
                 actor_user_id=str(event["actor_user_id"]),
+                actor_email=self.user_info_gateway.get_user_email(
+                    UUID(str(event["actor_user_id"]))
+                ),
                 event_data=event["event_data"],
             )
             for event in events

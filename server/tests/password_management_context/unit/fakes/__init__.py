@@ -3,6 +3,7 @@ from .fake_password_permissions_repository import FakePasswordPermissionsReposit
 from .fake_password_repository import FakePasswordRepository
 from .fake_password_encryption_gateway import FakePasswordEncryptionGateway
 from .fake_password_event_repository import FakePasswordEventRepository
+from .fake_user_info_gateway import FakeUserInfoGateway
 
 __all__ = [
     "FakeGroupAccessGateway",
@@ -10,4 +11,5 @@ __all__ = [
     "FakePasswordRepository",
     "FakePasswordEncryptionGateway",
     "FakePasswordEventRepository",
+    "FakeUserInfoGateway",
 ]

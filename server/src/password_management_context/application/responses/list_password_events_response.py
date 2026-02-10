@@ -9,6 +9,7 @@ class PasswordEventItem:
     event_type: str
     occurred_on: str
     actor_user_id: str
+    actor_email: str | None
     event_data: dict
 
 

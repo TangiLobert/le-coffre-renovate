@@ -49,7 +49,7 @@
           <template #body="slotProps">
             <div class="flex items-center gap-2">
               <i class="pi pi-user text-sm"></i>
-              <span class="text-sm font-mono">{{ slotProps.data.actor_user_id.substring(0, 8) }}...</span>
+              <span class="text-sm">{{ slotProps.data.actor_email || 'Unknown User' }}</span>
             </div>
           </template>
         </Column>
@@ -68,11 +68,11 @@
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordSharedEvent'">
                 Shared with group: <strong>{{ slotProps.data.event_data.shared_with_group_id?.substring(0, 8)
-                }}...</strong>
+                  }}...</strong>
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordUnsharedEvent'">
                 Unshared from group: <strong>{{ slotProps.data.event_data.unshared_with_group_id?.substring(0, 8)
-                }}...</strong>
+                  }}...</strong>
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordAccessedEvent'">
                 Password accessed

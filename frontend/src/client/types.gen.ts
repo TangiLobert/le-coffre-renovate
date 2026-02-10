@@ -533,6 +533,10 @@ export type PasswordEventResponse = {
      */
     actor_user_id: string;
     /**
+     * Actor Email
+     */
+    actor_email: string | null;
+    /**
      * Event Data
      */
     event_data: {
