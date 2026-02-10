@@ -29,6 +29,7 @@ from vault_management_context.adapters.secondary import (
     CryptoShamirGateway,
     AesEncryptionGateway,
     InMemoryVaultSessionGateway,
+    InMemoryShareRepository,
 )
 from vault_management_context.application.use_cases import (
     EncryptUseCase,
@@ -102,10 +103,12 @@ async def lifespan(app: FastAPI):
     shamir_gateway = CryptoShamirGateway()
     encryption_gateway = AesEncryptionGateway()
     vault_session_gateway = InMemoryVaultSessionGateway()
+    share_repository = InMemoryShareRepository()
 
     app.state.shamir_gateway = shamir_gateway
     app.state.encryption_gateway = encryption_gateway
     app.state.vault_session_gateway = vault_session_gateway
+    app.state.share_repository = share_repository
 
     # Encryption use cases and API (stateless)
     encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
@@ -164,6 +167,7 @@ async def health_check(request: Request):
         return {"status": "healthy"}
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Database unhealthy: {e}")
+
 
 
 # Include API routers without additional prefix

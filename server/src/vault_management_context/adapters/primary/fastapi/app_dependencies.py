@@ -14,6 +14,7 @@ from vault_management_context.application.gateways import (
     ShamirGateway,
     EncryptionGateway,
     VaultSessionGateway,
+    ShareRepository,
 )
 from vault_management_context.adapters.secondary import (
     SqlVaultRepository,
@@ -37,6 +38,10 @@ def get_vault_session_gateway(request: Request) -> VaultSessionGateway:
     return request.app.state.vault_session_gateway
 
 
+def get_share_repository(request: Request) -> ShareRepository:
+    return request.app.state.share_repository
+
+
 def get_create_vault_usecase(
     vault_repository: VaultRepository = Depends(get_vault_repository),
     shamir_gateway: ShamirGateway = Depends(get_shamir_gateway),
@@ -53,9 +58,14 @@ def get_unlock_vault_usecase(
     shamir_gateway: ShamirGateway = Depends(get_shamir_gateway),
     encryption_gateway: EncryptionGateway = Depends(get_encryption_gateway),
     vault_session_gateway: VaultSessionGateway = Depends(get_vault_session_gateway),
+    share_repository: ShareRepository = Depends(get_share_repository),
 ):
     return UnlockVaultUseCase(
-        vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
+        vault_repository,
+        shamir_gateway,
+        encryption_gateway,
+        vault_session_gateway,
+        share_repository,
     )
 
 

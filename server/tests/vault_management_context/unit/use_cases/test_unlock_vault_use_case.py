@@ -17,6 +17,7 @@ from ..fakes import (
     FakeShamirGateway,
     FakeEncryptionGateway,
     FakeVaultSessionGateway,
+    FakeShareRepository,
 )
 
 
@@ -26,9 +27,14 @@ def use_case(
     shamir_gateway: FakeShamirGateway,
     encryption_gateway: FakeEncryptionGateway,
     vault_session_gateway: FakeVaultSessionGateway,
+    share_repository: FakeShareRepository,
 ):
     return UnlockVaultUseCase(
-        vault_repository, shamir_gateway, encryption_gateway, vault_session_gateway
+        vault_repository,
+        shamir_gateway,
+        encryption_gateway,
+        vault_session_gateway,
+        share_repository,
     )
 
 
@@ -144,3 +150,105 @@ def test_given_already_unlocked_vault_when_unlocking_vault_should_raise_vault_un
 
     with pytest.raises(VaultUnlockedError):
         use_case.execute(command)
+
+
+def test_given_reset_true_when_unlocking_vault_should_empty_share_repository(
+    use_case,
+    vault_repository: FakeVaultRepository,
+    shamir_gateway: FakeShamirGateway,
+    encryption_gateway: FakeEncryptionGateway,
+    share_repository: FakeShareRepository,
+):
+    vault_key = "test_vault_key_12345678"
+    master_key = "master_key"
+    encrypted_key = "encrypted_vault_key_hex"
+    shares = [Share("share0"), Share("share1")]
+
+    vault_repository.save(
+        Vault(
+            nb_shares=3,
+            threshold=2,
+            encrypted_key=encrypted_key,
+            setup_id="test-setup-id",
+            status=VaultStatus.SETUPED.value,
+        )
+    )
+
+    old_shares = [Share("old_share0"), Share("old_share1")]
+    share_repository.add(old_shares)
+
+    shamir_gateway.set_shamir_result(ShamirResult(shares, master_key))
+    encryption_gateway.set_decrypted_data(vault_key)
+    encryption_gateway.set_encrypted_data(encrypted_key)
+    encryption_gateway.set_master_key(master_key)
+
+    command = UnlockVaultCommand(shares=shares, reset=True)
+    use_case.execute(command)
+
+    assert len(share_repository.get_all()) == 0
+
+
+def test_given_reset_false_and_existing_shares_when_unlocking_vault_should_combine_shares(
+    use_case,
+    vault_repository: FakeVaultRepository,
+    shamir_gateway: FakeShamirGateway,
+    encryption_gateway: FakeEncryptionGateway,
+    vault_session_gateway: FakeVaultSessionGateway,
+    share_repository: FakeShareRepository,
+):
+    vault_key = "test_vault_key_12345678"
+    master_key = "master_key"
+    encrypted_key = "encrypted_vault_key_hex"
+    new_shares = [Share("share1")]
+
+    vault_repository.save(
+        Vault(
+            nb_shares=3,
+            threshold=2,
+            encrypted_key=encrypted_key,
+            setup_id="test-setup-id",
+            status=VaultStatus.SETUPED.value,
+        )
+    )
+
+    old_shares = [Share("share0")]
+    share_repository.add(old_shares)
+
+    combined_shares = old_shares + new_shares
+    shamir_gateway.set_shamir_result(ShamirResult(combined_shares, master_key))
+    encryption_gateway.set_decrypted_data(vault_key)
+    encryption_gateway.set_encrypted_data(encrypted_key)
+    encryption_gateway.set_master_key(master_key)
+
+    command = UnlockVaultCommand(shares=new_shares, reset=False)
+    use_case.execute(command)
+
+    decrypted_key = vault_session_gateway.get_decrypted_key()
+    assert decrypted_key == vault_key
+
+
+def test_given_insufficient_shares_when_unlocking_fails_should_add_shares_to_repository(
+    use_case,
+    vault_repository: FakeVaultRepository,
+    share_repository: FakeShareRepository,
+):
+    vault_repository.save(
+        Vault(
+            nb_shares=3,
+            threshold=2,
+            encrypted_key="encrypted_vault_key_hex",
+            setup_id="test-setup-id",
+            status=VaultStatus.SETUPED.value,
+        )
+    )
+
+    shares = [Share("share0")]
+
+    command = UnlockVaultCommand(shares=shares, reset=False)
+
+    with pytest.raises(ShareReconstructionError):
+        use_case.execute(command)
+
+    stored_shares = share_repository.get_all()
+    assert len(stored_shares) == 1
+    assert stored_shares[0].secret == "share0"

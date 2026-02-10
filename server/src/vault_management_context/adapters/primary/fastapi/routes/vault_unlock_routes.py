@@ -22,7 +22,8 @@ class UnlockVaultPostRequest(BaseModel):
                 "shares": [
                     "0:abc123def456",
                     "1:def789ghi012",
-                ]
+                ],
+                "reset": False,
             }
         }
     )
@@ -31,6 +32,10 @@ class UnlockVaultPostRequest(BaseModel):
         ...,
         min_length=1,
         description="List of share secrets (hex strings with embedded index)",
+    )
+    reset: bool = Field(
+        default=False,
+        description="If true, clear existing shares before unlocking. If false, combine with existing shares.",
     )
 
 
@@ -55,11 +60,12 @@ def unlock_vault(
     before any user can authenticate.
 
     - **shares**: List of share secrets (hex strings with embedded index in format "index:hexsecret")
+    - **reset**: If true, clear existing shares before unlocking. If false, combine with existing shares.
     """
     try:
         # Create Share objects from secrets (index is embedded in secret)
         shares = [Share(share_secret) for share_secret in request.shares]
-        command = UnlockVaultCommand(shares=shares)
+        command = UnlockVaultCommand(shares=shares, reset=request.reset)
         usecase.execute(command)
         return {"message": "Vault unlocked successfully"}
     except VaultManagementDomainError as e:
