@@ -6,8 +6,9 @@
       <div class="flex flex-col gap-4 md:flex-row md:items-end">
         <div class="flex-1">
           <label for="date-range" class="block mb-2 font-medium">Date Range</label>
-          <DatePicker id="date-range" v-model="dateRange" selectionMode="range" dateFormat="yy-mm-dd" showIcon
-            iconDisplay="button" :manualInput="false" showButtonBar fluid @update:modelValue="fetchEvents" />
+          <DatePicker id="date-range" v-model="dateRange" selectionMode="range" dateFormat="yy-mm-dd" showTime
+            hourFormat="24" showIcon iconDisplay="button" :manualInput="false" showButtonBar fluid
+            @update:modelValue="fetchEvents" />
         </div>
         <div class="flex-1">
           <label for="event-types" class="block mb-2 font-medium">Filter by Event Type</label>
@@ -67,11 +68,11 @@
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordSharedEvent'">
                 Shared with group: <strong>{{ slotProps.data.event_data.shared_with_group_id?.substring(0, 8)
-                  }}...</strong>
+                }}...</strong>
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordUnsharedEvent'">
                 Unshared from group: <strong>{{ slotProps.data.event_data.unshared_with_group_id?.substring(0, 8)
-                  }}...</strong>
+                }}...</strong>
               </span>
               <span v-else-if="slotProps.data.event_type === 'PasswordAccessedEvent'">
                 Password accessed
@@ -130,15 +131,9 @@ const fetchEvents = async () => {
         [start, end] = [end, start];
       }
 
-      // Set to start of day for start date
-      const startOfDay = new Date(start);
-      startOfDay.setHours(0, 0, 0, 0);
-      startDate = startOfDay.toISOString();
-
-      // Set to end of day for end date
-      const endOfDay = new Date(end);
-      endOfDay.setHours(23, 59, 59, 999);
-      endDate = endOfDay.toISOString();
+      // Use the exact date and time selected by the user
+      startDate = start.toISOString();
+      endDate = end.toISOString();
     }
 
     const response = await listPasswordEventsPasswordsPasswordIdEventsGet({
@@ -199,8 +194,12 @@ watch(() => [visible.value, props.password], ([isVisible, password]) => {
   if (isVisible && password) {
     // Set default date range to last 30 days
     const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
     dateRange.value = [thirtyDaysAgo, now];
 
     fetchEvents();
