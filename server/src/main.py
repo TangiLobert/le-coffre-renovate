@@ -152,7 +152,7 @@ app.include_router(get_group_management_router())
 frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     # Serve static files
-    root_app.mount(
+    app.mount(
         "/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets"
     )
 
