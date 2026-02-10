@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from sqlmodel import Session, create_engine
 from sqlalchemy.orm import sessionmaker
@@ -155,15 +153,3 @@ app.include_router(get_user_management_router())
 app.include_router(get_authentication_router())
 app.include_router(get_group_management_router())
 app.include_router(get_audit_logging_router())
-
-# Mount static files for frontend if they exist
-frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
-if frontend_dist.exists():
-    # Serve static files
-    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
-
-    # Catch-all route for SPA (must be last)
-    @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
-        # Serve index.html for all non-API routes (SPA)
-        return FileResponse(frontend_dist / "index.html")
