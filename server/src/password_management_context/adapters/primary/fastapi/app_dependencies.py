@@ -1,17 +1,21 @@
 from fastapi import Depends
 from starlette.requests import Request
 from sqlmodel import Session
-from identity_access_management_context.application.gateways import UserRepository
+from identity_access_management_context.adapters.primary.fastapi.app_dependencies import (
+    get_user_info_api,
+)
+from identity_access_management_context.adapters.primary.private_api import (
+    UserInfoApi,
+)
 from identity_access_management_context.adapters.secondary.sql import (
     SqlGroupRepository,
     SqlGroupMemberRepository,
-    SqlUserRepository,
 )
 from identity_access_management_context.adapters.secondary.group_access_gateway_adapter import (
     GroupAccessGatewayAdapter,
 )
-from identity_access_management_context.adapters.secondary.user_info_gateway_adapter import (
-    UserInfoGatewayAdapter,
+from password_management_context.adapters.secondary.gateways.iam_user_info_gateway import (
+    IamUserInfoGateway,
 )
 from password_management_context.application.gateways import (
     PasswordRepository,
@@ -74,10 +78,9 @@ def get_group_access_gateway(
 
 
 def get_user_info_gateway(
-    session: Session = Depends(get_session),
+    user_info_api: UserInfoApi = Depends(get_user_info_api),
 ) -> UserInfoGateway:
-    user_repository = SqlUserRepository(session)
-    return UserInfoGatewayAdapter(user_repository)
+    return IamUserInfoGateway(user_info_api)
 
 
 def get_event_publisher(request: Request) -> DomainEventPublisher:
@@ -186,10 +189,6 @@ def get_delete_password_usecase(
         event_publisher,
         password_event_repository,
     )
-
-
-def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
-    return SqlUserRepository(session)
 
 
 def get_share_access_usecase(

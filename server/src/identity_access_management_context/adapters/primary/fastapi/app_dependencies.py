@@ -26,6 +26,9 @@ from identity_access_management_context.application.use_cases import (
     IsSsoConfigSetUseCase,
     DeleteGroupUseCase,
 )
+from identity_access_management_context.adapters.primary.private_api import (
+    UserInfoApi,
+)
 from identity_access_management_context.application.gateways import (
     UserRepository,
     UserPasswordRepository,
@@ -63,11 +66,15 @@ def get_group_repository(session: Session = Depends(get_session)) -> GroupReposi
     return SqlGroupRepository(session)
 
 
-def get_group_member_repository(session: Session = Depends(get_session)) -> GroupMemberRepository:
+def get_group_member_repository(
+    session: Session = Depends(get_session),
+) -> GroupMemberRepository:
     return SqlGroupMemberRepository(session)
 
 
-def get_group_usage_gateway(session: Session = Depends(get_session)) -> GroupUsageGateway:
+def get_group_usage_gateway(
+    session: Session = Depends(get_session),
+) -> GroupUsageGateway:
     # Create the password permissions repository with session
     password_permissions_repository = SqlPasswordPermissionsRepository(session)
     # Create the use case
@@ -82,15 +89,21 @@ def get_user_repository(session: Session = Depends(get_session)) -> UserReposito
     return SqlUserRepository(session)
 
 
-def get_user_password_repository(session: Session = Depends(get_session)) -> UserPasswordRepository:
+def get_user_password_repository(
+    session: Session = Depends(get_session),
+) -> UserPasswordRepository:
     return SqlUserPasswordRepository(session)
 
 
-def get_sso_user_repository(session: Session = Depends(get_session)) -> SsoUserRepository:
+def get_sso_user_repository(
+    session: Session = Depends(get_session),
+) -> SsoUserRepository:
     return SqlSsoUserRepository(session)
 
 
-def get_sso_configuration_repository(session: Session = Depends(get_session)) -> SsoConfigurationRepository:
+def get_sso_configuration_repository(
+    session: Session = Depends(get_session),
+) -> SsoConfigurationRepository:
     return SqlSsoConfigurationRepository(session)
 
 
@@ -119,6 +132,13 @@ def get_get_user_usecase(
     user_repository: UserRepository = Depends(get_user_repository),
 ):
     return GetUserUseCase(user_repository)
+
+
+def get_user_info_api(
+    get_user_usecase: GetUserUseCase = Depends(get_get_user_usecase),
+) -> UserInfoApi:
+    """Private API for other contexts to query user information"""
+    return UserInfoApi(get_user_usecase)
 
 
 def get_delete_user_usecase(
