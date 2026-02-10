@@ -803,8 +803,3 @@ export const listGroupsGroupsGet = <ThrowOnError extends boolean = false>(option
     url: '/groups',
     ...options
 });
-
-/**
- * Health Check
- */
-export const healthCheckHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
