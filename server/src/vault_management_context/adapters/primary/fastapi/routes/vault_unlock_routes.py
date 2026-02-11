@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 
@@ -10,7 +11,10 @@ from vault_management_context.application.use_cases.unlock_vault_use_case import
     UnlockVaultUseCase,
 )
 from vault_management_context.domain.entities.share import Share
-from vault_management_context.domain.exceptions import VaultManagementDomainError
+from vault_management_context.domain.exceptions import (
+    VaultManagementDomainError,
+    ShareReconstructionError,
+)
 
 router = APIRouter(prefix="/vault", tags=["Vault"])
 
@@ -22,7 +26,7 @@ class UnlockVaultPostRequest(BaseModel):
                 "shares": [
                     "0:abc123def456",
                     "1:def789ghi012",
-                ]
+                ],
             }
         }
     )
@@ -55,6 +59,14 @@ def unlock_vault(
     before any user can authenticate.
 
     - **shares**: List of share secrets (hex strings with embedded index in format "index:hexsecret")
+
+    Shares are added to any existing pending shares. Use DELETE /vault/unlock/clear
+    to remove all pending shares before submitting new ones.
+
+    Returns:
+    - 200: Vault unlocked successfully
+    - 202: Shares accepted and stored, but more shares needed to unlock
+    - 400: Invalid shares or other domain error
     """
     try:
         # Create Share objects from secrets (index is embedded in secret)
@@ -62,6 +74,14 @@ def unlock_vault(
         command = UnlockVaultCommand(shares=shares)
         usecase.execute(command)
         return {"message": "Vault unlocked successfully"}
+    except ShareReconstructionError:
+        # Shares were stored but insufficient to unlock
+        return JSONResponse(
+            status_code=202,
+            content={
+                "message": "Shares accepted. More shares needed to unlock the vault."
+            },
+        )
     except VaultManagementDomainError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

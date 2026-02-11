@@ -29,6 +29,7 @@ from vault_management_context.adapters.secondary import (
     CryptoShamirGateway,
     AesEncryptionGateway,
     InMemoryVaultSessionGateway,
+    InMemoryShareRepository,
 )
 from vault_management_context.application.use_cases import (
     EncryptUseCase,
@@ -71,7 +72,9 @@ def run_migrations(max_retries: int = 5, retry_delay: float = 5.0):
             return
         except Exception as e:
             if attempt < max_retries - 1:
-                print(f"Migration attempt {attempt + 1}/{max_retries} failed: {e}. Retrying in {retry_delay}s...")
+                print(
+                    f"Migration attempt {attempt + 1}/{max_retries} failed: {e}. Retrying in {retry_delay}s..."
+                )
                 time.sleep(retry_delay)
             else:
                 raise
@@ -102,10 +105,12 @@ async def lifespan(app: FastAPI):
     shamir_gateway = CryptoShamirGateway()
     encryption_gateway = AesEncryptionGateway()
     vault_session_gateway = InMemoryVaultSessionGateway()
+    share_repository = InMemoryShareRepository()
 
     app.state.shamir_gateway = shamir_gateway
     app.state.encryption_gateway = encryption_gateway
     app.state.vault_session_gateway = vault_session_gateway
+    app.state.share_repository = share_repository
 
     # Encryption use cases and API (stateless)
     encrypt_use_case = EncryptUseCase(encryption_gateway, vault_session_gateway)
@@ -173,17 +178,3 @@ app.include_router(get_password_management_router())
 app.include_router(get_user_management_router())
 app.include_router(get_authentication_router())
 app.include_router(get_group_management_router())
-
-# Mount static files for frontend if they exist
-frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
-if frontend_dist.exists():
-    # Serve static files
-    app.mount(
-        "/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets"
-    )
-
-    # Catch-all route for SPA (must be last)
-    @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
-        # Serve index.html for all non-API routes (SPA)
-        return FileResponse(frontend_dist / "index.html")

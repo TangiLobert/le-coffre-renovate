@@ -5,6 +5,7 @@ from .fakes import (
     FakeShamirGateway,
     FakeEncryptionGateway,
     FakeVaultSessionGateway,
+    FakeShareRepository,
 )
 
 
@@ -26,3 +27,8 @@ def encryption_gateway():
 @pytest.fixture()
 def vault_session_gateway():
     return FakeVaultSessionGateway()
+
+
+@pytest.fixture()
+def share_repository():
+    return FakeShareRepository()
