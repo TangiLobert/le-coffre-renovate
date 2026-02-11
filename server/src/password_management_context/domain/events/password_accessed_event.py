@@ -1,23 +1,29 @@
-from datetime import datetime
-from uuid import UUID, uuid4
-from shared_kernel.domain.entities import DomainEvent
-from shared_kernel.domain.value_objects import EventPriority
+from dataclasses import dataclass
+from typing import TypedDict
+from uuid import UUID
+
+from .base_password_event import BasePasswordEvent
 
 
-class PasswordAccessedEvent(DomainEvent):
-    def __init__(
-        self,
-        password_id: UUID,
-        password_name: str,
-        accessed_by_user_id: UUID,
-        event_id: UUID | None = None,
-        occurred_on: datetime | None = None,
-    ):
-        super().__init__(
-            event_id=event_id or uuid4(),
-            occurred_on=occurred_on or datetime.now(),
-            priority=EventPriority.LOW,
-        )
-        self.password_id = password_id
-        self.password_name = password_name
-        self.accessed_by_user_id = accessed_by_user_id
+class PasswordAccessedEventData(TypedDict):
+    """Typed structure for PasswordAccessedEvent storage data"""
+
+    password_id: str
+    password_name: str
+
+
+@dataclass
+class PasswordAccessedEvent(BasePasswordEvent):
+    """Domain event for password access"""
+
+    password_name: str
+    accessed_by_user_id: UUID
+
+    def get_actor_user_id(self) -> UUID:
+        return self.accessed_by_user_id
+
+    def to_event_data(self) -> PasswordAccessedEventData:
+        return {
+            "password_id": str(self.password_id),
+            "password_name": self.password_name,
+        }

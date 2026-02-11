@@ -3,6 +3,10 @@ from password_management_context.application.gateways import (
     PasswordPermissionsRepository,
     GroupAccessGateway,
     PasswordEncryptionGateway,
+    PasswordEventRepository,
+)
+from password_management_context.application.services import (
+    PasswordEventStorageService,
 )
 from password_management_context.application.commands import UpdatePasswordCommand
 from password_management_context.domain.exceptions import (
@@ -24,12 +28,14 @@ class UpdatePasswordUseCase:
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
         event_publisher: DomainEventPublisher,
+        password_event_repository: PasswordEventRepository,
     ):
         self.password_repository = password_repository
         self.password_encryption_gateway = password_encryption_gateway
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
         self.event_publisher = event_publisher
+        self.password_event_repository = password_event_repository
 
     def execute(self, new_password: UpdatePasswordCommand) -> None:
         existing_password = self.password_repository.get_by_id(new_password.id)
@@ -78,7 +84,7 @@ class UpdatePasswordUseCase:
 
         self.password_repository.update(existing_password)
 
-        # Publish domain event
+        # Store domain event
         event = PasswordUpdatedEvent(
             password_id=existing_password.id,
             updated_by_user_id=new_password.requester_id,
@@ -86,4 +92,7 @@ class UpdatePasswordUseCase:
             has_password_changed=has_password_changed,
             has_folder_changed=has_folder_changed,
         )
-        self.event_publisher.publish(event)
+        event_storage_service = PasswordEventStorageService(
+            self.password_event_repository
+        )
+        event_storage_service.store_event(event)

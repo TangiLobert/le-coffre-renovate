@@ -239,28 +239,6 @@ export type CreateVaultPostResponse = {
 };
 
 /**
- * EventData
- */
-export type EventData = {
-    /**
-     * Event Id
-     */
-    event_id: string;
-    /**
-     * Event Type
-     */
-    event_type: string;
-    /**
-     * Occurred On
-     */
-    occurred_on: string;
-    /**
-     * Priority
-     */
-    priority: string;
-};
-
-/**
  * GetGroupResponse
  */
 export type GetGroupResponse = {
@@ -457,16 +435,6 @@ export type IsSsoConfigSetResponse = {
 };
 
 /**
- * ListEventsResponse
- */
-export type ListEventsResponse = {
-    /**
-     * Events
-     */
-    events: Array<EventData>;
-};
-
-/**
  * ListGroupsResponse
  */
 export type ListGroupsResponse = {
@@ -496,6 +464,16 @@ export type ListPasswordAccessResponse = {
      * Group Access List
      */
     group_access_list: Array<GroupAccessItem>;
+};
+
+/**
+ * ListPasswordEventsResponse
+ */
+export type ListPasswordEventsResponse = {
+    /**
+     * Events
+     */
+    events: Array<PasswordEventResponse>;
 };
 
 /**
@@ -532,6 +510,38 @@ export type LockVaultPostResponse = {
      * Message
      */
     message: string;
+};
+
+/**
+ * PasswordEventResponse
+ */
+export type PasswordEventResponse = {
+    /**
+     * Event Id
+     */
+    event_id: string;
+    /**
+     * Event Type
+     */
+    event_type: string;
+    /**
+     * Occurred On
+     */
+    occurred_on: string;
+    /**
+     * Actor User Id
+     */
+    actor_user_id: string;
+    /**
+     * Actor Email
+     */
+    actor_email: string | null;
+    /**
+     * Event Data
+     */
+    event_data: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -993,6 +1003,55 @@ export type ListPasswordsPasswordsListGetResponses = {
 };
 
 export type ListPasswordsPasswordsListGetResponse = ListPasswordsPasswordsListGetResponses[keyof ListPasswordsPasswordsListGetResponses];
+
+export type ListPasswordEventsPasswordsPasswordIdEventsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Password Id
+         */
+        password_id: string;
+    };
+    query?: {
+        /**
+         * Event Type
+         *
+         * Filter by event types
+         */
+        event_type?: Array<string> | null;
+        /**
+         * Start Date
+         *
+         * Filter events from this date (inclusive)
+         */
+        start_date?: string | null;
+        /**
+         * End Date
+         *
+         * Filter events until this date (inclusive)
+         */
+        end_date?: string | null;
+    };
+    url: '/passwords/{password_id}/events';
+};
+
+export type ListPasswordEventsPasswordsPasswordIdEventsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPasswordEventsPasswordsPasswordIdEventsGetError = ListPasswordEventsPasswordsPasswordIdEventsGetErrors[keyof ListPasswordEventsPasswordsPasswordIdEventsGetErrors];
+
+export type ListPasswordEventsPasswordsPasswordIdEventsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ListPasswordEventsResponse;
+};
+
+export type ListPasswordEventsPasswordsPasswordIdEventsGetResponse = ListPasswordEventsPasswordsPasswordIdEventsGetResponses[keyof ListPasswordEventsPasswordsPasswordIdEventsGetResponses];
 
 export type DeletePasswordPasswordsPasswordIdDeleteData = {
     body?: never;
@@ -1759,47 +1818,3 @@ export type ListGroupsGroupsGetResponses = {
 };
 
 export type ListGroupsGroupsGetResponse = ListGroupsGroupsGetResponses[keyof ListGroupsGroupsGetResponses];
-
-export type ListEventsEventsGetData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Event Type
-         *
-         * Filter by event types
-         */
-        event_type?: Array<string> | null;
-        /**
-         * Start Date
-         *
-         * Filter events from this date (inclusive)
-         */
-        start_date?: string | null;
-        /**
-         * End Date
-         *
-         * Filter events until this date (inclusive)
-         */
-        end_date?: string | null;
-    };
-    url: '/events';
-};
-
-export type ListEventsEventsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListEventsEventsGetError = ListEventsEventsGetErrors[keyof ListEventsEventsGetErrors];
-
-export type ListEventsEventsGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: ListEventsResponse;
-};
-
-export type ListEventsEventsGetResponse = ListEventsEventsGetResponses[keyof ListEventsEventsGetResponses];

@@ -1,23 +1,29 @@
-from datetime import datetime
-from uuid import UUID, uuid4
-from shared_kernel.domain.entities import DomainEvent
-from shared_kernel.domain.value_objects import EventPriority
+from dataclasses import dataclass
+from typing import TypedDict
+from uuid import UUID
+
+from .base_password_event import BasePasswordEvent
 
 
-class PasswordDeletedEvent(DomainEvent):
-    def __init__(
-        self,
-        password_id: UUID,
-        deleted_by_user_id: UUID,
-        owner_group_id: UUID,
-        event_id: UUID | None = None,
-        occurred_on: datetime | None = None,
-    ):
-        super().__init__(
-            event_id=event_id or uuid4(),
-            occurred_on=occurred_on or datetime.now(),
-            priority=EventPriority.HIGH,
-        )
-        self.password_id = password_id
-        self.deleted_by_user_id = deleted_by_user_id
-        self.owner_group_id = owner_group_id
+class PasswordDeletedEventData(TypedDict):
+    """Typed structure for PasswordDeletedEvent storage data"""
+
+    password_id: str
+    owner_group_id: str
+
+
+@dataclass
+class PasswordDeletedEvent(BasePasswordEvent):
+    """Domain event for password deletion"""
+
+    deleted_by_user_id: UUID
+    owner_group_id: UUID
+
+    def get_actor_user_id(self) -> UUID:
+        return self.deleted_by_user_id
+
+    def to_event_data(self) -> PasswordDeletedEventData:
+        return {
+            "password_id": str(self.password_id),
+            "owner_group_id": str(self.owner_group_id),
+        }

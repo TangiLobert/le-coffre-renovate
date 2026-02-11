@@ -13,15 +13,9 @@
     </div>
 
     <div v-else class="space-y-2">
-      <FolderCard
-        v-for="folder in folders"
-        :key="folder.name"
-        :folder="folder"
-        :initialOpen="selectedFolder === folder.name"
-        @edit="handleEdit"
-        @share="handleShare"
-        @deleted="handleDeleted"
-      />
+      <FolderCard v-for="folder in folders" :key="folder.name" :folder="folder"
+        :initialOpen="selectedFolder === folder.name" @edit="handleEdit" @share="handleShare" @history="handleHistory"
+        @deleted="handleDeleted" />
     </div>
   </div>
 </template>
@@ -42,6 +36,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'edit', password: GetPasswordListResponse): void;
   (e: 'share', password: GetPasswordListResponse): void;
+  (e: 'history', password: GetPasswordListResponse): void;
   (e: 'deleted'): void;
 }>();
 
@@ -51,6 +46,10 @@ const handleEdit = (password: GetPasswordListResponse) => {
 
 const handleShare = (password: GetPasswordListResponse) => {
   emit('share', password);
+};
+
+const handleHistory = (password: GetPasswordListResponse) => {
+  emit('history', password);
 };
 
 const handleDeleted = () => {
