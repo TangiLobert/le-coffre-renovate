@@ -9,5 +9,5 @@ class PasswordResponse:
     name: str
     password: str
     folder: str
-    created_at: datetime | None
-    last_password_updated_at: datetime | None
+    created_at: datetime
+    last_password_updated_at: datetime

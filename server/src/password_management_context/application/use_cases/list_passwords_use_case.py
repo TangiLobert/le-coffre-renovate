@@ -6,8 +6,10 @@ from password_management_context.application.gateways import (
     PasswordRepository,
     PasswordPermissionsRepository,
     GroupAccessGateway,
+    PasswordEventRepository,
 )
 from password_management_context.application.responses import PasswordMetadataResponse
+from password_management_context.application.services import PasswordTimestampService
 from password_management_context.domain.exceptions import FolderNotFoundError
 from password_management_context.domain.value_objects import PasswordPermission
 
@@ -18,10 +20,12 @@ class ListPasswordsUseCase:
         password_repository: PasswordRepository,
         password_permissions_repository: PasswordPermissionsRepository,
         group_access_gateway: GroupAccessGateway,
+        password_event_repository: PasswordEventRepository,
     ):
         self.password_repository = password_repository
         self.password_permissions_repository = password_permissions_repository
         self.group_access_gateway = group_access_gateway
+        self.password_event_repository = password_event_repository
 
     def execute(self, command: ListPasswordsCommand) -> List[PasswordMetadataResponse]:
         password_entities = self.password_repository.list_all(command.folder)
@@ -30,19 +34,36 @@ class ListPasswordsUseCase:
             raise FolderNotFoundError(command.folder)
 
         password_responses = []
+        accessible_passwords = []
+
         for password_entity in password_entities:
             access_info = self._user_has_access_through_groups(
                 command.requester_id, password_entity.id
             )
             if access_info is not None:
                 user_group_id, owner_group_id = access_info
-                password_response = PasswordMetadataResponse(
-                    id=password_entity.id,
-                    name=password_entity.name,
-                    folder=password_entity.folder,
-                    group_id=owner_group_id,
-                )
-                password_responses.append(password_response)
+                accessible_passwords.append((password_entity, owner_group_id))
+
+        if not accessible_passwords:
+            return []
+
+        timestamp_service = PasswordTimestampService(self.password_event_repository)
+        password_ids = [pwd.id for pwd, _ in accessible_passwords]
+        timestamps_map = timestamp_service.get_timestamps_bulk(password_ids)
+
+        for password_entity, owner_group_id in accessible_passwords:
+            created_at, last_password_updated_at = timestamps_map.get(
+                password_entity.id, (None, None)
+            )
+            password_response = PasswordMetadataResponse(
+                id=password_entity.id,
+                name=password_entity.name,
+                folder=password_entity.folder,
+                group_id=owner_group_id,
+                created_at=created_at,
+                last_password_updated_at=last_password_updated_at,
+            )
+            password_responses.append(password_response)
 
         return password_responses
 

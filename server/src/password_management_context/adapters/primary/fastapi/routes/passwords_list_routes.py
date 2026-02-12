@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from uuid import UUID
@@ -26,6 +27,8 @@ class GetPasswordListResponse(BaseModel):
     name: str
     folder: str
     group_id: UUID
+    created_at: datetime
+    last_updated_at: datetime
 
 
 @router.get(
@@ -56,6 +59,8 @@ def list_passwords(
                 name=password.name,
                 folder=password.folder,
                 group_id=password.group_id,
+                created_at=password.created_at,
+                last_updated_at=password.last_password_updated_at,
             )
             for password in passwords
         ]

@@ -11,6 +11,7 @@ from password_management_context.application.gateways import (
 from password_management_context.application.responses import PasswordResponse
 from password_management_context.application.services import (
     PasswordEventStorageService,
+    PasswordTimestampService,
 )
 from password_management_context.domain.exceptions import (
     PasswordNotFoundError,
@@ -55,23 +56,11 @@ class GetPasswordUseCase:
             password_entity.encrypted_value
         )
 
-        # Retrieve creation event
-        creation_events = self.password_event_repository.list_events(
-            password_id=command.password_id,
-            event_types=["PasswordCreatedEvent"],
+        # Retrieve timestamps using service
+        timestamp_service = PasswordTimestampService(self.password_event_repository)
+        created_at, last_password_updated_at = timestamp_service.get_timestamps(
+            command.password_id
         )
-        created_at = creation_events[0]["occurred_on"] if creation_events else None
-
-        # Retrieve last password update event (only those that changed the password)
-        update_events = self.password_event_repository.list_events(
-            password_id=command.password_id,
-            event_types=["PasswordUpdatedEvent"],
-        )
-        last_password_updated_at = created_at
-        for event in update_events:
-            if event["event_data"].get("has_password_changed", False):
-                last_password_updated_at = event["occurred_on"]
-                break
 
         # Store domain event
         event = PasswordAccessedEvent(

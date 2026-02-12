@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 
@@ -7,4 +8,6 @@ class PasswordMetadataResponse:
     id: UUID
     name: str
     folder: str
-    group_id: UUID  # The owning group ID
+    group_id: UUID
+    created_at: datetime
+    last_password_updated_at: datetime
