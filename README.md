@@ -19,8 +19,6 @@ Le Coffre is an open-source password manager that allows you to securely store a
 - [Development Server](#development-server)
 - [Production](#production)
 - [Security](#security)
-  - [Process of creation of the encryption key](#process-of-creation-of-the-encryption-key)
-  - [Process of encryption and decryption of a password](#process-of-encryption-and-decryption-of-a-password)
 
 ## License
 
@@ -182,3 +180,9 @@ docker run -p 3000:3000 le-coffre:latest --volume le-coffre-volume:/app
 # Pull docker image
 docker pull rg.fr-par.scw.cloud/soma-smart-cr/le-coffre:latest
 ```
+
+## Security
+
+For detailed security policies, threat model, and vulnerability reporting instructions, see [SECURITY.md](SECURITY.md).
+
+For a detailed explanation of the cryptographic design and key management model, see [CRYPTOGRAPHIC_ARCHITECTURE.md](CRYPTOGRAPHIC_ARCHITECTURE.md).
