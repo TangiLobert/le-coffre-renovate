@@ -3,6 +3,7 @@ import os
 import time
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from sqlmodel import Session, create_engine
 from sqlalchemy import text
@@ -176,6 +177,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, root_path="/api")
 
 app.add_middleware(RequestLoggingMiddleware)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
 
 # Health check endpoint for Kubernetes
 # Note: With root_path="/api", this will be accessible at /api/health
