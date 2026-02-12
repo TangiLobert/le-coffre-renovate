@@ -11,6 +11,7 @@ from password_management_context.application.gateways import (
 from password_management_context.application.responses import PasswordResponse
 from password_management_context.application.services import (
     PasswordEventStorageService,
+    PasswordTimestampService,
 )
 from password_management_context.domain.exceptions import (
     PasswordNotFoundError,
@@ -55,6 +56,12 @@ class GetPasswordUseCase:
             password_entity.encrypted_value
         )
 
+        # Retrieve timestamps using service
+        timestamp_service = PasswordTimestampService(self.password_event_repository)
+        created_at, last_password_updated_at = timestamp_service.get_timestamps(
+            command.password_id
+        )
+
         # Store domain event
         event = PasswordAccessedEvent(
             password_id=password_entity.id,
@@ -71,6 +78,8 @@ class GetPasswordUseCase:
             name=password_entity.name,
             password=decrypted_password,
             folder=password_entity.folder,
+            created_at=created_at,
+            last_password_updated_at=last_password_updated_at,
         )
 
     def _user_has_access_through_groups(self, user_id: UUID, password_id: UUID) -> bool:

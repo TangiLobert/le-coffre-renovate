@@ -165,9 +165,15 @@ def get_list_passwords_usecase(
         get_password_permissions_repository
     ),
     group_access_gateway: GroupAccessGateway = Depends(get_group_access_gateway),
+    password_event_repository: PasswordEventRepository = Depends(
+        get_password_event_repository
+    ),
 ):
     return ListPasswordsUseCase(
-        password_repository, password_permissions_repository, group_access_gateway
+        password_repository,
+        password_permissions_repository,
+        group_access_gateway,
+        password_event_repository,
     )
 
 

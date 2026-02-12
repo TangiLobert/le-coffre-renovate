@@ -75,3 +75,35 @@ class SqlPasswordEventRepository(SQLBaseRepository):
             }
             for event in results
         ]
+
+    def list_events_bulk(
+        self,
+        password_ids: list[UUID],
+        event_types: list[str] | None = None,
+    ) -> list[dict]:
+        """List events for multiple passwords with optional event type filter"""
+        if not password_ids:
+            return []
+
+        query = select(PasswordEventTable).where(
+            PasswordEventTable.password_id.in_(password_ids)  # type: ignore[attr-defined]
+        )
+
+        if event_types:
+            query = query.where(PasswordEventTable.event_type.in_(event_types))  # type: ignore[attr-defined]
+
+        query = query.order_by(PasswordEventTable.occurred_on.desc())  # type: ignore[attr-defined]
+
+        results = self._session.exec(query).all()
+
+        return [
+            {
+                "event_id": str(event.event_id),
+                "event_type": event.event_type,
+                "occurred_on": event.occurred_on.isoformat(),
+                "password_id": str(event.password_id),
+                "actor_user_id": str(event.actor_user_id),
+                "event_data": event.event_data,
+            }
+            for event in results
+        ]

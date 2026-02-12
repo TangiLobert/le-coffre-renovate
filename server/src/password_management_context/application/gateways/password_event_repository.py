@@ -32,3 +32,16 @@ class PasswordEventRepository(Protocol):
         password_id, actor_user_id, event_data
         """
         ...
+
+    def list_events_bulk(
+        self,
+        password_ids: list[UUID],
+        event_types: list[str] | None = None,
+    ) -> list[dict]:
+        """List events for multiple passwords with optional event type filter
+
+        Returns list of dicts with keys: event_id, event_type, occurred_on,
+        password_id, actor_user_id, event_data
+        Sorted by occurred_on descending (most recent first) per password
+        """
+        ...

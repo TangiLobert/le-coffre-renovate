@@ -62,3 +62,20 @@ class FakePasswordEventRepository:
             filtered = [event for event in filtered if event["occurred_on"] <= end_date]
 
         return sorted(filtered, key=lambda e: e["occurred_on"], reverse=True)
+
+    def list_events_bulk(
+        self,
+        password_ids: list[UUID],
+        event_types: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """List events for multiple passwords with optional event type filter"""
+        filtered = [
+            event for event in self.events if event["password_id"] in password_ids
+        ]
+
+        if event_types:
+            filtered = [
+                event for event in filtered if event["event_type"] in event_types
+            ]
+
+        return sorted(filtered, key=lambda e: e["occurred_on"], reverse=True)

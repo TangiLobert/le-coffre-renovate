@@ -2,8 +2,10 @@
   <div class="surface-ground rounded-lg p-4 hover:surface-hover transition-colors">
     <div class="flex justify-between items-start">
       <div class="flex-1">
-        <h4 class="font-semibold mb-2">{{ password.name }}</h4>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 mb-2">
+          <h4 class="font-semibold">{{ password.name }}</h4>
+        </div>
+        <div class="flex items-center gap-2 mb-2">
           <code class="text-sm surface-card px-3 py-1 rounded border surface-border font-mono">
             {{ isVisible && passwordValue ? passwordValue : '••••••••' }}
           </code>
@@ -12,6 +14,12 @@
             @click="toggleVisibility" />
           <Button icon="pi pi-copy" text rounded size="small" severity="secondary" aria-label="Copy password"
             @click="copyToClipboard" />
+        </div>
+        <div class="text-xs text-color-secondary flex gap-4">
+          <i v-if="needsUpdate" class="pi pi-exclamation-triangle text-orange-500"
+            v-tooltip.top="'Password not updated in 3+ months'" />
+          <span>Created: {{ formatDate(password.created_at) }}</span>
+          <span>Updated: {{ formatDate(password.last_updated_at) }}</span>
         </div>
       </div>
       <div class="flex gap-1">
@@ -31,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { storeToRefs } from 'pinia';
@@ -64,6 +72,27 @@ const isLoading = ref(false);
 const isDeleting = ref(false);
 const isOwner = ref(false);
 const ownerGroupNames = ref<string[]>([]);
+
+// Check if password needs update (3 months = 90 days)
+const needsUpdate = computed(() => {
+  const lastUpdated = new Date(props.password.last_updated_at);
+  const now = new Date();
+  const diffInMs = now.getTime() - lastUpdated.getTime();
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+  return diffInDays > 90;
+});
+
+// Format date to readable format
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
 // Check if current user is owner by checking if they own the group that owns this password
 const checkOwnership = () => {
