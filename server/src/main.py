@@ -14,11 +14,15 @@ from alembic import command
 
 def configure_logging():
     logging.basicConfig(
-        force=True,  # override uvicorn's pre-configured handlers
+        force=True,  # override uvicorn's or alembic's pre-configured handlers
         level=logging.INFO,
         format="%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+    # alembic's fileConfig uses disable_existing_loggers=True by default,
+    # which marks all pre-existing loggers as disabled. Re-enable them.
+    for name in logging.Logger.manager.loggerDict:
+        logging.getLogger(name).disabled = False
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
@@ -111,6 +115,7 @@ async def lifespan(app: FastAPI):
     # Run migrations instead of create_tables
     logger.info("Starting database migrations...")
     run_migrations()
+    configure_logging()  # re-apply after alembic's fileConfig resets the root logger
     logger.info("Database migrations completed")
 
     engine = _build_engine(get_database_url())
