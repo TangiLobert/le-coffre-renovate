@@ -185,6 +185,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    if exc.status_code >= 500:
+        logger.error("HTTP %d on %s %s: %s", exc.status_code, request.method, request.url.path, exc.detail)
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
 # Health check endpoint for Kubernetes
 # Note: With root_path="/api", this will be accessible at /api/health
 @app.get("/health")
