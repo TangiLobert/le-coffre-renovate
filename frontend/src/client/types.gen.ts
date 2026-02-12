@@ -298,6 +298,14 @@ export type GetPasswordListResponse = {
      * Group Id
      */
     group_id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Last Updated At
+     */
+    last_updated_at: string;
 };
 
 /**
@@ -320,6 +328,14 @@ export type GetPasswordResponse = {
      * Folder
      */
     folder: string;
+    /**
+     * Created At
+     */
+    created_at: string | null;
+    /**
+     * Last Password Updated At
+     */
+    last_password_updated_at: string | null;
 };
 
 /**
