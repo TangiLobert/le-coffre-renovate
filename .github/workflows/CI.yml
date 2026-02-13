@@ -39,12 +39,12 @@ jobs:
         run: bun audit --audit-level=moderate
 
       - name: Type Checking
-        if: (${{ success() }} || ${{ failure() }})
+        if: success() || failure()
         working-directory: frontend/
         run: bun run type-check
 
       - name: Build Project
-        if: (${{ success() }} || ${{ failure() }})
+        if: success() || failure()
         working-directory: frontend/
         run: bun run build
 
