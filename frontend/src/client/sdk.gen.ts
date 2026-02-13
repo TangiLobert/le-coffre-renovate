@@ -661,7 +661,7 @@ export const refreshAccessTokenAuthRefreshTokenPost = <ThrowOnError extends bool
  *
  * - **Authorization**: Requires valid access_token cookie
  *
- * Returns a CSRF token that expires after 15 minutes (same as access token).
+ * Returns a CSRF token that remains valid for the entire session.
  */
 export const getCsrfTokenAuthCsrfTokenGet = <ThrowOnError extends boolean = false>(options?: Options<GetCsrfTokenAuthCsrfTokenGetData, ThrowOnError>) => (options?.client ?? client).get<GetCsrfTokenAuthCsrfTokenGetResponses, unknown, ThrowOnError>({
     security: [{
