@@ -2,10 +2,11 @@
 import { ref, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
-import { unlockVaultVaultUnlockPost, getVaultStatusVaultStatusGet, clearPendingSharesVaultUnlockClearDelete } from '@/client/sdk.gen';
+import { unlockVaultVaultUnlockPost, clearPendingSharesVaultUnlockClearDelete } from '@/client/sdk.gen';
 import type { VaultStatus } from '@/client/types.gen';
+import { useSetupStore } from '@/stores/setup';
 
-const visible = defineModel<boolean>('visible', { required: true});
+const visible = defineModel<boolean>('visible', { required: true });
 
 const props = defineProps<{
   vaultStatus?: VaultStatus | null;
@@ -19,6 +20,7 @@ const emit = defineEmits<{
 
 const toast = useToast();
 const confirm = useConfirm();
+const setupStore = useSetupStore();
 
 const shares = ref<string[]>(['']);
 
@@ -28,7 +30,7 @@ const isPendingUnlock = computed(() => props.vaultStatus === 'PENDING_UNLOCK');
 
 const hasStalePendingShares = computed(() => {
   if (!isPendingUnlock.value || !props.lastShareTimestamp) return false;
-  
+
   const lastSubmit = new Date(props.lastShareTimestamp);
   const ageMinutes = (Date.now() - lastSubmit.getTime()) / 60000;
   return ageMinutes > 10; // Warn if older than 10 minutes
@@ -36,14 +38,14 @@ const hasStalePendingShares = computed(() => {
 
 const lastShareAge = computed(() => {
   if (!props.lastShareTimestamp) return '';
-  
+
   const lastSubmit = new Date(props.lastShareTimestamp);
   const ageMinutes = Math.floor((Date.now() - lastSubmit.getTime()) / 60000);
-  
+
   if (ageMinutes < 1) return 'just now';
   if (ageMinutes === 1) return '1 minute ago';
   if (ageMinutes < 60) return `${ageMinutes} minutes ago`;
-  
+
   const ageHours = Math.floor(ageMinutes / 60);
   if (ageHours === 1) return '1 hour ago';
   return `${ageHours} hours ago`;
@@ -97,9 +99,9 @@ const handleSubmit = async () => {
       return;
     }
 
-    // Check vault status after unlock attempt
-    const statusResponse = await getVaultStatusVaultStatusGet();
-    const newStatus = statusResponse.data?.status;
+    // Check vault status after unlock attempt using setup store
+    await setupStore.fetchVaultStatus(true); // Force fresh fetch
+    const newStatus = setupStore.vaultStatus;
 
     if (newStatus === 'UNLOCKED') {
       toast.add({
@@ -149,16 +151,16 @@ const handleReset = async () => {
     accept: async () => {
       try {
         loading.value = true;
-        
+
         await clearPendingSharesVaultUnlockClearDelete();
-        
+
         toast.add({
           severity: 'success',
           summary: 'Shares Cleared',
           detail: 'All pending shares have been cleared',
           life: 3000
         });
-        
+
         // Refresh vault status
         emit('statusChanged', 'LOCKED');
       } catch (err: unknown) {
@@ -192,9 +194,9 @@ const handleReset = async () => {
               {{ isPendingUnlock ? 'Unlock in Progress' : 'Vault is Locked' }}
             </p>
             <p class="text-sm">
-              {{ isPendingUnlock 
-                ? 'At least one share has already been submitted. Your shares will be added to the existing ones.' 
-                : 'Please enter your Shamir shares to unlock the vault and access your passwords.' 
+              {{ isPendingUnlock
+                ? 'At least one share has already been submitted. Your shares will be added to the existing ones.'
+                : 'Please enter your Shamir shares to unlock the vault and access your passwords.'
               }}
             </p>
           </div>
@@ -208,7 +210,7 @@ const handleReset = async () => {
           <div>
             <p class="text-sm font-semibold mb-1">Pending shares are old</p>
             <p class="text-sm">
-              Last share was submitted {{ lastShareAge }}. 
+              Last share was submitted {{ lastShareAge }}.
               Consider clearing and starting fresh.
             </p>
           </div>
@@ -222,14 +224,8 @@ const handleReset = async () => {
             <label class="block text-sm font-semibold mb-1">
               Existing Share(s)
             </label>
-            <Password 
-              model-value="••••••••••••••••" 
-              placeholder="Existing shares" 
-              disabled 
-              :feedback="false" 
-              class="w-full" 
-              inputClass="w-full font-mono" 
-            />
+            <Password model-value="••••••••••••••••" placeholder="Existing shares" disabled :feedback="false"
+              class="w-full" inputClass="w-full font-mono" />
           </div>
           <div class="mt-7 w-10"></div> <!-- Spacer to align with other rows -->
         </div>
@@ -258,23 +254,11 @@ const handleReset = async () => {
 
     <template #footer>
       <div class="flex justify-between w-full">
-        <Button 
-          v-if="isPendingUnlock"
-          label="Clear Pending Shares" 
-          @click="handleReset" 
-          :loading="loading" 
-          icon="pi pi-times" 
-          severity="danger"
-          outlined
-        />
+        <Button v-if="isPendingUnlock" label="Clear Pending Shares" @click="handleReset" :loading="loading"
+          icon="pi pi-times" severity="danger" outlined />
         <div v-else></div> <!-- Spacer to push unlock button to the right when no reset button -->
-        <Button 
-          :label="isPendingUnlock ? 'Add Shares' : 'Submit Shares'" 
-          @click="handleSubmit" 
-          :loading="loading" 
-          :disabled="!isValid" 
-          icon="pi pi-unlock" 
-        />
+        <Button :label="isPendingUnlock ? 'Add Shares' : 'Submit Shares'" @click="handleSubmit" :loading="loading"
+          :disabled="!isValid" icon="pi pi-unlock" />
       </div>
     </template>
   </Dialog>

@@ -1,5 +1,6 @@
 import os
 import secrets
+import warnings
 
 
 def get_database_url():
@@ -18,12 +19,10 @@ def get_jwt_secret_key() -> str:
     if not secret:
         # Development fallback - generate a random secret for this session
         # This means tokens won't work across server restarts in dev
-        import warnings
-
         warnings.warn(
             "JWT_SECRET_KEY not set! Using random session key. "
             "Set JWT_SECRET_KEY environment variable in production!",
-            UserWarning,
+            stacklevel=2,
         )
         secret = secrets.token_urlsafe(32)
 

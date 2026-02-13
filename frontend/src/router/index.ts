@@ -4,6 +4,7 @@ import SetupView from '@/pages/SetupPage.vue'
 import { useSetupStore } from '@/stores/setup'
 import { useUserStore } from '@/stores/user'
 import { isAuthenticated } from '@/utils/auth'
+import { checkVaultStatus } from '@/plugins/vaultStatus'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +89,14 @@ router.beforeEach(async (to) => {
     return '/setup';
   }
 
+  // Trigger vault status check (will be deduplicated if already running)
+  // This updates the vaultStatus plugin with the data from setupStore
+  if (isSetup) {
+    checkVaultStatus().catch(err => {
+      console.error('Error checking vault status in router guard:', err);
+    });
+  }
+
   // If we are not logged in, redirect to login
   // Check for both JWT cookies (SSO login)
   const isLoggedIn = isAuthenticated();
@@ -99,7 +108,7 @@ router.beforeEach(async (to) => {
 
   // Check if route requires admin privileges
   if (to.meta.requiresAdmin && isLoggedIn) {
-    // Fetch user data to check admin status
+    // Fetch user data to check admin status (will use cache if already loaded)
     await userStore.fetchCurrentUser();
     
     if (!userStore.isAdmin) {

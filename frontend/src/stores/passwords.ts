@@ -3,6 +3,9 @@ import { defineStore } from 'pinia';
 import { listPasswordsPasswordsListGet } from '@/client/sdk.gen';
 import type { GetPasswordListResponse } from '@/client/types.gen';
 
+// Global pending promise to deduplicate concurrent calls
+let globalPendingPromise: Promise<void> | null = null;
+
 export const usePasswordsStore = defineStore('passwords', () => {
   const passwords = ref<GetPasswordListResponse[]>([]);
   const loading = ref(false);
@@ -38,23 +41,34 @@ export const usePasswordsStore = defineStore('passwords', () => {
       return;
     }
 
+    // If already fetching and not forcing, wait for existing request
+    if (!force && globalPendingPromise) {
+      return globalPendingPromise;
+    }
+
     loading.value = true;
     error.value = null;
     
-    try {
-      const response = await listPasswordsPasswordsListGet();
-      passwords.value = response.data ?? [];
-      lastFetch.value = now;
-    } catch (e) {
-      console.error('Error loading passwords:', e);
-      error.value = 'Failed to load passwords';
-    } finally {
-      loading.value = false;
-    }
+    globalPendingPromise = (async () => {
+      try {
+        const response = await listPasswordsPasswordsListGet();
+        passwords.value = response.data ?? [];
+        lastFetch.value = now;
+      } catch (e) {
+        console.error('Error loading passwords:', e);
+        error.value = 'Failed to load passwords';
+      } finally {
+        loading.value = false;
+        globalPendingPromise = null;
+      }
+    })();
+
+    return globalPendingPromise;
   };
 
   const invalidateCache = () => {
     lastFetch.value = null;
+    globalPendingPromise = null;
   };
 
   const refresh = async () => {

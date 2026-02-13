@@ -8,9 +8,12 @@ import {
   addMemberToGroupGroupsGroupIdMembersPost,
   addOwnerToGroupGroupsGroupIdOwnersPost,
   removeMemberFromGroupGroupsGroupIdMembersUserIdDelete,
-  getUserMeUsersMeGet
 } from '@/client/sdk.gen';
 import type { GroupItem } from '@/client/types.gen';
+import { useUserStore } from './user';
+
+// Global pending promise to deduplicate concurrent calls
+let globalPendingPromise: Promise<void> | null = null;
 
 export const useGroupsStore = defineStore('groups', () => {
   const groups = ref<GroupItem[]>([]);
@@ -20,8 +23,11 @@ export const useGroupsStore = defineStore('groups', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
   const lastFetch = ref<number | null>(null);
-  const currentUserId = ref<string | null>(null);
-  const currentUserPersonalGroupId = ref<string | null>(null);
+
+  // Get current user info from user store instead of making duplicate API call
+  const userStore = useUserStore();
+  const currentUserId = computed(() => userStore.currentUser?.id ?? null);
+  const currentUserPersonalGroupId = computed(() => userStore.currentUser?.personal_group_id ?? null);
 
   // Computed
   const groupsCount = computed(() => groups.value.length);
@@ -42,18 +48,6 @@ export const useGroupsStore = defineStore('groups', () => {
   });
 
   // Actions
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await getUserMeUsersMeGet();
-      if (response.data) {
-        currentUserId.value = response.data.id;
-        currentUserPersonalGroupId.value = response.data.personal_group_id || null;
-      }
-    } catch (e) {
-      console.error('Error loading current user:', e);
-    }
-  };
-
   const fetchGroups = async (includePersonal = true, force = false) => {
     // Cache for 30 seconds unless forced
     const now = Date.now();
@@ -61,41 +55,51 @@ export const useGroupsStore = defineStore('groups', () => {
       return;
     }
 
+    // If already fetching and not forcing, wait for existing request
+    if (!force && globalPendingPromise) {
+      return globalPendingPromise;
+    }
+
     loading.value = true;
     error.value = null;
     
-    try {
-      // Ensure we have current user info
-      if (!currentUserId.value) {
-        await fetchCurrentUser();
-      }
-
-      const response = await listGroupsGroupsGet({
-        query: { include_personal: includePersonal }
-      });
-      
-      if (response.data) {
-        groups.value = response.data.groups;
-        
-        // Separate shared and personal groups
-        sharedGroups.value = response.data.groups.filter(g => !g.is_personal);
-        personalGroups.value = response.data.groups.filter(g => g.is_personal);
-        
-        // Set user's personal group (the one with matching personal_group_id)
-        if (currentUserPersonalGroupId.value) {
-          userPersonalGroup.value = response.data.groups.find(
-            g => g.id === currentUserPersonalGroupId.value
-          ) || null;
+    globalPendingPromise = (async () => {
+      try {
+        // Ensure we have current user info from user store
+        if (!currentUserId.value) {
+          await userStore.fetchCurrentUser();
         }
+
+        const response = await listGroupsGroupsGet({
+          query: { include_personal: includePersonal }
+        });
         
-        lastFetch.value = now;
+        if (response.data) {
+          groups.value = response.data.groups;
+          
+          // Separate shared and personal groups
+          sharedGroups.value = response.data.groups.filter(g => !g.is_personal);
+          personalGroups.value = response.data.groups.filter(g => g.is_personal);
+          
+          // Set user's personal group (the one with matching personal_group_id)
+          if (currentUserPersonalGroupId.value) {
+            userPersonalGroup.value = response.data.groups.find(
+              g => g.id === currentUserPersonalGroupId.value
+            ) || null;
+          }
+          
+          lastFetch.value = now;
+        }
+      } catch (e) {
+        console.error('Error loading groups:', e);
+        error.value = 'Failed to load groups';
+      } finally {
+        loading.value = false;
+        globalPendingPromise = null;
       }
-    } catch (e) {
-      console.error('Error loading groups:', e);
-      error.value = 'Failed to load groups';
-    } finally {
-      loading.value = false;
-    }
+    })();
+
+    return globalPendingPromise;
   };
 
   const fetchAllGroups = async (force = false) => {
@@ -235,6 +239,7 @@ export const useGroupsStore = defineStore('groups', () => {
 
   const invalidateCache = () => {
     lastFetch.value = null;
+    globalPendingPromise = null;
   };
 
   const refresh = async () => {
@@ -261,7 +266,6 @@ export const useGroupsStore = defineStore('groups', () => {
     fetchGroups,
     fetchAllGroups,
     fetchSharedGroupsOnly,
-    fetchCurrentUser,
     createGroup,
     updateGroup,
     addMemberToGroup,
