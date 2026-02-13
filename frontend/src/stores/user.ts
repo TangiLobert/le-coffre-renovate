@@ -6,13 +6,14 @@ const ADMIN_ROLE = 'admin';
 
 interface UserState {
     currentUser: GetUserMeResponse | null;
-    _pending?: Promise<GetUserMeResponse | null> | null;
 }
+
+// Global pending promise to deduplicate concurrent calls across all instances
+let globalPendingPromise: Promise<GetUserMeResponse | null> | null = null;
 
 export const useUserStore = defineStore('user', {
     state: (): UserState => ({
         currentUser: null,
-        _pending: null,
     }),
     
     getters: {
@@ -50,6 +51,7 @@ export const useUserStore = defineStore('user', {
         /**
          * Fetch current user information from the backend
          * Caches the result to avoid redundant API calls
+         * Uses a global pending promise to deduplicate concurrent requests
          * @param force - If true, bypass cache and fetch fresh data
          */
         async fetchCurrentUser(force = false): Promise<GetUserMeResponse | null> {
@@ -59,11 +61,11 @@ export const useUserStore = defineStore('user', {
             }
 
             // If a request is already in flight, wait for it (unless forcing)
-            if (!force && this._pending) {
-                return this._pending;
+            if (!force && globalPendingPromise) {
+                return globalPendingPromise;
             }
 
-            this._pending = (async () => {
+            globalPendingPromise = (async () => {
                 try {
                     const response = await getUserMeUsersMeGet();
                     if (response.data) {
@@ -75,11 +77,11 @@ export const useUserStore = defineStore('user', {
                     console.error('Error fetching current user:', error);
                     return null;
                 } finally {
-                    this._pending = null;
+                    globalPendingPromise = null;
                 }
             })();
 
-            return this._pending;
+            return globalPendingPromise;
         },
         
         /**
@@ -87,7 +89,7 @@ export const useUserStore = defineStore('user', {
          */
         clearUser() {
             this.currentUser = null;
-            this._pending = null;
+            globalPendingPromise = null;
         },
     },
 });
