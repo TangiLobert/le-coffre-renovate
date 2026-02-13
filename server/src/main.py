@@ -11,50 +11,6 @@ from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
-from shared_kernel.adapters.primary.request_context import RequestIdFilter
-
-
-def configure_logging():
-    is_local = os.getenv("APP_ENV") == "local"
-
-    root = logging.getLogger()
-    root.setLevel(logging.INFO)
-    # Remove existing handlers (force=True equivalent)
-    for h in root.handlers[:]:
-        root.removeHandler(h)
-
-    handler = logging.StreamHandler()
-
-    if is_local:
-        handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s %(levelname)-8s [%(name)s] %(message)s [%(request_id)s]",
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
-        )
-    else:
-        from pythonjsonlogger.json import JsonFormatter
-
-        handler.setFormatter(
-            JsonFormatter(
-                fmt="%(timestamp)s %(level)s %(name)s %(message)s %(request_id)s",
-                rename_fields={"levelname": "level", "asctime": "timestamp"},
-                datefmt="%Y-%m-%dT%H:%M:%S",
-            )
-        )
-
-    request_id_filter = RequestIdFilter()
-    handler.addFilter(request_id_filter)
-    root.addHandler(handler)
-
-    # alembic's fileConfig uses disable_existing_loggers=True by default,
-    # which marks all pre-existing loggers as disabled. Re-enable them.
-    for name in logging.Logger.manager.loggerDict:
-        logging.getLogger(name).disabled = False
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
-
-
 logger = logging.getLogger(__name__)
 
 from config import (
@@ -65,7 +21,6 @@ from config import (
     get_jwt_refresh_token_expiration_days,
 )
 
-from shared_kernel.adapters.primary.logging_middleware import RequestLoggingMiddleware
 from shared_kernel.adapters.secondary import (
     UtcTimeGateway,
     InMemoryDomainEventPublisher,
@@ -148,7 +103,6 @@ async def lifespan(app: FastAPI):
     # Run migrations instead of create_tables
     logger.info("Starting database migrations...")
     run_migrations()
-    configure_logging()  # re-apply after alembic's fileConfig resets the root logger
     logger.info("Database migrations completed")
 
     engine = _build_engine(get_database_url())
@@ -216,8 +170,6 @@ async def lifespan(app: FastAPI):
 # Create the main app with lifespan
 # root_path="/api" ensures OpenAPI docs are served at /api/openapi.json
 app = FastAPI(lifespan=lifespan, root_path="/api")
-
-app.add_middleware(RequestLoggingMiddleware)
 
 
 @app.exception_handler(Exception)
