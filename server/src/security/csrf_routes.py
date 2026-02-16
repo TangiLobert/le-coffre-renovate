@@ -1,3 +1,5 @@
+"""CSRF token routes."""
+
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 

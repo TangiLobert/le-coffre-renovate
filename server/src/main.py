@@ -30,7 +30,7 @@ from config import (
     get_jwt_refresh_token_expiration_days,
 )
 
-from security import CsrfMiddleware, CsrfTokenManager
+from security import CsrfMiddleware, CsrfTokenManager, csrf_router
 from shared_kernel.adapters.secondary import (
     UtcTimeGateway,
     InMemoryDomainEventPublisher,
@@ -226,6 +226,7 @@ async def health_check(request: Request):
 
 # Include API routers without additional prefix
 # root_path="/api" already makes all routes accessible under /api
+app.include_router(csrf_router)
 app.include_router(get_vault_management_router())
 app.include_router(get_password_management_router())
 app.include_router(get_user_management_router())
