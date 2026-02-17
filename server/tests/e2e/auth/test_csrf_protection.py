@@ -1,251 +1,132 @@
 """
-E2E tests for CSRF protection.
-Tests the CSRF middleware and CSRF token endpoint.
+E2E test for CSRF protection.
+Tests the full CSRF lifecycle: token generation, validation, rejection, exemptions.
 """
 
 
-class TestCsrfProtection:
-    """E2E tests for CSRF protection."""
+def test_csrf_protection_full_flow(e2e_client):
+    """
+    Complete CSRF protection flow:
+    1. Unauthenticated user cannot get a CSRF token
+    2. Registration and login are exempt from CSRF
+    3. Authenticated user can get a CSRF token
+    4. GET requests work without CSRF token
+    5. POST/PUT/DELETE without CSRF token are rejected
+    6. POST with invalid CSRF token is rejected
+    7. POST with valid CSRF token succeeds
+    8. Same token can be reused across multiple requests
+    9. Regenerating a token invalidates the previous one
+    10. Refresh token endpoint is exempt from CSRF
+    """
 
-    def test_should_get_csrf_token_when_authenticated(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that authenticated users can get a CSRF token."""
-        response = authenticated_admin_client.get("/api/auth/csrf-token")
+    # 1. Unauthenticated user cannot get a CSRF token
+    response = e2e_client.get("/api/auth/csrf-token")
+    assert response.status_code == 401
 
-        assert response.status_code == 200
-        data = response.json()
-        assert "csrf_token" in data
-        assert len(data["csrf_token"]) > 0
-
-    def test_should_reject_csrf_token_request_when_not_authenticated(
-        self, unauthenticated_client
-    ):
-        """Test that unauthenticated users cannot get a CSRF token."""
-        response = unauthenticated_client.get("/api/auth/csrf-token")
-
-        assert response.status_code == 401
-
-    def test_should_allow_post_request_with_valid_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that POST requests with valid CSRF token are allowed."""
-        # Get CSRF token
-        token_response = authenticated_admin_client.get("/api/auth/csrf-token")
-        csrf_token = token_response.json()["csrf_token"]
-
-        # Try to create a group with CSRF token
-        group_data = {
-            "name": "Test Group with CSRF",
-            "description": "Testing CSRF protection",
-        }
-        response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-            headers={"X-CSRF-Token": csrf_token},
-        )
-
-        assert response.status_code == 201
-
-    def test_should_reject_post_request_without_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that POST requests without CSRF token are rejected."""
-        # Disable auto CSRF injection for this test
-        authenticated_admin_client.disable_auto_csrf()
-
-        group_data = {
-            "name": "Test Group without CSRF",
-            "description": "Should fail",
-        }
-        response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-        )
-
-        # Re-enable auto CSRF for other tests
-        authenticated_admin_client.enable_auto_csrf()
-
-        assert response.status_code == 403
-        assert "CSRF token missing" in response.json()["detail"]
-
-    def test_should_reject_post_request_with_invalid_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that POST requests with invalid CSRF token are rejected."""
-        group_data = {
-            "name": "Test Group with invalid CSRF",
-            "description": "Should fail",
-        }
-        response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-            headers={"X-CSRF-Token": "invalid_token_12345"},
-        )
-
-        assert response.status_code == 403
-        assert "Invalid or expired CSRF token" in response.json()["detail"]
-
-    def test_should_allow_get_request_without_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that GET requests don't require CSRF token."""
-        # List groups endpoint
-        response = authenticated_admin_client.get("/api/groups")
-
-        # Should work without CSRF token (GET requests are exempt)
-        assert response.status_code == 200
-
-    def test_should_reject_put_request_without_csrf_token(
-        self, authenticated_admin_client, setup, admin_personal_group_id
-    ):
-        """Test that PUT requests without CSRF token are rejected."""
-        # Disable auto CSRF injection for this test
-        authenticated_admin_client.disable_auto_csrf()
-
-        update_data = {
-            "name": "Updated Group Name",
-            "description": "Updated description",
-        }
-        response = authenticated_admin_client.put(
-            f"/api/groups/{admin_personal_group_id}",
-            json=update_data,
-        )
-
-        # Re-enable auto CSRF for other tests
-        authenticated_admin_client.enable_auto_csrf()
-
-        assert response.status_code == 403
-        assert "CSRF token missing" in response.json()["detail"]
-
-    def test_should_reject_delete_request_without_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that DELETE requests without CSRF token are rejected."""
-        # First create a group with CSRF token
-        token_response = authenticated_admin_client.get("/api/auth/csrf-token")
-        csrf_token = token_response.json()["csrf_token"]
-
-        group_data = {
-            "name": "Group to Delete",
-            "description": "Will be deleted",
-        }
-        create_response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-            headers={"X-CSRF-Token": csrf_token},
-        )
-        group_id = create_response.json()["id"]
-
-        # Disable auto CSRF injection
-        authenticated_admin_client.disable_auto_csrf()
-
-        # Try to delete without CSRF token
-        response = authenticated_admin_client.delete(f"/api/groups/{group_id}")
-
-        # Re-enable auto CSRF
-        authenticated_admin_client.enable_auto_csrf()
-
-        assert response.status_code == 403
-        assert "CSRF token missing" in response.json()["detail"]
-
-    def test_should_exempt_login_from_csrf_protection(self, e2e_client):
-        """Test that login endpoint doesn't require CSRF token."""
-        # Register admin first
-        register_data = {
-            "email": "csrf_test@example.com",
+    # 2. Registration and login are exempt from CSRF
+    e2e_client.post(
+        "/api/auth/register-admin",
+        json={
+            "email": "csrf@example.com",
             "password": "password123",
             "display_name": "CSRF Test Admin",
-        }
-        e2e_client.post("/api/auth/register-admin", json=register_data)
+        },
+    )
 
-        # Login should work without CSRF token
-        login_data = {
-            "email": "csrf_test@example.com",
-            "password": "password123",
-        }
-        response = e2e_client.post("/api/auth/login", json=login_data)
+    login_response = e2e_client.post(
+        "/api/auth/login",
+        json={"email": "csrf@example.com", "password": "password123"},
+    )
+    assert login_response.status_code == 200
 
-        assert response.status_code == 200
+    # 3. Authenticated user can get a CSRF token
+    token_response = e2e_client.get("/api/auth/csrf-token")
+    assert token_response.status_code == 200
+    csrf_token = token_response.json()["csrf_token"]
+    assert len(csrf_token) > 0
 
-    def test_should_exempt_register_from_csrf_protection(self, e2e_client):
-        """Test that registration endpoint doesn't require CSRF token."""
-        register_data = {
-            "email": "csrf_register_test@example.com",
-            "password": "password123",
-            "display_name": "CSRF Register Test",
-        }
-        response = e2e_client.post("/api/auth/register-admin", json=register_data)
+    # 4. GET requests work without CSRF token
+    response = e2e_client.get("/api/groups")
+    assert response.status_code == 200
 
+    # 5a. POST without CSRF token is rejected
+    e2e_client.disable_auto_csrf()
+
+    response = e2e_client.post(
+        "/api/groups/",
+        json={"name": "No CSRF", "description": "Should fail"},
+    )
+    assert response.status_code == 403
+    assert "CSRF token missing" in response.json()["detail"]
+
+    # 5b. PUT without CSRF token is rejected
+    me = e2e_client.get("/api/users/me").json()
+    response = e2e_client.put(
+        f"/api/groups/{me['personal_group_id']}",
+        json={"name": "No CSRF", "description": "Should fail"},
+    )
+    assert response.status_code == 403
+    assert "CSRF token missing" in response.json()["detail"]
+
+    # 6. POST with invalid CSRF token is rejected
+    response = e2e_client.post(
+        "/api/groups/",
+        json={"name": "Bad CSRF", "description": "Should fail"},
+        headers={"X-CSRF-Token": "invalid_token_12345"},
+    )
+    assert response.status_code == 403
+    assert "Invalid or expired CSRF token" in response.json()["detail"]
+
+    e2e_client.enable_auto_csrf()
+
+    # 7. POST with valid CSRF token succeeds
+    create_response = e2e_client.post(
+        "/api/groups/",
+        json={"name": "Valid CSRF Group", "description": "Should succeed"},
+        headers={"X-CSRF-Token": csrf_token},
+    )
+    assert create_response.status_code == 201
+    group_id = create_response.json()["id"]
+
+    # 5c. DELETE without CSRF token is rejected
+    e2e_client.disable_auto_csrf()
+    response = e2e_client.delete(f"/api/groups/{group_id}")
+    assert response.status_code == 403
+    assert "CSRF token missing" in response.json()["detail"]
+    e2e_client.enable_auto_csrf()
+
+    # 8. Same token can be reused across multiple requests
+    for i in range(3):
+        response = e2e_client.post(
+            "/api/groups/",
+            json={"name": f"Reuse Token {i}", "description": "Multi-use"},
+            headers={"X-CSRF-Token": csrf_token},
+        )
         assert response.status_code == 201
 
-    def test_should_exempt_refresh_token_from_csrf_protection(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that refresh token endpoint doesn't require CSRF token."""
-        # The refresh token endpoint should work without CSRF token
-        response = authenticated_admin_client.post("/api/auth/refresh-token")
+    # 9. Regenerating a token invalidates the previous one
+    new_token_response = e2e_client.get("/api/auth/csrf-token")
+    new_csrf_token = new_token_response.json()["csrf_token"]
+    assert new_csrf_token != csrf_token
 
-        # Should succeed or fail for other reasons, but not CSRF
-        assert response.status_code != 403 or "CSRF" not in response.json().get(
-            "detail", ""
-        )
+    # Old token should be rejected
+    response = e2e_client.post(
+        "/api/groups/",
+        json={"name": "Old Token", "description": "Should fail"},
+        headers={"X-CSRF-Token": csrf_token},
+    )
+    assert response.status_code == 403
 
-    def test_should_allow_multiple_requests_with_same_csrf_token(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that the same CSRF token can be used for multiple requests."""
-        # Get CSRF token
-        token_response = authenticated_admin_client.get("/api/auth/csrf-token")
-        csrf_token = token_response.json()["csrf_token"]
+    # New token should work
+    response = e2e_client.post(
+        "/api/groups/",
+        json={"name": "New Token", "description": "Should succeed"},
+        headers={"X-CSRF-Token": new_csrf_token},
+    )
+    assert response.status_code == 201
 
-        # Use it for multiple requests
-        for i in range(3):
-            group_data = {
-                "name": f"Test Group {i}",
-                "description": f"Group number {i}",
-            }
-            response = authenticated_admin_client.post(
-                "/api/groups/",
-                json=group_data,
-                headers={"X-CSRF-Token": csrf_token},
-            )
-            assert response.status_code == 201
-
-    def test_should_use_new_csrf_token_after_regeneration(
-        self, authenticated_admin_client, setup
-    ):
-        """Test that regenerating a CSRF token invalidates the old one."""
-        # Get first CSRF token
-        token_response1 = authenticated_admin_client.get("/api/auth/csrf-token")
-        csrf_token1 = token_response1.json()["csrf_token"]
-
-        # Get second CSRF token (regenerate)
-        token_response2 = authenticated_admin_client.get("/api/auth/csrf-token")
-        csrf_token2 = token_response2.json()["csrf_token"]
-
-        assert csrf_token1 != csrf_token2
-
-        # Old token should not work
-        group_data = {
-            "name": "Test Group with old token",
-            "description": "Should fail",
-        }
-        response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-            headers={"X-CSRF-Token": csrf_token1},
-        )
-        assert response.status_code == 403
-
-        # New token should work
-        group_data = {
-            "name": "Test Group with new token",
-            "description": "Should succeed",
-        }
-        response = authenticated_admin_client.post(
-            "/api/groups/",
-            json=group_data,
-            headers={"X-CSRF-Token": csrf_token2},
-        )
-        assert response.status_code == 201
+    # 10. Refresh token endpoint is exempt from CSRF
+    response = e2e_client.post("/api/auth/refresh-token")
+    assert response.status_code != 403 or "CSRF" not in response.json().get(
+        "detail", ""
+    )
