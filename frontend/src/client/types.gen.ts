@@ -249,6 +249,16 @@ export type CreateVaultPostResponse = {
 };
 
 /**
+ * CsrfTokenResponse
+ */
+export type CsrfTokenResponse = {
+    /**
+     * Csrf Token
+     */
+    csrf_token: string;
+};
+
+/**
  * GetGroupResponse
  */
 export type GetGroupResponse = {
@@ -887,6 +897,22 @@ export type HealthCheckHealthGetResponses = {
      */
     200: unknown;
 };
+
+export type GetCsrfTokenAuthCsrfTokenGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/csrf-token';
+};
+
+export type GetCsrfTokenAuthCsrfTokenGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CsrfTokenResponse;
+};
+
+export type GetCsrfTokenAuthCsrfTokenGetResponse = GetCsrfTokenAuthCsrfTokenGetResponses[keyof GetCsrfTokenAuthCsrfTokenGetResponses];
 
 export type CreateVaultVaultSetupPostData = {
     body: CreateVaultPostRequest;
