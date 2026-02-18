@@ -6,6 +6,8 @@ This module tests that migrations can be applied and rolled back successfully.
 import pytest
 import tempfile
 import os
+import importlib
+import inspect
 from pathlib import Path
 from alembic.config import Config
 from alembic import command
@@ -13,66 +15,48 @@ from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, text
 from sqlmodel import SQLModel
 
-# Import all models to register them with SQLModel.metadata
-from identity_access_management_context.adapters.secondary.sql import (
-    UserTable,
-    GroupTable,
-    GroupMemberTable,
-    SsoConfigurationTable,
-    SsoUsersTable,
-    UserPasswordTable,
-)
-from password_management_context.adapters.secondary.sql import (
-    PermissionsTable,
-    OwnershipTable,
-    PasswordTable,
-    PasswordEventTable,
-)
-from vault_management_context.adapters.secondary.sql import VaultTable
-from vault_management_context.adapters.secondary.sql.models.vault_event import VaultEventTable
-from identity_access_management_context.adapters.secondary.sql.model.iam_event import IamEventTable
-
-# Silence unused-import warnings
-_ = (
-    UserTable,
-    GroupTable,
-    GroupMemberTable,
-    SsoConfigurationTable,
-    SsoUsersTable,
-    UserPasswordTable,
-    PermissionsTable,
-    OwnershipTable,
-    PasswordTable,
-    PasswordEventTable,
-    VaultTable,
-    VaultEventTable,
-    IamEventTable,
-)
-
 
 def get_expected_application_tables():
     """
-    Get the list of expected application table names.
+    Dynamically discover all SQLModel table classes from the application.
     
-    This function returns table names from the imported model classes,
-    ensuring the test stays in sync with model changes without including
-    test-only tables.
+    This function scans all adapters/secondary/sql/__init__.py files in the src directory,
+    imports them, and extracts all classes that inherit from SQLModel and have table=True.
+    This ensures the test automatically stays in sync with model changes.
     """
-    return [
-        UserTable.__tablename__,
-        GroupTable.__tablename__,
-        GroupMemberTable.__tablename__,
-        SsoConfigurationTable.__tablename__,
-        SsoUsersTable.__tablename__,
-        UserPasswordTable.__tablename__,
-        PermissionsTable.__tablename__,
-        OwnershipTable.__tablename__,
-        PasswordTable.__tablename__,
-        PasswordEventTable.__tablename__,
-        VaultTable.__tablename__,
-        VaultEventTable.__tablename__,
-        IamEventTable.__tablename__,
-    ]
+    # Get the src directory path
+    src_dir = Path(__file__).parent.parent.parent / "src"
+    
+    # Find all sql __init__.py files
+    sql_init_files = list(src_dir.glob("**/adapters/secondary/sql/__init__.py"))
+    
+    table_names = []
+    
+    for init_file in sql_init_files:
+        # Build module path relative to src directory
+        relative_path = init_file.relative_to(src_dir)
+        module_parts = list(relative_path.parts[:-1])  # Remove __init__.py
+        module_name = ".".join(module_parts)
+        
+        try:
+            # Import the module
+            module = importlib.import_module(module_name)
+            
+            # Inspect all members of the module
+            for name, obj in inspect.getmembers(module):
+                # Check if it's a class that inherits from SQLModel
+                if (inspect.isclass(obj) and 
+                    issubclass(obj, SQLModel) and 
+                    obj is not SQLModel):
+                    # Check if it has table=True (has __tablename__ attribute)
+                    if hasattr(obj, '__tablename__'):
+                        table_names.append(obj.__tablename__)
+        except (ImportError, AttributeError) as e:
+            # Some modules might not be importable or might not have tables
+            # This is expected (e.g., shared_kernel has no tables)
+            continue
+    
+    return sorted(set(table_names))  # Return unique sorted list
 
 
 @pytest.fixture

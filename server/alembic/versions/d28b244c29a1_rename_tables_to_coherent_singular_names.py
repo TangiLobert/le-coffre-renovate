@@ -31,56 +31,31 @@ def upgrade() -> None:
     op.rename_table('SsoUsersTable', 'SsoUser')
     op.rename_table('UserPasswordTable', 'UserPassword')
     op.rename_table('UserTable', 'User')
-    
-    # For tables that only differ in case (vault -> Vault, iam_events -> IamEvent)
-    # SQLite treats table names as case-insensitive, so direct rename would fail
-    # Other databases (PostgreSQL, MySQL) handle this correctly
-    bind = op.get_bind()
-    dialect_name = bind.dialect.name
-    
-    if dialect_name == 'sqlite':
-        # SQLite: use temporary names as intermediate step
-        op.rename_table('vault', '_temp_vault')
-        op.rename_table('iam_events', '_temp_iam_events')
-        op.rename_table('password_events', '_temp_password_events')
-        op.rename_table('vault_events', '_temp_vault_events')
-        
-        op.rename_table('_temp_vault', 'Vault')
-        op.rename_table('_temp_iam_events', 'IamEvent')
-        op.rename_table('_temp_password_events', 'PasswordEvent')
-        op.rename_table('_temp_vault_events', 'VaultEvent')
-    else:
-        # PostgreSQL and others: direct rename works
-        op.rename_table('vault', 'Vault')
-        op.rename_table('iam_events', 'IamEvent')
-        op.rename_table('password_events', 'PasswordEvent')
-        op.rename_table('vault_events', 'VaultEvent')
+    # Rename vault-related tables with temp names to handle case-insensitivity
+    op.rename_table('vault', '_temp_vault')
+    op.rename_table('iam_events', '_temp_iam_events')
+    op.rename_table('password_events', '_temp_password_events')
+    op.rename_table('vault_events', '_temp_vault_events')
+    # Now rename to final names
+    op.rename_table('_temp_vault', 'Vault')
+    op.rename_table('_temp_iam_events', 'IamEvent')
+    op.rename_table('_temp_password_events', 'PasswordEvent')
+    op.rename_table('_temp_vault_events', 'VaultEvent')
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Revert table names back to original names
-    bind = op.get_bind()
-    dialect_name = bind.dialect.name
-    
-    if dialect_name == 'sqlite':
-        # SQLite: use temporary names as intermediate step
-        op.rename_table('VaultEvent', '_temp_vault_events')
-        op.rename_table('PasswordEvent', '_temp_password_events')
-        op.rename_table('IamEvent', '_temp_iam_events')
-        op.rename_table('Vault', '_temp_vault')
-        
-        op.rename_table('_temp_vault_events', 'vault_events')
-        op.rename_table('_temp_password_events', 'password_events')
-        op.rename_table('_temp_iam_events', 'iam_events')
-        op.rename_table('_temp_vault', 'vault')
-    else:
-        # PostgreSQL and others: direct rename works
-        op.rename_table('VaultEvent', 'vault_events')
-        op.rename_table('PasswordEvent', 'password_events')
-        op.rename_table('IamEvent', 'iam_events')
-        op.rename_table('Vault', 'vault')
-    
+    # Use temp names for case-sensitivity issues
+    op.rename_table('VaultEvent', '_temp_vault_events')
+    op.rename_table('PasswordEvent', '_temp_password_events')
+    op.rename_table('IamEvent', '_temp_iam_events')
+    op.rename_table('Vault', '_temp_vault')
+    # Now rename to final lowercase names
+    op.rename_table('_temp_vault_events', 'vault_events')
+    op.rename_table('_temp_password_events', 'password_events')
+    op.rename_table('_temp_iam_events', 'iam_events')
+    op.rename_table('_temp_vault', 'vault')
     # Rename other tables
     op.rename_table('User', 'UserTable')
     op.rename_table('UserPassword', 'UserPasswordTable')
