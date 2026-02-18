@@ -62,16 +62,19 @@ def test_upgrade_migration_creates_all_tables(alembic_config, temp_database):
         
         # Check for application tables
         expected_tables = [
-            'GroupMemberTable',
-            'GroupTable',
-            'OwnershipTable',
-            'PasswordTable',
-            'PermissionsTable',
-            'SsoConfigurationTable',
-            'SsoUsersTable',
-            'UserPasswordTable',
-            'UserTable',
-            'vault',
+            'GroupMember',
+            'Group',
+            'Ownership',
+            'Password',
+            'Permission',
+            'SsoConfiguration',
+            'SsoUser',
+            'UserPassword',
+            'User',
+            'Vault',
+            'IamEvent',
+            'PasswordEvent',
+            'VaultEvent',
         ]
         
         for table_name in expected_tables:
@@ -94,9 +97,9 @@ def test_downgrade_migration_removes_tables(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
-        assert result.fetchone() is not None, "UserTable should exist before downgrade"
+        assert result.fetchone() is not None, "User should exist before downgrade"
     engine.dispose()
     
     # Now downgrade
@@ -106,14 +109,14 @@ def test_downgrade_migration_removes_tables(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
-        assert result.fetchone() is None, "UserTable should not exist after downgrade"
+        assert result.fetchone() is None, "User should not exist after downgrade"
         
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='vault'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='Vault'"
         ))
-        assert result.fetchone() is None, "vault table should not exist after downgrade"
+        assert result.fetchone() is None, "Vault table should not exist after downgrade"
         
         # alembic_version should still exist
         result = conn.execute(text(
@@ -155,7 +158,7 @@ def test_multiple_upgrade_downgrade_cycles(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
         assert result.fetchone() is not None
     engine.dispose()
@@ -165,7 +168,7 @@ def test_multiple_upgrade_downgrade_cycles(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
         assert result.fetchone() is None
     engine.dispose()
@@ -175,7 +178,7 @@ def test_multiple_upgrade_downgrade_cycles(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
         assert result.fetchone() is not None
     engine.dispose()
@@ -185,7 +188,7 @@ def test_multiple_upgrade_downgrade_cycles(alembic_config, temp_database):
     engine = create_engine(database_url)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='UserTable'"
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='User'"
         ))
         assert result.fetchone() is None
     engine.dispose()
