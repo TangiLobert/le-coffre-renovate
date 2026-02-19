@@ -11,26 +11,25 @@ from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
-logger = logging.getLogger(__name__)
-
-
-class _HealthCheckFilter(logging.Filter):
-    def filter(self, record: logging.LogRecord) -> bool:
-        msg = record.getMessage()
-        return not ("GET /api/health" in msg and '" 200' in msg)
-
-
-logging.getLogger("uvicorn.access").addFilter(_HealthCheckFilter())
-
 from config import (
     get_database_url,
     get_jwt_secret_key,
     get_jwt_algorithm,
     get_jwt_access_token_expiration_minutes,
     get_jwt_refresh_token_expiration_days,
+    get_rate_limit_enabled,
+    get_rate_limit_auth_max_requests,
+    get_rate_limit_api_max_requests,
+    get_rate_limit_window_seconds,
 )
 
-from security import CsrfMiddleware, CsrfTokenManager, csrf_router
+from security import (
+    CsrfMiddleware,
+    CsrfTokenManager,
+    csrf_router,
+    InMemoryRateLimiter,
+    RateLimitMiddleware,
+)
 from shared_kernel.adapters.secondary import (
     UtcTimeGateway,
     InMemoryDomainEventPublisher,
@@ -68,6 +67,17 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
     get_group_management_router,
 )
+
+logger = logging.getLogger(__name__)
+
+
+class _HealthCheckFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        msg = record.getMessage()
+        return not ("GET /api/health" in msg and '" 200' in msg)
+
+
+logging.getLogger("uvicorn.access").addFilter(_HealthCheckFilter())
 
 
 def run_migrations(max_retries: int = 5, retry_delay: float = 5.0):
@@ -174,6 +184,13 @@ async def lifespan(app: FastAPI):
     domain_event_publisher = InMemoryDomainEventPublisher()
     app.state.domain_event_publisher = domain_event_publisher
 
+    # Rate limiter (in-memory sliding window)
+    rate_limiter = InMemoryRateLimiter()
+    app.state.rate_limiter = rate_limiter
+    app.state.rate_limit_auth_max_requests = get_rate_limit_auth_max_requests()
+    app.state.rate_limit_api_max_requests = get_rate_limit_api_max_requests()
+    app.state.rate_limit_window_seconds = get_rate_limit_window_seconds()
+
     db_url = get_database_url()
     db_type = "postgresql" if db_url.startswith("postgresql") else "sqlite"
     logger.info("Application started — db=%s base_url=%s", db_type, base_url)
@@ -188,6 +205,10 @@ app = FastAPI(lifespan=lifespan, root_path="/api")
 
 # Add CSRF protection middleware
 app.add_middleware(CsrfMiddleware)
+
+# Add rate limiting middleware (runs before CSRF since middlewares execute in reverse order)
+if get_rate_limit_enabled():
+    app.add_middleware(RateLimitMiddleware)
 
 
 @app.exception_handler(Exception)
