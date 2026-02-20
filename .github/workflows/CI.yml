@@ -36,7 +36,9 @@ jobs:
 
       - name: Check Dependencies Security
         working-directory: frontend/
-        run: bun audit --audit-level=moderate
+        # GHSA-2g4f-4pwh-qvx6: ajv ReDoS via $data option (moderate) — unfixable in ESLint 9,
+        # ajv@6 is required by @eslint/eslintrc (ESLint internal dep). Tracked for ESLint 10 upgrade.
+        run: bun audit --audit-level=moderate --ignore=GHSA-2g4f-4pwh-qvx6
 
       - name: Type Checking
         if: success() || failure()
