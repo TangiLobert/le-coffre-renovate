@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -5,7 +6,7 @@ import pytest
 from unittest.mock import patch, MagicMock, call
 from fastapi import FastAPI
 
-from monitoring import setup_monitoring, _UvicornAccessFilter
+from monitoring import JsonFormatter, setup_monitoring, _UvicornAccessFilter
 
 
 @pytest.fixture
@@ -178,10 +179,6 @@ def test_filter_keeps_business_routes():
     assert f.filter(_make_record("GET", "/api/passwords/list", 200)) is True
 
 
-import json
-from monitoring import JsonFormatter
-
-
 def _make_application_record(level=logging.INFO, msg="hello world", name="src.main"):
     record = logging.LogRecord(
         name=name, level=level, pathname="", lineno=0,
@@ -224,7 +221,7 @@ def test_json_formatter_with_exc_info_includes_exception():
             name="src.main", level=logging.ERROR, pathname="", lineno=0,
             msg="something failed", args=(), exc_info=sys.exc_info(),
         )
-    parsed = json.loads(fmt.format(record))
+        parsed = json.loads(fmt.format(record))
     assert "exception" in parsed
     assert "ValueError" in parsed["exception"]
 
