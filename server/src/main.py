@@ -12,10 +12,6 @@ from alembic.config import Config
 from alembic import command
 
 from monitoring import setup_logging, setup_monitoring
-
-setup_logging()
-
-logger = logging.getLogger(__name__)
 from config import (
     get_database_url,
     get_jwt_secret_key,
@@ -62,6 +58,10 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
     get_group_management_router,
 )
+
+setup_logging()
+
+logger = logging.getLogger(__name__)
 
 
 def run_migrations(max_retries: int = 5, retry_delay: float = 5.0):
