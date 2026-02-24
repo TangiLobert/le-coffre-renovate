@@ -32,41 +32,65 @@ class _UvicornAccessFilter(logging.Filter):
 
 
 def setup_monitoring(app) -> None:
-    """Instrument the FastAPI app with OpenTelemetry metrics.
+    """Instrument the FastAPI app with OpenTelemetry metrics via OTLP.
 
-    Does nothing if ENABLE_MONITORING=false or if OTel packages are not installed.
+    Activation:
+    - ENABLE_MONITORING=false → disabled (hard override)
+    - OTEL_EXPORTER_OTLP_ENDPOINT not set and ENABLE_MONITORING != true → silent no-op
+    - OTel packages not installed → logs INFO and no-op
+    - Otherwise → instruments app and exports metrics via OTLP HTTP
     """
     if os.getenv("ENABLE_MONITORING", "").lower() == "false":
         _install_filter(monitoring_active=False)
         return
 
-    try:
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-        from opentelemetry.exporter.prometheus import PrometheusMetricReader
-        from opentelemetry.sdk.metrics import MeterProvider
-    except ImportError:
-        logger.info("Monitoring dependencies not installed, skipping instrumentation")
+    endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+    if not endpoint and os.getenv("ENABLE_MONITORING", "").lower() != "true":
         _install_filter(monitoring_active=False)
         return
 
-    _configure_otel(app, FastAPIInstrumentor, PrometheusMetricReader, MeterProvider)
-    _install_filter(monitoring_active=True)
+    if not _try_import_otel():
+        _install_filter(monitoring_active=False)
+        return
+
+    _configure_otel(app)
+    # OTLP pushes to collector — no /metrics endpoint is mounted.
+    _install_filter(monitoring_active=False)
 
 
-def _install_filter(monitoring_active: bool) -> None:
-    uvicorn_logger = logging.getLogger("uvicorn.access")
-    # Remove any previously installed instance to avoid duplicates on re-calls.
-    uvicorn_logger.filters = [
-        f for f in uvicorn_logger.filters if not isinstance(f, _UvicornAccessFilter)
-    ]
-    uvicorn_logger.addFilter(_UvicornAccessFilter(monitoring_active=monitoring_active))
+def _try_import_otel() -> bool:
+    """Attempt to import OTel packages. Returns False and logs if unavailable."""
+    try:
+        import opentelemetry.instrumentation.fastapi  # noqa: F401
+        import opentelemetry.exporter.otlp.proto.http.metric_exporter  # noqa: F401
+        import opentelemetry.sdk.metrics  # noqa: F401
+        import opentelemetry.sdk.metrics.export  # noqa: F401
+        import opentelemetry.sdk.resources  # noqa: F401
+        return True
+    except ImportError:
+        logger.info("Monitoring dependencies not installed, skipping instrumentation")
+        return False
 
 
-def _configure_otel(app, FastAPIInstrumentor, PrometheusMetricReader, MeterProvider) -> None:
-    import prometheus_client
+def _configure_otel(app) -> None:
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+    from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 
-    reader = PrometheusMetricReader()
-    provider = MeterProvider(metric_readers=[reader])
+    endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+    service_name = os.getenv("OTEL_SERVICE_NAME", "le-coffre")
+
+    resource = Resource.create({
+        SERVICE_NAME: service_name,
+        **_parse_resource_attributes(),
+    })
+
+    reader = PeriodicExportingMetricReader(
+        OTLPMetricExporter(endpoint=f"{endpoint.rstrip('/')}/v1/metrics")
+    )
+    provider = MeterProvider(resource=resource, metric_readers=[reader])
 
     FastAPIInstrumentor.instrument_app(
         app,
@@ -74,8 +98,32 @@ def _configure_otel(app, FastAPIInstrumentor, PrometheusMetricReader, MeterProvi
         meter_provider=provider,
     )
 
-    @app.get("/metrics", include_in_schema=False)
-    def metrics():
-        from fastapi.responses import Response
-        data = prometheus_client.generate_latest()
-        return Response(content=data, media_type=prometheus_client.CONTENT_TYPE_LATEST)
+    logger.info(
+        "OpenTelemetry metrics enabled — service=%s endpoint=%s",
+        service_name,
+        endpoint,
+    )
+
+
+def _parse_resource_attributes() -> dict:
+    """Parse OTEL_RESOURCE_ATTRIBUTES env var into a dict.
+
+    Format: key=value,key2=value2
+    """
+    raw = os.getenv("OTEL_RESOURCE_ATTRIBUTES", "")
+    if not raw:
+        return {}
+    result = {}
+    for pair in raw.split(","):
+        if "=" in pair:
+            k, v = pair.split("=", 1)
+            result[k.strip()] = v.strip()
+    return result
+
+
+def _install_filter(monitoring_active: bool) -> None:
+    uvicorn_logger = logging.getLogger("uvicorn.access")
+    uvicorn_logger.filters = [
+        f for f in uvicorn_logger.filters if not isinstance(f, _UvicornAccessFilter)
+    ]
+    uvicorn_logger.addFilter(_UvicornAccessFilter(monitoring_active=monitoring_active))

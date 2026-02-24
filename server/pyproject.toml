@@ -26,7 +26,8 @@ dev = [
 ]
 monitoring = [
     "opentelemetry-instrumentation-fastapi>=0.52b0",
-    "opentelemetry-exporter-prometheus>=0.52b0",
+    "opentelemetry-exporter-otlp-proto-http>=1.39.1",
+    "opentelemetry-sdk>=1.39.1",
 ]
 sqlite = ["sqlite-utils==3.39"]
 postgres = ["psycopg2==2.9.11", "psycopg[binary]==3.3.2"]
