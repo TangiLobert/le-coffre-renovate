@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import patch, MagicMock, call
 from fastapi import FastAPI
 
-from monitoring import JsonFormatter, setup_monitoring, _UvicornAccessFilter
+from monitoring import JsonFormatter, setup_monitoring, _UvicornAccessFilter, setup_logging
 
 
 @pytest.fixture
@@ -238,3 +238,48 @@ def test_json_formatter_handles_uvicorn_access_tuple_args():
     output = fmt.format(record)
     parsed = json.loads(output)
     assert "200" in parsed["message"] or "/api/passwords/list" in parsed["message"]
+
+
+def test_setup_logging_noop_when_log_format_not_set():
+    """Without LOG_FORMAT, handlers must keep their original formatters."""
+    env = {k: v for k, v in os.environ.items() if k != "LOG_FORMAT"}
+    with patch.dict(os.environ, env, clear=True):
+        setup_logging()
+    for handler in logging.getLogger().handlers:
+        assert not isinstance(handler.formatter, JsonFormatter)
+
+
+def test_setup_logging_noop_when_log_format_is_text():
+    """LOG_FORMAT=text must be a no-op."""
+    with patch.dict(os.environ, {"LOG_FORMAT": "text"}):
+        setup_logging()
+    for handler in logging.getLogger().handlers:
+        assert not isinstance(handler.formatter, JsonFormatter)
+
+
+def test_setup_logging_installs_json_formatter_on_uvicorn_access():
+    """LOG_FORMAT=json must install JsonFormatter on uvicorn.access handlers."""
+    access_logger = logging.getLogger("uvicorn.access")
+    handler = logging.StreamHandler()
+    access_logger.addHandler(handler)
+    try:
+        with patch.dict(os.environ, {"LOG_FORMAT": "json"}):
+            setup_logging()
+        assert isinstance(handler.formatter, JsonFormatter)
+    finally:
+        access_logger.removeHandler(handler)
+        handler.setFormatter(None)
+
+
+def test_setup_logging_installs_json_formatter_on_uvicorn_error():
+    """LOG_FORMAT=json must install JsonFormatter on uvicorn.error handlers."""
+    error_logger = logging.getLogger("uvicorn.error")
+    handler = logging.StreamHandler()
+    error_logger.addHandler(handler)
+    try:
+        with patch.dict(os.environ, {"LOG_FORMAT": "json"}):
+            setup_logging()
+        assert isinstance(handler.formatter, JsonFormatter)
+    finally:
+        error_logger.removeHandler(handler)
+        handler.setFormatter(None)

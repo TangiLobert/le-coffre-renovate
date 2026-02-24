@@ -22,6 +22,23 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(entry, ensure_ascii=False)
 
 
+def setup_logging() -> None:
+    """Configure JSON log formatting when LOG_FORMAT=json.
+
+    Opt-in, environment-agnostic. Works in any deployment context.
+    Default (no variable set) keeps uvicorn's standard text format.
+    Called at module level in main.py — uvicorn configures its loggers before
+    importing the app module, so all handlers are already present at call time.
+    """
+    if os.getenv("LOG_FORMAT", "").lower() != "json":
+        return
+
+    formatter = JsonFormatter()
+    for name in ("", "uvicorn", "uvicorn.access", "uvicorn.error"):
+        for handler in logging.getLogger(name).handlers:
+            handler.setFormatter(formatter)
+
+
 class _UvicornAccessFilter(logging.Filter):
     """Suppress noisy OK responses from health checks and, when active, the /metrics route."""
 
