@@ -19,6 +19,16 @@ class JsonFormatter(logging.Formatter):
         }
         if record.exc_info:
             entry["exception"] = self.formatException(record.exc_info)
+        # Inject OTEL trace context for log/trace correlation when a span is active
+        try:
+            import opentelemetry.trace as otel_trace
+            span = otel_trace.get_current_span()
+            ctx = span.get_span_context()
+            if ctx.is_valid:
+                entry["trace_id"] = format(ctx.trace_id, "032x")
+                entry["span_id"] = format(ctx.span_id, "016x")
+        except Exception:  # ImportError when otel is absent; TypeError/AttributeError if context is invalid
+            pass
         return json.dumps(entry, ensure_ascii=False)
 
 

@@ -530,3 +530,65 @@ def test_configure_otel_sets_global_tracer_provider(app):
     tracer_prov, meter_prov = result
     assert tracer_prov is mock_tracer_provider_instance
     assert meter_prov is mock_meter_provider_instance
+
+
+# --- Task 2: Log/trace correlation in JsonFormatter ---
+
+
+def test_json_formatter_injects_trace_id_when_span_is_active():
+    """When an OTEL span is active, trace_id and span_id must appear in JSON output."""
+    from unittest.mock import MagicMock
+    import opentelemetry.trace as otel_trace
+
+    mock_ctx = MagicMock()
+    mock_ctx.is_valid = True
+    mock_ctx.trace_id = 0xABCDEF1234567890ABCDEF1234567890
+    mock_ctx.span_id = 0x1234567890ABCDEF
+
+    mock_span = MagicMock()
+    mock_span.get_span_context.return_value = mock_ctx
+
+    fmt = JsonFormatter()
+    record = _make_application_record()
+
+    with patch.object(otel_trace, "get_current_span", return_value=mock_span):
+        parsed = json.loads(fmt.format(record))
+
+    assert "trace_id" in parsed
+    assert "span_id" in parsed
+    assert len(parsed["trace_id"]) == 32
+    assert len(parsed["span_id"]) == 16
+
+
+def test_json_formatter_no_trace_id_when_no_active_span():
+    """When no OTEL span is active (is_valid=False), trace_id must not appear."""
+    import opentelemetry.trace as otel_trace
+    from opentelemetry.trace import NonRecordingSpan, INVALID_SPAN_CONTEXT
+
+    fmt = JsonFormatter()
+    record = _make_application_record()
+
+    # NonRecordingSpan with INVALID_SPAN_CONTEXT is what get_current_span() returns
+    # when no span is in context (is_valid=False)
+    invalid_span = NonRecordingSpan(INVALID_SPAN_CONTEXT)
+    with patch.object(otel_trace, "get_current_span", return_value=invalid_span):
+        parsed = json.loads(fmt.format(record))
+
+    assert "trace_id" not in parsed
+    assert "span_id" not in parsed
+
+
+def test_json_formatter_no_trace_id_when_opentelemetry_not_importable():
+    """When opentelemetry is not installed, JSON output must not contain trace_id."""
+    import sys
+    fmt = JsonFormatter()
+    record = _make_application_record()
+    blocked = {
+        "opentelemetry": None,
+        "opentelemetry.trace": None,
+    }
+    with patch.dict(sys.modules, blocked):
+        parsed = json.loads(fmt.format(record))
+
+    assert "trace_id" not in parsed
+    assert "span_id" not in parsed
