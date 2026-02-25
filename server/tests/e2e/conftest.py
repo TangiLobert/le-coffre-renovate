@@ -103,14 +103,19 @@ def env_vars():
 
 @pytest.fixture(scope="session")
 def database_path():
-    """Create a temporary database file that persists for the entire test session."""
+    """Create a temporary database file with schema applied once for the entire test session."""
     db_fd, db_path = tempfile.mkstemp(suffix=".db")
-    os.close(db_fd)  # Close the file descriptor, we just need the path
+    os.close(db_fd)
 
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
+
+    # Run Alembic migrations once for the whole session
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("script_location", "alembic")
+    command.upgrade(alembic_cfg, "head")
+
     yield db_path
 
-    # Cleanup at end of session
     try:
         os.unlink(db_path)
     except OSError:
@@ -122,42 +127,32 @@ def database_path():
 def database(database_path):
     """
     Function-scoped fixture that cleans the database before each test.
-    Uses the session-scoped database file but resets its content.
+    Uses the session-scoped database file but deletes all rows between tests.
 
-    This ensures complete test isolation by:
-    - Dropping all tables (including users, passwords, groups, SSO config, vault setup, etc.)
-    - Recreating the schema via Alembic migrations
-    - Providing a fresh database state for each test
+    This ensures complete test isolation by truncating all application tables
+    while keeping the schema (avoiding expensive Alembic re-migrations).
     """
-
-    # Drop all tables and recreate schema for each test
     engine = create_engine(f"sqlite:///{database_path}")
 
-    # Drop all tables
     with engine.connect() as conn:
         conn.execute(text("PRAGMA foreign_keys = OFF"))
         conn.commit()
 
-        # Get all table names
         result = conn.execute(
             text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                "SELECT name FROM sqlite_master WHERE type='table'"
+                " AND name NOT LIKE 'sqlite_%' AND name != 'alembic_version'"
             )
         )
         tables = [row[0] for row in result]
 
-        # Drop each table
         for table in tables:
-            conn.execute(text(f"DROP TABLE IF EXISTS {table}"))
+            conn.execute(text(f'DELETE FROM "{table}"'))
 
         conn.execute(text("PRAGMA foreign_keys = ON"))
         conn.commit()
 
-    # Run migrations to recreate schema
-    alembic_cfg = Config("alembic.ini")
-    alembic_cfg.set_main_option("script_location", "alembic")
-    command.upgrade(alembic_cfg, "head")
-
+    engine.dispose()
     yield database_path
 
 

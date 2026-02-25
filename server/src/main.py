@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command
 
+from monitoring import setup_logging, setup_monitoring
 from config import (
     get_database_url,
     get_jwt_secret_key,
@@ -68,16 +69,9 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_group_management_router,
 )
 
+setup_logging()
+
 logger = logging.getLogger(__name__)
-
-
-class _HealthCheckFilter(logging.Filter):
-    def filter(self, record: logging.LogRecord) -> bool:
-        msg = record.getMessage()
-        return not ("GET /api/health" in msg and '" 200' in msg)
-
-
-logging.getLogger("uvicorn.access").addFilter(_HealthCheckFilter())
 
 
 def run_migrations(max_retries: int = 5, retry_delay: float = 5.0):
@@ -209,6 +203,7 @@ app.add_middleware(CsrfMiddleware)
 # Add rate limiting middleware (runs before CSRF since middlewares execute in reverse order)
 if get_rate_limit_enabled():
     app.add_middleware(RateLimitMiddleware)
+setup_monitoring(app)
 
 
 @app.exception_handler(Exception)
