@@ -21,6 +21,10 @@ from config import (
 )
 
 from security import CsrfMiddleware, CsrfTokenManager, csrf_router
+from shared_kernel.adapters.primary.request_id_middleware import (
+    RequestIdFilter,
+    RequestIdMiddleware,
+)
 from shared_kernel.adapters.secondary import (
     UtcTimeGateway,
     InMemoryDomainEventPublisher,
@@ -60,6 +64,7 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
 )
 
 setup_logging()
+logging.getLogger().addFilter(RequestIdFilter())
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +194,7 @@ app = FastAPI(lifespan=lifespan, root_path="/api")
 
 # Add CSRF protection middleware
 app.add_middleware(CsrfMiddleware)
+app.add_middleware(RequestIdMiddleware)
 
 _otel_providers = setup_monitoring(app)
 

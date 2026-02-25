@@ -478,6 +478,48 @@ def test_build_sampler_out_of_range_falls_back_to_parentbased(caplog):
 # --- _configure_otel test ---
 
 
+def test_configure_otel_instruments_sqlalchemy(app):
+    """_configure_otel must call SQLAlchemyInstrumentor().instrument()."""
+    from monitoring import _configure_otel
+    mock_sqla = MagicMock()
+    with patch("monitoring.SQLAlchemyInstrumentor", mock_sqla):
+        with patch("monitoring.HTTPXClientInstrumentor", MagicMock()):
+            with patch("monitoring.TracerProvider", MagicMock()):
+                with patch("monitoring.MeterProvider", MagicMock()):
+                    with patch("monitoring.OTLPMetricExporter", MagicMock()):
+                        with patch("monitoring.OTLPSpanExporter", MagicMock()):
+                            with patch("monitoring.PeriodicExportingMetricReader", MagicMock()):
+                                with patch("monitoring.Resource", MagicMock()):
+                                    with patch("monitoring.BatchSpanProcessor", MagicMock()):
+                                        with patch("monitoring.FastAPIInstrumentor", MagicMock()):
+                                            with patch("monitoring.otel_trace", MagicMock()):
+                                                with patch("monitoring.otel_metrics", MagicMock()):
+                                                    with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+                                                        _configure_otel(app)
+    mock_sqla.return_value.instrument.assert_called_once()
+
+
+def test_configure_otel_instruments_httpx(app):
+    """_configure_otel must call HTTPXClientInstrumentor().instrument()."""
+    from monitoring import _configure_otel
+    mock_httpx = MagicMock()
+    with patch("monitoring.SQLAlchemyInstrumentor", MagicMock()):
+        with patch("monitoring.HTTPXClientInstrumentor", mock_httpx):
+            with patch("monitoring.TracerProvider", MagicMock()):
+                with patch("monitoring.MeterProvider", MagicMock()):
+                    with patch("monitoring.OTLPMetricExporter", MagicMock()):
+                        with patch("monitoring.OTLPSpanExporter", MagicMock()):
+                            with patch("monitoring.PeriodicExportingMetricReader", MagicMock()):
+                                with patch("monitoring.Resource", MagicMock()):
+                                    with patch("monitoring.BatchSpanProcessor", MagicMock()):
+                                        with patch("monitoring.FastAPIInstrumentor", MagicMock()):
+                                            with patch("monitoring.otel_trace", MagicMock()):
+                                                with patch("monitoring.otel_metrics", MagicMock()):
+                                                    with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+                                                        _configure_otel(app)
+    mock_httpx.return_value.instrument.assert_called_once()
+
+
 def test_configure_otel_sets_global_tracer_provider(app):
     """_configure_otel must call otel_trace.set_tracer_provider with the created TracerProvider."""
     from monitoring import _configure_otel

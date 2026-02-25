@@ -8,6 +8,8 @@ try:
     from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
     import opentelemetry.metrics as otel_metrics
     import opentelemetry.trace as otel_trace
     from opentelemetry.sdk.metrics import MeterProvider
@@ -187,6 +189,13 @@ def _configure_otel(app) -> tuple:
         app,
         excluded_urls="/api/health,/api/metrics",
         meter_provider=meter_provider,
+        tracer_provider=tracer_provider,
+    )
+    SQLAlchemyInstrumentor().instrument(
+        tracer_provider=tracer_provider,
+        enable_commenter=True,
+    )
+    HTTPXClientInstrumentor().instrument(
         tracer_provider=tracer_provider,
     )
 

@@ -26,6 +26,8 @@ dev = [
 ]
 monitoring = [
     "opentelemetry-instrumentation-fastapi>=0.52b0",
+    "opentelemetry-instrumentation-httpx>=0.52b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.52b0",
     "opentelemetry-exporter-otlp-proto-http>=1.39.1",
     "opentelemetry-sdk>=1.39.1",
 ]

@@ -2,10 +2,9 @@ from password_management_context.application.commands import CheckAccessCommand
 from password_management_context.application.gateways import (
     PasswordPermissionsRepository,
 )
-from shared_kernel.domain.value_objects import AccessResult, Granted
-
-
+from shared_kernel.application.metrics import access_check_not_found_counter
 from shared_kernel.application.tracing import TracedUseCase
+from shared_kernel.domain.value_objects import AccessResult, Granted
 
 
 class CheckAccessUseCase(TracedUseCase):
@@ -21,6 +20,7 @@ class CheckAccessUseCase(TracedUseCase):
         )
 
         if not has_permission:
+            access_check_not_found_counter.add(1)
             return AccessResult(granted=Granted.NOT_FOUND)
 
         return AccessResult(granted=Granted.ACCESS)
