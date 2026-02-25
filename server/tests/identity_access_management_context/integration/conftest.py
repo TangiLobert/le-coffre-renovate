@@ -1,6 +1,4 @@
 import pytest
-import tempfile
-import os
 from sqlmodel import create_engine, Session, SQLModel
 from identity_access_management_context.adapters.secondary.sql import (
     SqlSsoUserRepository,
@@ -13,21 +11,13 @@ from identity_access_management_context.adapters.secondary.sql import (
 
 @pytest.fixture(scope="function")
 def database_engine():
-    db_fd, db_path = tempfile.mkstemp(suffix=".db")
-    os.close(db_fd)
-    try:
-        database_url = f"sqlite:///{db_path}"
-        engine = create_engine(database_url, connect_args={"check_same_thread": False})
-
-        # Create all tables
-        SQLModel.metadata.create_all(engine)
-
-        yield engine
-    finally:
-        try:
-            os.unlink(db_path)
-        except OSError:
-            pass
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+    )
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture(scope="function")
