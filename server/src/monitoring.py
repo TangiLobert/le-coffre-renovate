@@ -27,7 +27,7 @@ class JsonFormatter(logging.Formatter):
             if ctx.is_valid:
                 entry["trace_id"] = format(ctx.trace_id, "032x")
                 entry["span_id"] = format(ctx.span_id, "016x")
-        except Exception:  # ImportError when otel is absent; TypeError/AttributeError if context is invalid
+        except ImportError:
             pass
         return json.dumps(entry, ensure_ascii=False)
 

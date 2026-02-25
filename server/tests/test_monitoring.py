@@ -412,11 +412,16 @@ def _make_sampling_modules():
         TraceIdRatioBased=traceid_ratio_cls,
     )
     sdk_trace_mod = MagicMock(sampling=sampling_mod)
+    otel_trace_mock = MagicMock()
+    otel_trace_mock.get_current_span.return_value.get_span_context.return_value.is_valid = False
+    otel_root_mock = MagicMock()
+    otel_root_mock.trace = otel_trace_mock
     return {
-        "opentelemetry": MagicMock(),
+        "opentelemetry": otel_root_mock,
         "opentelemetry.sdk": MagicMock(),
         "opentelemetry.sdk.trace": sdk_trace_mod,
         "opentelemetry.sdk.trace.sampling": sampling_mod,
+        "opentelemetry.trace": otel_trace_mock,
     }, sampling_mod
 
 
