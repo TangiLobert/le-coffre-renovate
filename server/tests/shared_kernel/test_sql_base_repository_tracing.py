@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
+from opentelemetry.trace import StatusCode
 from shared_kernel.adapters.secondary.sql.sql_base_repository import SQLBaseRepository
 
 
@@ -24,7 +25,6 @@ def test_commit_creates_db_commit_span(repo):
 
 
 def test_commit_marks_span_error_on_exception(repo):
-    from opentelemetry.trace import StatusCode
     repo._session.commit.side_effect = RuntimeError("db down")
     mock_tracer = MagicMock()
     mock_span = MagicMock()
@@ -58,7 +58,6 @@ def test_commit_and_refresh_creates_span(repo):
 
 
 def test_commit_and_refresh_marks_span_error_on_exception(repo):
-    from opentelemetry.trace import StatusCode
     repo._session.commit.side_effect = RuntimeError("constraint violation")
     obj = MagicMock()
     mock_tracer = MagicMock()

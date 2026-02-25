@@ -71,7 +71,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: server/
-        run: uv sync --frozen
+        run: uv sync --frozen --group monitoring
 
       - name: Check Alembic Migrations
         working-directory: server/
@@ -129,7 +129,7 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: server/
-        run: uv sync --frozen
+        run: uv sync --frozen --group monitoring
 
       - name: Install Bun
         uses: oven-sh/setup-bun@v2

@@ -1,6 +1,7 @@
 import asyncio
 import pytest
 from unittest.mock import MagicMock, patch
+from opentelemetry.trace import StatusCode
 from shared_kernel.application.tracing import TracedUseCase, safe_set_attributes
 
 
@@ -50,7 +51,6 @@ def test_traced_use_case_sets_use_case_attribute():
 
 
 def test_traced_use_case_marks_span_error_on_exception():
-    from opentelemetry.trace import StatusCode
     mock_tracer = MagicMock()
     mock_span = MagicMock()
     mock_span.__enter__ = MagicMock(return_value=mock_span)
@@ -145,7 +145,6 @@ def test_traced_use_case_async_propagates_exception():
 
 
 def test_traced_use_case_async_marks_span_error():
-    from opentelemetry.trace import StatusCode
     mock_tracer = MagicMock()
     mock_span = MagicMock()
     mock_span.__enter__ = MagicMock(return_value=mock_span)
