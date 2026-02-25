@@ -8,8 +8,12 @@ from forgetting to add rollback logic in individual repository methods.
 from typing import Any
 from sqlmodel import Session
 import logging
+import opentelemetry.trace as otel_trace
+from opentelemetry.trace import StatusCode
 
 logger = logging.getLogger(__name__)
+
+tracer = otel_trace.get_tracer(__name__)
 
 
 class SQLBaseRepository:
@@ -17,7 +21,8 @@ class SQLBaseRepository:
     Base repository class that provides automatic transaction management.
 
     All write operations (commit) are automatically wrapped with rollback
-    on exception handling.
+    on exception handling. Each operation is also instrumented with an
+    OTEL span for distributed tracing.
 
     Usage:
         class SqlUserRepository(SQLBaseRepository, UserRepository):
@@ -35,21 +40,27 @@ class SQLBaseRepository:
         Commit the session with automatic rollback on exception.
 
         This method should be used instead of self._session.commit()
-        in all repository methods.
+        in all repository methods. The operation is traced with an OTEL span.
 
         Raises:
             The original exception after rolling back the transaction.
         """
-        try:
-            self._session.commit()
-        except Exception as e:
-            logger.exception("Transaction failed")
-            self._session.rollback()
-            raise
+        with tracer.start_as_current_span("db.commit") as span:
+            span.set_attribute("db.operation", "commit")
+            try:
+                self._session.commit()
+            except Exception as e:
+                span.set_status(StatusCode.ERROR, str(e))
+                span.record_exception(e)
+                logger.exception("Transaction failed")
+                self._session.rollback()
+                raise
 
     def commit_and_refresh(self, obj: Any) -> None:
         """
         Commit the session and refresh an object with automatic rollback on exception.
+
+        The operation is traced with an OTEL span.
 
         Args:
             obj: The database object to refresh after commit
@@ -57,10 +68,14 @@ class SQLBaseRepository:
         Raises:
             The original exception after rolling back the transaction.
         """
-        try:
-            self._session.commit()
-            self._session.refresh(obj)
-        except Exception as e:
-            logger.exception("Transaction failed")
-            self._session.rollback()
-            raise
+        with tracer.start_as_current_span("db.commit_and_refresh") as span:
+            span.set_attribute("db.operation", "commit_and_refresh")
+            try:
+                self._session.commit()
+                self._session.refresh(obj)
+            except Exception as e:
+                span.set_status(StatusCode.ERROR, str(e))
+                span.record_exception(e)
+                logger.exception("Transaction failed")
+                self._session.rollback()
+                raise
