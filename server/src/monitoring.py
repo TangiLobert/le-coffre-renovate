@@ -3,6 +3,23 @@ import logging
 import os
 from datetime import datetime, timezone
 
+# Optional OpenTelemetry SDK — installed via the [monitoring] dependency group.
+try:
+    from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+    import opentelemetry.metrics as otel_metrics
+    import opentelemetry.trace as otel_trace
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+    from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.sdk.trace.sampling import ALWAYS_ON, ParentBased, TraceIdRatioBased
+    _OTEL_AVAILABLE = True
+except ImportError:
+    _OTEL_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,15 +37,12 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             entry["exception"] = self.formatException(record.exc_info)
         # Inject OTEL trace context for log/trace correlation when a span is active
-        try:
-            import opentelemetry.trace as otel_trace
+        if _OTEL_AVAILABLE:
             span = otel_trace.get_current_span()
             ctx = span.get_span_context()
             if ctx.is_valid:
                 entry["trace_id"] = format(ctx.trace_id, "032x")
                 entry["span_id"] = format(ctx.span_id, "016x")
-        except ImportError:
-            pass
         return json.dumps(entry, ensure_ascii=False)
 
 
@@ -117,20 +131,10 @@ def setup_monitoring(app) -> tuple | None:
 
 
 def _try_import_otel() -> bool:
-    """Attempt to import OTel packages. Returns False and logs if unavailable."""
-    try:
-        import opentelemetry.instrumentation.fastapi  # noqa: F401
-        import opentelemetry.exporter.otlp.proto.http.metric_exporter  # noqa: F401
-        import opentelemetry.sdk.metrics  # noqa: F401
-        import opentelemetry.sdk.metrics.export  # noqa: F401
-        import opentelemetry.sdk.resources  # noqa: F401
-        import opentelemetry.sdk.trace  # noqa: F401
-        import opentelemetry.sdk.trace.export  # noqa: F401
-        import opentelemetry.exporter.otlp.proto.http.trace_exporter  # noqa: F401
-        return True
-    except ImportError:
+    """Check if OTel packages are available. Returns False and logs if not."""
+    if not _OTEL_AVAILABLE:
         logger.info("Monitoring dependencies not installed, skipping instrumentation")
-        return False
+    return _OTEL_AVAILABLE
 
 
 def _configure_otel(app) -> tuple:
@@ -139,17 +143,6 @@ def _configure_otel(app) -> tuple:
     Returns (tracer_provider, meter_provider) for use by the caller
     (e.g. graceful shutdown hooks).
     """
-    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-    from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-    from opentelemetry.sdk.metrics import MeterProvider
-    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-    from opentelemetry.sdk.resources import Resource, SERVICE_NAME
-    from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    import opentelemetry.trace as otel_trace
-    import opentelemetry.metrics as otel_metrics
-
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
     service_name = os.getenv("OTEL_SERVICE_NAME", "le-coffre")
 
@@ -192,8 +185,6 @@ def _configure_otel(app) -> tuple:
 
 def _build_sampler():
     """Build a trace sampler from OTEL_TRACES_SAMPLER / OTEL_TRACES_SAMPLER_ARG env vars."""
-    from opentelemetry.sdk.trace.sampling import ALWAYS_ON, ParentBased, TraceIdRatioBased
-
     name = os.getenv("OTEL_TRACES_SAMPLER", "parentbased_always_on")
     raw_arg = os.getenv("OTEL_TRACES_SAMPLER_ARG", "1.0")
 

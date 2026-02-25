@@ -10,8 +10,6 @@ try:
     tracer = otel_trace.get_tracer(__name__)
 except ImportError:
     # opentelemetry is not installed — use no-op stubs
-    import types
-
     class _NoOpSpan:
         def __enter__(self): return self
         def __exit__(self, *_): pass

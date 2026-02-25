@@ -5,6 +5,9 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock, call
 from fastapi import FastAPI
+import opentelemetry.trace as otel_trace
+from opentelemetry.trace import NonRecordingSpan, INVALID_SPAN_CONTEXT
+from opentelemetry.trace import StatusCode
 
 from monitoring import JsonFormatter, setup_monitoring, _UvicornAccessFilter, setup_logging, _parse_resource_attributes
 
@@ -59,26 +62,10 @@ def test_setup_monitoring_without_endpoint_emits_no_logs(app, caplog):
 # --- Missing OTel dependencies when endpoint is set ---
 
 
-_OTEL_MODULES = [
-    "opentelemetry",
-    "opentelemetry.instrumentation",
-    "opentelemetry.instrumentation.fastapi",
-    "opentelemetry.exporter",
-    "opentelemetry.exporter.otlp",
-    "opentelemetry.exporter.otlp.proto",
-    "opentelemetry.exporter.otlp.proto.http",
-    "opentelemetry.exporter.otlp.proto.http.metric_exporter",
-    "opentelemetry.sdk",
-    "opentelemetry.sdk.metrics",
-    "opentelemetry.sdk.metrics.export",
-    "opentelemetry.sdk.resources",
-]
-
-
 def test_setup_monitoring_without_dependencies_does_not_instrument(app, caplog):
     """When OTel packages are absent but endpoint is set, no instrumentation runs."""
     with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
-        with patch.dict(sys.modules, {mod: None for mod in _OTEL_MODULES}):
+        with patch("monitoring._OTEL_AVAILABLE", False):
             with caplog.at_level(logging.INFO, logger="monitoring"):
                 setup_monitoring(app)
     assert "Monitoring dependencies not installed" in caplog.text
@@ -87,7 +74,7 @@ def test_setup_monitoring_without_dependencies_does_not_instrument(app, caplog):
 def test_setup_monitoring_without_dependencies_logs_info(app, caplog):
     """When OTel packages are absent, an INFO message must be emitted."""
     with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
-        with patch.dict(sys.modules, {mod: None for mod in _OTEL_MODULES}):
+        with patch("monitoring._OTEL_AVAILABLE", False):
             with caplog.at_level(logging.INFO, logger="monitoring"):
                 setup_monitoring(app)
     assert "Monitoring dependencies not installed" in caplog.text
@@ -347,21 +334,14 @@ def test_parse_resource_attributes_merges_both_sources():
     assert result.get("app.version") == "1.2.0"
 
 
-# --- New tests for distributed tracing (Task 1) ---
-
-_TRACE_MODULES = [
-    "opentelemetry.sdk.trace",
-    "opentelemetry.sdk.trace.export",
-    "opentelemetry.exporter.otlp.proto.http.trace_exporter",
-]
+# --- Distributed tracing: _try_import_otel ---
 
 
-def test_try_import_otel_returns_false_when_trace_modules_missing(app):
-    """_try_import_otel() must return False when trace-specific modules are absent."""
+def test_try_import_otel_returns_false_when_otel_unavailable(app):
+    """_try_import_otel() must return False when _OTEL_AVAILABLE is False."""
     from monitoring import _try_import_otel
 
-    blocked = {**{mod: None for mod in _OTEL_MODULES}, **{mod: None for mod in _TRACE_MODULES}}
-    with patch.dict(sys.modules, blocked):
+    with patch("monitoring._OTEL_AVAILABLE", False):
         result = _try_import_otel()
     assert result is False
 
@@ -400,70 +380,79 @@ def test_setup_monitoring_returns_providers_tuple_when_active(app):
     assert result == (fake_tracer, fake_meter)
 
 
-def _make_sampling_modules():
-    """Build a sys.modules patch that provides a minimal opentelemetry.sdk.trace.sampling mock."""
-    always_on = MagicMock(name="ALWAYS_ON")
-    parent_based_cls = MagicMock(name="ParentBased", side_effect=lambda root: MagicMock(spec=["__class__"], _root=root, _ParentBased=True))
-    traceid_ratio_cls = MagicMock(name="TraceIdRatioBased", side_effect=lambda ratio: MagicMock(spec=["__class__"], _ratio=ratio, _TraceIdRatio=True))
-
-    sampling_mod = MagicMock(
-        ALWAYS_ON=always_on,
-        ParentBased=parent_based_cls,
-        TraceIdRatioBased=traceid_ratio_cls,
-    )
-    sdk_trace_mod = MagicMock(sampling=sampling_mod)
-    otel_trace_mock = MagicMock()
-    otel_trace_mock.get_current_span.return_value.get_span_context.return_value.is_valid = False
-    otel_root_mock = MagicMock()
-    otel_root_mock.trace = otel_trace_mock
-    return {
-        "opentelemetry": otel_root_mock,
-        "opentelemetry.sdk": MagicMock(),
-        "opentelemetry.sdk.trace": sdk_trace_mod,
-        "opentelemetry.sdk.trace.sampling": sampling_mod,
-        "opentelemetry.trace": otel_trace_mock,
-    }, sampling_mod
+# --- _build_sampler tests ---
 
 
 def test_build_sampler_default_returns_parentbased_always_on():
     from monitoring import _build_sampler
-    modules, sampling = _make_sampling_modules()
+
+    mock_always_on = MagicMock(name="ALWAYS_ON")
+    mock_parent_based = MagicMock(name="ParentBased")
+    mock_traceid_ratio = MagicMock(name="TraceIdRatioBased")
+
     env = {k: v for k, v in os.environ.items() if k not in ("OTEL_TRACES_SAMPLER", "OTEL_TRACES_SAMPLER_ARG")}
-    with patch.dict(sys.modules, modules):
-        with patch.dict(os.environ, env, clear=True):
-            sampler = _build_sampler()
-    sampling.ParentBased.assert_called_once_with(sampling.ALWAYS_ON)
+    with patch("monitoring.ALWAYS_ON", mock_always_on):
+        with patch("monitoring.ParentBased", mock_parent_based):
+            with patch("monitoring.TraceIdRatioBased", mock_traceid_ratio):
+                with patch.dict(os.environ, env, clear=True):
+                    _build_sampler()
+
+    mock_parent_based.assert_called_once_with(mock_always_on)
 
 
 def test_build_sampler_traceidratio():
     from monitoring import _build_sampler
-    modules, sampling = _make_sampling_modules()
-    with patch.dict(sys.modules, modules):
-        with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "0.5"}):
-            sampler = _build_sampler()
-    sampling.TraceIdRatioBased.assert_called_once_with(0.5)
+
+    mock_always_on = MagicMock(name="ALWAYS_ON")
+    mock_parent_based = MagicMock(name="ParentBased")
+    mock_traceid_ratio = MagicMock(name="TraceIdRatioBased")
+
+    with patch("monitoring.ALWAYS_ON", mock_always_on):
+        with patch("monitoring.ParentBased", mock_parent_based):
+            with patch("monitoring.TraceIdRatioBased", mock_traceid_ratio):
+                with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "0.5"}):
+                    _build_sampler()
+
+    mock_traceid_ratio.assert_called_once_with(0.5)
 
 
 def test_build_sampler_invalid_arg_falls_back_to_parentbased(caplog):
     from monitoring import _build_sampler
-    modules, sampling = _make_sampling_modules()
-    with patch.dict(sys.modules, modules):
-        with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "not-a-float"}):
-            with caplog.at_level(logging.WARNING, logger="monitoring"):
-                sampler = _build_sampler()
-    sampling.ParentBased.assert_called_once_with(sampling.ALWAYS_ON)
+
+    mock_always_on = MagicMock(name="ALWAYS_ON")
+    mock_parent_based = MagicMock(name="ParentBased")
+    mock_traceid_ratio = MagicMock(name="TraceIdRatioBased")
+
+    with patch("monitoring.ALWAYS_ON", mock_always_on):
+        with patch("monitoring.ParentBased", mock_parent_based):
+            with patch("monitoring.TraceIdRatioBased", mock_traceid_ratio):
+                with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "not-a-float"}):
+                    with caplog.at_level(logging.WARNING, logger="monitoring"):
+                        _build_sampler()
+
+    mock_parent_based.assert_called_once_with(mock_always_on)
     assert "OTEL_TRACES_SAMPLER_ARG" in caplog.text
 
 
 def test_build_sampler_out_of_range_falls_back_to_parentbased(caplog):
     from monitoring import _build_sampler
-    modules, sampling = _make_sampling_modules()
-    with patch.dict(sys.modules, modules):
-        with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "1.5"}):
-            with caplog.at_level(logging.WARNING, logger="monitoring"):
-                sampler = _build_sampler()
-    sampling.ParentBased.assert_called_once_with(sampling.ALWAYS_ON)
+
+    mock_always_on = MagicMock(name="ALWAYS_ON")
+    mock_parent_based = MagicMock(name="ParentBased")
+    mock_traceid_ratio = MagicMock(name="TraceIdRatioBased")
+
+    with patch("monitoring.ALWAYS_ON", mock_always_on):
+        with patch("monitoring.ParentBased", mock_parent_based):
+            with patch("monitoring.TraceIdRatioBased", mock_traceid_ratio):
+                with patch.dict(os.environ, {"OTEL_TRACES_SAMPLER": "traceidratio", "OTEL_TRACES_SAMPLER_ARG": "1.5"}):
+                    with caplog.at_level(logging.WARNING, logger="monitoring"):
+                        _build_sampler()
+
+    mock_parent_based.assert_called_once_with(mock_always_on)
     assert "OTEL_TRACES_SAMPLER_ARG" in caplog.text
+
+
+# --- _configure_otel test ---
 
 
 def test_configure_otel_sets_global_tracer_provider(app):
@@ -484,50 +473,26 @@ def test_configure_otel_sets_global_tracer_provider(app):
     mock_batch_processor = MagicMock()
     mock_otel_trace = MagicMock()
     mock_otel_metrics = MagicMock()
+    mock_always_on = MagicMock(name="ALWAYS_ON")
+    mock_parent_based = MagicMock(name="ParentBased", side_effect=lambda root: root)
+    mock_traceid_ratio = MagicMock(name="TraceIdRatioBased")
 
-    # `import opentelemetry.trace as otel_trace` resolves by loading `opentelemetry`
-    # then reading its `.trace` attribute. We must wire those attributes explicitly
-    # so the mock namespace matches what the production code will receive.
-    otel_pkg = MagicMock()
-    otel_pkg.trace = mock_otel_trace
-    otel_pkg.metrics = mock_otel_metrics
-
-    otel_sdk_pkg = MagicMock()
-    otel_sdk_trace_module = MagicMock(TracerProvider=mock_tracer_provider_cls)
-    otel_sdk_trace_module.sampling = MagicMock(
-        ALWAYS_ON=MagicMock(),
-        ParentBased=MagicMock(side_effect=lambda root: root),
-        TraceIdRatioBased=MagicMock(),
-    )
-    otel_sdk_pkg.trace = otel_sdk_trace_module
-
-    otel_exporter_pkg = MagicMock()
-    otel_instrumentation_pkg = MagicMock()
-
-    modules = {
-        "opentelemetry": otel_pkg,
-        "opentelemetry.trace": mock_otel_trace,
-        "opentelemetry.metrics": mock_otel_metrics,
-        "opentelemetry.sdk": otel_sdk_pkg,
-        "opentelemetry.sdk.metrics": MagicMock(MeterProvider=mock_meter_provider_cls),
-        "opentelemetry.sdk.metrics.export": MagicMock(PeriodicExportingMetricReader=mock_reader),
-        "opentelemetry.sdk.resources": MagicMock(Resource=mock_resource_cls, SERVICE_NAME="service.name"),
-        "opentelemetry.sdk.trace": otel_sdk_trace_module,
-        "opentelemetry.sdk.trace.export": MagicMock(BatchSpanProcessor=mock_batch_processor),
-        "opentelemetry.sdk.trace.sampling": otel_sdk_trace_module.sampling,
-        "opentelemetry.exporter": otel_exporter_pkg,
-        "opentelemetry.exporter.otlp": MagicMock(),
-        "opentelemetry.exporter.otlp.proto": MagicMock(),
-        "opentelemetry.exporter.otlp.proto.http": MagicMock(),
-        "opentelemetry.exporter.otlp.proto.http.metric_exporter": MagicMock(OTLPMetricExporter=mock_otlp_metric),
-        "opentelemetry.exporter.otlp.proto.http.trace_exporter": MagicMock(OTLPSpanExporter=mock_otlp_trace),
-        "opentelemetry.instrumentation": otel_instrumentation_pkg,
-        "opentelemetry.instrumentation.fastapi": MagicMock(FastAPIInstrumentor=mock_instrumentor),
-    }
-
-    with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
-        with patch.dict(sys.modules, modules):
-            result = _configure_otel(app)
+    with patch("monitoring.otel_trace", mock_otel_trace):
+        with patch("monitoring.otel_metrics", mock_otel_metrics):
+            with patch("monitoring.TracerProvider", mock_tracer_provider_cls):
+                with patch("monitoring.MeterProvider", mock_meter_provider_cls):
+                    with patch("monitoring.OTLPMetricExporter", mock_otlp_metric):
+                        with patch("monitoring.OTLPSpanExporter", mock_otlp_trace):
+                            with patch("monitoring.PeriodicExportingMetricReader", mock_reader):
+                                with patch("monitoring.Resource", mock_resource_cls):
+                                    with patch("monitoring.SERVICE_NAME", "service.name"):
+                                        with patch("monitoring.BatchSpanProcessor", mock_batch_processor):
+                                            with patch("monitoring.FastAPIInstrumentor", mock_instrumentor):
+                                                with patch("monitoring.ALWAYS_ON", mock_always_on):
+                                                    with patch("monitoring.ParentBased", mock_parent_based):
+                                                        with patch("monitoring.TraceIdRatioBased", mock_traceid_ratio):
+                                                            with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+                                                                result = _configure_otel(app)
 
     mock_otel_trace.set_tracer_provider.assert_called_once_with(mock_tracer_provider_instance)
     mock_otel_metrics.set_meter_provider.assert_called_once_with(mock_meter_provider_instance)
@@ -542,9 +507,6 @@ def test_configure_otel_sets_global_tracer_provider(app):
 
 def test_json_formatter_injects_trace_id_when_span_is_active():
     """When an OTEL span is active, trace_id and span_id must appear in JSON output."""
-    from unittest.mock import MagicMock
-    import opentelemetry.trace as otel_trace
-
     mock_ctx = MagicMock()
     mock_ctx.is_valid = True
     mock_ctx.trace_id = 0xABCDEF1234567890ABCDEF1234567890
@@ -567,9 +529,6 @@ def test_json_formatter_injects_trace_id_when_span_is_active():
 
 def test_json_formatter_no_trace_id_when_no_active_span():
     """When no OTEL span is active (is_valid=False), trace_id must not appear."""
-    import opentelemetry.trace as otel_trace
-    from opentelemetry.trace import NonRecordingSpan, INVALID_SPAN_CONTEXT
-
     fmt = JsonFormatter()
     record = _make_application_record()
 
@@ -585,14 +544,10 @@ def test_json_formatter_no_trace_id_when_no_active_span():
 
 def test_json_formatter_no_trace_id_when_opentelemetry_not_importable():
     """When opentelemetry is not installed, JSON output must not contain trace_id."""
-    import sys
     fmt = JsonFormatter()
     record = _make_application_record()
-    blocked = {
-        "opentelemetry": None,
-        "opentelemetry.trace": None,
-    }
-    with patch.dict(sys.modules, blocked):
+
+    with patch("monitoring._OTEL_AVAILABLE", False):
         parsed = json.loads(fmt.format(record))
 
     assert "trace_id" not in parsed

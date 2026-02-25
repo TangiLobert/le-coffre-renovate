@@ -14,8 +14,6 @@ try:
     from opentelemetry.trace import StatusCode
     tracer = otel_trace.get_tracer(__name__)
 except ImportError:
-    import types
-
     class _NoOpSpan:
         def __enter__(self): return self
         def __exit__(self, *_): pass
