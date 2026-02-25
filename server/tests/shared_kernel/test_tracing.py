@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from unittest.mock import MagicMock, patch
 from shared_kernel.application.tracing import TracedUseCase, safe_set_attributes
@@ -119,3 +120,47 @@ def test_traced_use_case_no_double_wrap_on_subclass():
         ChildUseCase().execute(1)
 
     assert mock_tracer.start_as_current_span.call_count == 1
+
+
+# --- Async use case tests ---
+
+class AsyncUseCase(TracedUseCase):
+    async def execute(self, value: int) -> int:
+        return value * 3
+
+
+class AsyncFailingUseCase(TracedUseCase):
+    async def execute(self):
+        raise ValueError("async error")
+
+
+def test_traced_use_case_async_returns_result():
+    result = asyncio.run(AsyncUseCase().execute(4))
+    assert result == 12
+
+
+def test_traced_use_case_async_propagates_exception():
+    with pytest.raises(ValueError, match="async error"):
+        asyncio.run(AsyncFailingUseCase().execute())
+
+
+def test_traced_use_case_async_marks_span_error():
+    from opentelemetry.trace import StatusCode
+    mock_tracer = MagicMock()
+    mock_span = MagicMock()
+    mock_span.__enter__ = MagicMock(return_value=mock_span)
+    mock_span.__exit__ = MagicMock(return_value=False)
+    mock_tracer.start_as_current_span.return_value = mock_span
+
+    with patch("shared_kernel.application.tracing.tracer", mock_tracer):
+        with pytest.raises(ValueError):
+            asyncio.run(AsyncFailingUseCase().execute())
+
+    mock_span.set_status.assert_called_once()
+    mock_span.record_exception.assert_called_once()
+    assert mock_span.set_status.call_args[0][0] == StatusCode.ERROR
+
+
+def test_traced_use_case_async_is_noop_without_provider():
+    result = asyncio.run(AsyncUseCase().execute(2))
+    assert result == 6

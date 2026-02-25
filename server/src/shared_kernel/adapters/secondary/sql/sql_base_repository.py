@@ -46,7 +46,7 @@ class SQLBaseRepository:
             The original exception after rolling back the transaction.
         """
         with tracer.start_as_current_span("db.commit") as span:
-            span.set_attribute("db.operation", "commit")
+            span.set_attribute("db.operation", "commit")  # safe: hardcoded constant
             try:
                 self._session.commit()
             except Exception as e:
@@ -69,7 +69,7 @@ class SQLBaseRepository:
             The original exception after rolling back the transaction.
         """
         with tracer.start_as_current_span("db.commit_and_refresh") as span:
-            span.set_attribute("db.operation", "commit_and_refresh")
+            span.set_attribute("db.operation", "commit_and_refresh")  # safe: hardcoded constant
             try:
                 self._session.commit()
                 self._session.refresh(obj)

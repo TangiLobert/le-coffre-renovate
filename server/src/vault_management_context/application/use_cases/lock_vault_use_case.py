@@ -15,10 +15,10 @@ from shared_kernel.domain.services import AdminPermissionChecker
 from vault_management_context.domain.events import VaultLockedEvent
 from shared_kernel.application.gateways import DomainEventPublisher
 
+from shared_kernel.application.tracing import TracedUseCase
 logger = logging.getLogger(__name__)
 
 
-from shared_kernel.application.tracing import TracedUseCase
 
 
 class LockVaultUseCase(TracedUseCase):

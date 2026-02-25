@@ -178,6 +178,7 @@ async def lifespan(app: FastAPI):
         tracer_provider, meter_provider = _otel_providers
         tracer_provider.force_flush()
         tracer_provider.shutdown()
+        meter_provider.force_flush()
         meter_provider.shutdown()
 
 

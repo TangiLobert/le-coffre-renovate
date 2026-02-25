@@ -1,10 +1,32 @@
 """Distributed tracing utilities for use cases and the shared kernel."""
 
+import asyncio
 import functools
-import opentelemetry.trace as otel_trace
-from opentelemetry.trace import StatusCode
+import inspect
 
-tracer = otel_trace.get_tracer(__name__)
+try:
+    import opentelemetry.trace as otel_trace
+    from opentelemetry.trace import StatusCode
+    tracer = otel_trace.get_tracer(__name__)
+except ImportError:
+    # opentelemetry is not installed — use no-op stubs
+    import types
+
+    class _NoOpSpan:
+        def __enter__(self): return self
+        def __exit__(self, *_): pass
+        def set_attribute(self, *_): pass
+        def set_status(self, *_): pass
+        def record_exception(self, *_): pass
+
+    class _NoOpTracer:
+        def start_as_current_span(self, *_, **__): return _NoOpSpan()
+
+    class StatusCode:
+        ERROR = "ERROR"
+        OK = "OK"
+
+    tracer = _NoOpTracer()
 
 _ALLOWED_ATTRIBUTES = frozenset({
     "app.use_case",
@@ -21,7 +43,7 @@ _ALLOWED_ATTRIBUTES = frozenset({
 _TRACED = "_traced_execute"
 
 
-def safe_set_attributes(span: otel_trace.Span, attrs: dict) -> None:
+def safe_set_attributes(span, attrs: dict) -> None:
     """Set span attributes, filtering to the allowlist only."""
     for key, value in attrs.items():
         if key in _ALLOWED_ATTRIBUTES:
@@ -29,7 +51,25 @@ def safe_set_attributes(span: otel_trace.Span, attrs: dict) -> None:
 
 
 def _wrap_execute(fn):
-    """Wrap an execute() method with an OTEL span."""
+    """Wrap a use case execute() method in an OTEL span.
+
+    Handles both synchronous and asynchronous execute() implementations.
+    """
+    if inspect.iscoroutinefunction(fn):
+        @functools.wraps(fn)
+        async def async_wrapper(self, *args, **kwargs):
+            span_name = f"{type(self).__name__}.execute"
+            with tracer.start_as_current_span(span_name) as span:
+                safe_set_attributes(span, {"app.use_case": type(self).__name__})
+                try:
+                    return await fn(self, *args, **kwargs)
+                except Exception as exc:
+                    span.set_status(StatusCode.ERROR, str(exc))
+                    span.record_exception(exc)
+                    raise
+        setattr(async_wrapper, _TRACED, True)
+        return async_wrapper
+
     @functools.wraps(fn)
     def wrapper(self, *args, **kwargs):
         span_name = f"{type(self).__name__}.execute"

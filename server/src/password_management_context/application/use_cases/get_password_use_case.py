@@ -24,10 +24,10 @@ from password_management_context.domain.events import (
 from password_management_context.domain.value_objects import PasswordPermission
 from shared_kernel.application.gateways import DomainEventPublisher
 
+from shared_kernel.application.tracing import TracedUseCase
 logger = logging.getLogger(__name__)
 
 
-from shared_kernel.application.tracing import TracedUseCase
 
 
 class GetPasswordUseCase(TracedUseCase):

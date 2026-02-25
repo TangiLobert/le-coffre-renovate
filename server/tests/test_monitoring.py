@@ -613,7 +613,9 @@ def test_setup_monitoring_returns_providers_that_can_be_shut_down(app):
     # Call the shutdown methods — the lifespan uses them; they must not raise
     tracer_p.force_flush()
     tracer_p.shutdown()
+    meter_p.force_flush()
     meter_p.shutdown()
     tracer_p.force_flush.assert_called_once()
     tracer_p.shutdown.assert_called_once()
+    meter_p.force_flush.assert_called_once()
     meter_p.shutdown.assert_called_once()
