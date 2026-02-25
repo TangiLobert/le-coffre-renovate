@@ -22,6 +22,14 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# Standard LogRecord attributes — excluded from the extra-fields merge.
+_LOGRECORD_RESERVED = frozenset({
+    "name", "msg", "args", "created", "filename", "funcName", "levelname",
+    "levelno", "lineno", "module", "msecs", "pathname", "process",
+    "processName", "relativeCreated", "stack_info", "thread", "threadName",
+    "exc_info", "exc_text", "message", "taskName",
+})
+
 
 class JsonFormatter(logging.Formatter):
     """Formats log records as single-line JSON for structured log ingestion."""
@@ -36,6 +44,14 @@ class JsonFormatter(logging.Formatter):
         }
         if record.exc_info:
             entry["exception"] = self.formatException(record.exc_info)
+        # Merge extra fields passed via logger.info(..., extra={...})
+        for key, value in record.__dict__.items():
+            if key not in _LOGRECORD_RESERVED and not key.startswith("_") and key not in entry:
+                try:
+                    json.dumps(value)
+                    entry[key] = value
+                except (TypeError, ValueError):
+                    entry[key] = str(value)
         # Inject OTEL trace context for log/trace correlation when a span is active
         if _OTEL_AVAILABLE:
             span = otel_trace.get_current_span()

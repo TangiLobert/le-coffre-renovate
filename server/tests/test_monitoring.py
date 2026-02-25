@@ -214,6 +214,28 @@ def test_json_formatter_with_exc_info_includes_exception():
     assert "ValueError" in parsed["exception"]
 
 
+def test_json_formatter_includes_extra_fields():
+    """Extra fields passed via logger.info(..., extra={}) must appear in JSON output."""
+    fmt = JsonFormatter()
+    record = _make_application_record()
+    record.password_id = "abc123"
+    record.user_id = "user-42"
+    parsed = json.loads(fmt.format(record))
+    assert parsed["password_id"] == "abc123"
+    assert parsed["user_id"] == "user-42"
+
+
+def test_json_formatter_extra_fields_do_not_override_reserved_keys():
+    """Extra fields must not be able to overwrite timestamp, level, logger, message."""
+    fmt = JsonFormatter()
+    record = _make_application_record(msg="real message")
+    record.message = "injected"
+    record.level = "INJECTED"
+    parsed = json.loads(fmt.format(record))
+    assert parsed["message"] == "real message"
+    assert parsed["level"] == "INFO"
+
+
 def test_json_formatter_handles_uvicorn_access_tuple_args():
     """Uvicorn access logs use tuple args — must not crash."""
     fmt = JsonFormatter()
