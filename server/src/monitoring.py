@@ -68,38 +68,42 @@ class _UvicornAccessFilter(logging.Filter):
         return True
 
 
-def setup_monitoring(app) -> None:
-    """Instrument the FastAPI app with OpenTelemetry metrics via OTLP.
+def setup_monitoring(app) -> tuple | None:
+    """Instrument the FastAPI app with OpenTelemetry metrics and traces via OTLP.
 
     Activation:
     - ENABLE_MONITORING=false → disabled (hard override)
     - OTEL_EXPORTER_OTLP_ENDPOINT not set and ENABLE_MONITORING != true → silent no-op
     - OTel packages not installed → logs INFO and no-op
-    - Otherwise → instruments app and exports metrics via OTLP HTTP
+    - Otherwise → instruments app and exports metrics + traces via OTLP HTTP
+
+    Returns (tracer_provider, meter_provider) when active, None otherwise.
+    Callers can use the returned providers for graceful shutdown.
     """
     if os.getenv("ENABLE_MONITORING", "").lower() == "false":
         _install_filter(monitoring_active=False)
-        return
+        return None
 
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
     if not endpoint and os.getenv("ENABLE_MONITORING", "").lower() != "true":
         _install_filter(monitoring_active=False)
-        return
+        return None
 
     if not endpoint:
         logger.warning(
             "ENABLE_MONITORING=true but OTEL_EXPORTER_OTLP_ENDPOINT is not set — metrics will not be exported"
         )
         _install_filter(monitoring_active=False)
-        return
+        return None
 
     if not _try_import_otel():
         _install_filter(monitoring_active=False)
-        return
+        return None
 
-    _configure_otel(app)
+    providers = _configure_otel(app)
     # OTLP pushes to collector — no /metrics endpoint is mounted.
     _install_filter(monitoring_active=False)
+    return providers
 
 
 def _try_import_otel() -> bool:
@@ -110,18 +114,32 @@ def _try_import_otel() -> bool:
         import opentelemetry.sdk.metrics  # noqa: F401
         import opentelemetry.sdk.metrics.export  # noqa: F401
         import opentelemetry.sdk.resources  # noqa: F401
+        import opentelemetry.sdk.trace  # noqa: F401
+        import opentelemetry.sdk.trace.export  # noqa: F401
+        import opentelemetry.exporter.otlp.proto.http.trace_exporter  # noqa: F401
         return True
     except ImportError:
         logger.info("Monitoring dependencies not installed, skipping instrumentation")
         return False
 
 
-def _configure_otel(app) -> None:
+def _configure_otel(app) -> tuple:
+    """Configure OpenTelemetry metrics and distributed tracing.
+
+    Returns (tracer_provider, meter_provider) for use by the caller
+    (e.g. graceful shutdown hooks).
+    """
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
     from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
     from opentelemetry.sdk.metrics import MeterProvider
     from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
     from opentelemetry.sdk.resources import Resource, SERVICE_NAME
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.sdk.trace.sampling import ALWAYS_ON, ParentBased, TraceIdRatioBased
+    import opentelemetry.trace as otel_trace
+    import opentelemetry.metrics as otel_metrics
 
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
     service_name = os.getenv("OTEL_SERVICE_NAME", "le-coffre")
@@ -131,22 +149,49 @@ def _configure_otel(app) -> None:
         **_parse_resource_attributes(),
     })
 
+    # --- Metrics ---
     reader = PeriodicExportingMetricReader(
         OTLPMetricExporter(endpoint=f"{endpoint.rstrip('/')}/v1/metrics")
     )
-    provider = MeterProvider(resource=resource, metric_readers=[reader])
+    meter_provider = MeterProvider(resource=resource, metric_readers=[reader])
+    otel_metrics.set_meter_provider(meter_provider)
+
+    # --- Traces ---
+    tracer_provider = TracerProvider(resource=resource, sampler=_build_sampler())
+    tracer_provider.add_span_processor(
+        BatchSpanProcessor(
+            OTLPSpanExporter(endpoint=f"{endpoint.rstrip('/')}/v1/traces")
+        )
+    )
+    otel_trace.set_tracer_provider(tracer_provider)
 
     FastAPIInstrumentor.instrument_app(
         app,
         excluded_urls="/api/health,/api/metrics",
-        meter_provider=provider,
+        meter_provider=meter_provider,
+        tracer_provider=tracer_provider,
     )
 
     logger.info(
-        "OpenTelemetry metrics enabled — service=%s endpoint=%s",
+        "OpenTelemetry enabled — service=%s endpoint=%s",
         service_name,
         endpoint,
     )
+
+    return tracer_provider, meter_provider
+
+
+def _build_sampler():
+    """Build a trace sampler from OTEL_TRACES_SAMPLER / OTEL_TRACES_SAMPLER_ARG env vars."""
+    from opentelemetry.sdk.trace.sampling import ALWAYS_ON, ParentBased, TraceIdRatioBased
+
+    name = os.getenv("OTEL_TRACES_SAMPLER", "parentbased_always_on")
+    arg = os.getenv("OTEL_TRACES_SAMPLER_ARG", "1.0")
+    if name == "traceidratio":
+        return TraceIdRatioBased(float(arg))
+    if name == "parentbased_traceidratio":
+        return ParentBased(TraceIdRatioBased(float(arg)))
+    return ParentBased(ALWAYS_ON)
 
 
 def _parse_resource_attributes() -> dict:

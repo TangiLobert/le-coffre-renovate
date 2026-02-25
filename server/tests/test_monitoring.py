@@ -345,3 +345,128 @@ def test_parse_resource_attributes_merges_both_sources():
         result = _parse_resource_attributes()
     assert result.get("k8s.pod.name") == "le-coffre-backend-abc123"
     assert result.get("app.version") == "1.2.0"
+
+
+# --- New tests for distributed tracing (Task 1) ---
+
+_TRACE_MODULES = [
+    "opentelemetry.sdk.trace",
+    "opentelemetry.sdk.trace.export",
+    "opentelemetry.exporter.otlp.proto.http.trace_exporter",
+]
+
+
+def test_try_import_otel_returns_false_when_trace_modules_missing(app):
+    """_try_import_otel() must return False when trace-specific modules are absent."""
+    from monitoring import _try_import_otel
+
+    blocked = {**{mod: None for mod in _OTEL_MODULES}, **{mod: None for mod in _TRACE_MODULES}}
+    with patch.dict(sys.modules, blocked):
+        result = _try_import_otel()
+    assert result is False
+
+
+def test_setup_monitoring_returns_none_when_disabled(app):
+    """setup_monitoring must return None on all no-op paths."""
+    # Hard disable
+    with patch.dict(os.environ, {"ENABLE_MONITORING": "false"}):
+        result = setup_monitoring(app)
+    assert result is None
+
+    # No endpoint, no ENABLE_MONITORING=true
+    env = {k: v for k, v in os.environ.items() if k not in ("OTEL_EXPORTER_OTLP_ENDPOINT", "ENABLE_MONITORING")}
+    with patch.dict(os.environ, env, clear=True):
+        result = setup_monitoring(app)
+    assert result is None
+
+    # Deps missing
+    with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+        with patch("monitoring._try_import_otel", return_value=False):
+            result = setup_monitoring(app)
+    assert result is None
+
+
+def test_setup_monitoring_returns_providers_tuple_when_active(app):
+    """setup_monitoring must return a (tracer_provider, meter_provider) tuple when active."""
+    fake_tracer = MagicMock(name="tracer_provider")
+    fake_meter = MagicMock(name="meter_provider")
+
+    with patch("monitoring._configure_otel", return_value=(fake_tracer, fake_meter)) as mock_cfg:
+        with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+            with patch("monitoring._try_import_otel", return_value=True):
+                result = setup_monitoring(app)
+
+    mock_cfg.assert_called_once()
+    assert result == (fake_tracer, fake_meter)
+
+
+
+
+def test_configure_otel_sets_global_tracer_provider(app):
+    """_configure_otel must call otel_trace.set_tracer_provider with the created TracerProvider."""
+    from monitoring import _configure_otel
+
+    mock_tracer_provider_instance = MagicMock(name="TracerProvider_instance")
+    mock_meter_provider_instance = MagicMock(name="MeterProvider_instance")
+
+    mock_tracer_provider_cls = MagicMock(return_value=mock_tracer_provider_instance)
+    mock_meter_provider_cls = MagicMock(return_value=mock_meter_provider_instance)
+    mock_instrumentor = MagicMock()
+    mock_otlp_metric = MagicMock()
+    mock_otlp_trace = MagicMock()
+    mock_reader = MagicMock()
+    mock_resource_cls = MagicMock()
+    mock_resource_cls.create.return_value = MagicMock()
+    mock_batch_processor = MagicMock()
+    mock_otel_trace = MagicMock()
+    mock_otel_metrics = MagicMock()
+
+    # `import opentelemetry.trace as otel_trace` resolves by loading `opentelemetry`
+    # then reading its `.trace` attribute. We must wire those attributes explicitly
+    # so the mock namespace matches what the production code will receive.
+    otel_pkg = MagicMock()
+    otel_pkg.trace = mock_otel_trace
+    otel_pkg.metrics = mock_otel_metrics
+
+    otel_sdk_pkg = MagicMock()
+    otel_sdk_trace_module = MagicMock(TracerProvider=mock_tracer_provider_cls)
+    otel_sdk_trace_module.sampling = MagicMock(
+        ALWAYS_ON=MagicMock(),
+        ParentBased=MagicMock(side_effect=lambda root: root),
+        TraceIdRatioBased=MagicMock(),
+    )
+    otel_sdk_pkg.trace = otel_sdk_trace_module
+
+    otel_exporter_pkg = MagicMock()
+    otel_instrumentation_pkg = MagicMock()
+
+    modules = {
+        "opentelemetry": otel_pkg,
+        "opentelemetry.trace": mock_otel_trace,
+        "opentelemetry.metrics": mock_otel_metrics,
+        "opentelemetry.sdk": otel_sdk_pkg,
+        "opentelemetry.sdk.metrics": MagicMock(MeterProvider=mock_meter_provider_cls),
+        "opentelemetry.sdk.metrics.export": MagicMock(PeriodicExportingMetricReader=mock_reader),
+        "opentelemetry.sdk.resources": MagicMock(Resource=mock_resource_cls, SERVICE_NAME="service.name"),
+        "opentelemetry.sdk.trace": otel_sdk_trace_module,
+        "opentelemetry.sdk.trace.export": MagicMock(BatchSpanProcessor=mock_batch_processor),
+        "opentelemetry.sdk.trace.sampling": otel_sdk_trace_module.sampling,
+        "opentelemetry.exporter": otel_exporter_pkg,
+        "opentelemetry.exporter.otlp": MagicMock(),
+        "opentelemetry.exporter.otlp.proto": MagicMock(),
+        "opentelemetry.exporter.otlp.proto.http": MagicMock(),
+        "opentelemetry.exporter.otlp.proto.http.metric_exporter": MagicMock(OTLPMetricExporter=mock_otlp_metric),
+        "opentelemetry.exporter.otlp.proto.http.trace_exporter": MagicMock(OTLPSpanExporter=mock_otlp_trace),
+        "opentelemetry.instrumentation": otel_instrumentation_pkg,
+        "opentelemetry.instrumentation.fastapi": MagicMock(FastAPIInstrumentor=mock_instrumentor),
+    }
+
+    with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+        with patch.dict(sys.modules, modules):
+            result = _configure_otel(app)
+
+    mock_otel_trace.set_tracer_provider.assert_called_once_with(mock_tracer_provider_instance)
+    assert result is not None
+    tracer_prov, meter_prov = result
+    assert tracer_prov is mock_tracer_provider_instance
+    assert meter_prov is mock_meter_provider_instance
