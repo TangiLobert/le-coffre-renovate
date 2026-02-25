@@ -18,6 +18,8 @@ _ALLOWED_ATTRIBUTES = frozenset({
     "error.type",
 })
 
+_TRACED = "_traced_execute"
+
 
 def safe_set_attributes(span: otel_trace.Span, attrs: dict) -> None:
     """Set span attributes, filtering to the allowlist only."""
@@ -26,7 +28,7 @@ def safe_set_attributes(span: otel_trace.Span, attrs: dict) -> None:
             span.set_attribute(key, str(value))
 
 
-def _wrap_execute(fn, class_name: str):
+def _wrap_execute(fn):
     """Wrap an execute() method with an OTEL span."""
     @functools.wraps(fn)
     def wrapper(self, *args, **kwargs):
@@ -39,6 +41,7 @@ def _wrap_execute(fn, class_name: str):
                 span.set_status(StatusCode.ERROR, str(exc))
                 span.record_exception(exc)
                 raise
+    setattr(wrapper, _TRACED, True)
     return wrapper
 
 
@@ -55,5 +58,5 @@ class TracedUseCase:
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        if "execute" in cls.__dict__:
-            cls.execute = _wrap_execute(cls.__dict__["execute"], cls.__name__)
+        if "execute" in cls.__dict__ and not getattr(cls.__dict__["execute"], _TRACED, False):
+            cls.execute = _wrap_execute(cls.__dict__["execute"])

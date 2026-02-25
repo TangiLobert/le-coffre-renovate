@@ -94,3 +94,28 @@ def test_safe_set_attributes_empty_dict_does_nothing():
     mock_span = MagicMock()
     safe_set_attributes(mock_span, {})
     mock_span.set_attribute.assert_not_called()
+
+
+def test_traced_use_case_is_noop_without_provider():
+    """TracedUseCase must work correctly even without a TracerProvider configured."""
+    uc = ConcreteUseCase()
+    result = uc.execute(7)
+    assert result == 14
+
+
+def test_traced_use_case_no_double_wrap_on_subclass():
+    """A subclass defining execute must only wrap the span once."""
+    mock_tracer = MagicMock()
+    mock_span = MagicMock()
+    mock_span.__enter__ = MagicMock(return_value=mock_span)
+    mock_span.__exit__ = MagicMock(return_value=False)
+    mock_tracer.start_as_current_span.return_value = mock_span
+
+    class ChildUseCase(ConcreteUseCase):
+        def execute(self, value: int) -> int:
+            return value + 1
+
+    with patch("shared_kernel.application.tracing.tracer", mock_tracer):
+        ChildUseCase().execute(1)
+
+    assert mock_tracer.start_as_current_span.call_count == 1
