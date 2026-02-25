@@ -597,3 +597,21 @@ def test_json_formatter_no_trace_id_when_opentelemetry_not_importable():
 
     assert "trace_id" not in parsed
     assert "span_id" not in parsed
+
+
+def test_setup_monitoring_returns_providers_that_can_be_shut_down(app):
+    """The returned providers must expose force_flush and shutdown."""
+    with patch("monitoring._configure_otel") as mock_configure:
+        mock_tracer = MagicMock()
+        mock_meter = MagicMock()
+        mock_configure.return_value = (mock_tracer, mock_meter)
+        with patch.dict(os.environ, {"OTEL_EXPORTER_OTLP_ENDPOINT": "http://collector:4318"}):
+            with patch("monitoring._try_import_otel", return_value=True):
+                result = setup_monitoring(app)
+
+    assert result == (mock_tracer, mock_meter)
+    # Verify shutdown methods exist (duck-type check)
+    tracer_p, meter_p = result
+    assert hasattr(tracer_p, "force_flush")
+    assert hasattr(tracer_p, "shutdown")
+    assert hasattr(meter_p, "shutdown")

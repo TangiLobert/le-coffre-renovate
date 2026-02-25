@@ -173,6 +173,12 @@ async def lifespan(app: FastAPI):
     logger.info("Application started — db=%s base_url=%s", db_type, base_url)
     yield
     logger.info("Application shutting down")
+    # Flush and shut down OTel providers to avoid losing buffered spans/metrics
+    if _otel_providers is not None:
+        tracer_provider, meter_provider = _otel_providers
+        tracer_provider.force_flush()
+        tracer_provider.shutdown()
+        meter_provider.shutdown()
 
 
 # Create the main app with lifespan
