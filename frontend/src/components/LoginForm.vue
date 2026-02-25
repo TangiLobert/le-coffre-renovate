@@ -7,11 +7,11 @@ import {
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { useToast } from 'primevue'
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import z from 'zod';
-import { usePasswordsStore } from '@/stores/passwords';
-import { useUserStore } from '@/stores/user';
-import { useCsrfStore } from '@/stores/csrf';
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import z from 'zod'
+import { usePasswordsStore } from '@/stores/passwords'
+import { useUserStore } from '@/stores/user'
+import { useCsrfStore } from '@/stores/csrf'
 
 const router = useRouter()
 const route = useRoute()
@@ -39,33 +39,33 @@ const resolver = ref(
 const loading = ref(false)
 
 // ── Rate limit countdown ───────────────────────────────────────
-const rateLimitCountdown = ref(0);
-let countdownTimer: ReturnType<typeof setInterval> | null = null;
+const rateLimitCountdown = ref(0)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
 
-const isRateLimited = computed(() => rateLimitCountdown.value > 0);
+const isRateLimited = computed(() => rateLimitCountdown.value > 0)
 
 const onRateLimited = (event: Event) => {
-  const { retryAfter } = (event as CustomEvent).detail;
-  rateLimitCountdown.value = retryAfter || 60;
+  const { retryAfter } = (event as CustomEvent).detail
+  rateLimitCountdown.value = retryAfter || 60
 
-  if (countdownTimer) clearInterval(countdownTimer);
+  if (countdownTimer) clearInterval(countdownTimer)
   countdownTimer = setInterval(() => {
-    rateLimitCountdown.value--;
+    rateLimitCountdown.value--
     if (rateLimitCountdown.value <= 0) {
-      rateLimitCountdown.value = 0;
-      if (countdownTimer) clearInterval(countdownTimer);
+      rateLimitCountdown.value = 0
+      if (countdownTimer) clearInterval(countdownTimer)
     }
-  }, 1000);
-};
+  }, 1000)
+}
 
 onMounted(() => {
-  window.addEventListener('rate-limited', onRateLimited);
-});
+  window.addEventListener('rate-limited', onRateLimited)
+})
 
 onUnmounted(() => {
-  window.removeEventListener('rate-limited', onRateLimited);
-  if (countdownTimer) clearInterval(countdownTimer);
-});
+  window.removeEventListener('rate-limited', onRateLimited)
+  if (countdownTimer) clearInterval(countdownTimer)
+})
 
 // Check if SSO is configured on component mount
 onMounted(async () => {
@@ -198,8 +198,15 @@ const handleSsoLogin = async () => {
             {{ $form.password.error?.message }}
           </Message>
         </div>
-        <Button fluid block type="submit" label="Login" class="mt-4"
-          :disabled="!$form.valid || loading || isRateLimited" :loading="loading" />
+        <Button
+          fluid
+          block
+          type="submit"
+          label="Login"
+          class="mt-4"
+          :disabled="!$form.valid || loading || isRateLimited"
+          :loading="loading"
+        />
         <Message v-if="isRateLimited" severity="warn" class="mt-3">
           Too many login attempts. Please try again in {{ rateLimitCountdown }} seconds.
         </Message>
