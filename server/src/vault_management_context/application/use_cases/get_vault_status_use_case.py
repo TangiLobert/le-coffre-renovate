@@ -10,7 +10,8 @@ from vault_management_context.application.responses import VaultStatus
 from vault_management_context.domain.entities.vault import Vault
 
 
-class GetVaultStatusUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class GetVaultStatusUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repository: VaultRepository,

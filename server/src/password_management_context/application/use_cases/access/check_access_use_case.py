@@ -5,7 +5,8 @@ from password_management_context.application.gateways import (
 from shared_kernel.domain.value_objects import AccessResult, Granted
 
 
-class CheckAccessUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class CheckAccessUseCase(TracedUseCase):
     def __init__(self, permission_repository: PasswordPermissionsRepository):
         self.permission_repository = permission_repository
 

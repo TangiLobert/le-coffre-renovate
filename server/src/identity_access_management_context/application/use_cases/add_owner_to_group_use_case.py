@@ -18,7 +18,8 @@ from identity_access_management_context.domain.exceptions import (
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class AddOwnerToGroupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class AddOwnerToGroupUseCase(TracedUseCase):
     def __init__(
         self,
         user_repository: UserRepository,

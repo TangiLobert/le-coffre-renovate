@@ -6,7 +6,8 @@ from shared_kernel.application.gateways import DomainEventPublisher
 from uuid import UUID
 
 
-class UpdateUserUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class UpdateUserUseCase(TracedUseCase):
     def __init__(
         self,
         user_repository: UserRepository,

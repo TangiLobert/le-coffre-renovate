@@ -14,7 +14,8 @@ from password_management_context.domain.exceptions import FolderNotFoundError
 from password_management_context.domain.value_objects import PasswordPermission
 
 
-class ListPasswordsUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class ListPasswordsUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

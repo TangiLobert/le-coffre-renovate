@@ -27,7 +27,8 @@ from shared_kernel.application.gateways import DomainEventPublisher
 logger = logging.getLogger(__name__)
 
 
-class GetPasswordUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class GetPasswordUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

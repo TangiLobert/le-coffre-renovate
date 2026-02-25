@@ -22,7 +22,8 @@ from password_management_context.domain.events import (
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class CreatePasswordUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class CreatePasswordUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

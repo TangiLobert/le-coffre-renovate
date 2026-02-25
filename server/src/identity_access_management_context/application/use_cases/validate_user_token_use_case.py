@@ -16,7 +16,8 @@ from identity_access_management_context.domain.exceptions import (
 )
 
 
-class ValidateUserTokenUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class ValidateUserTokenUseCase(TracedUseCase):
     def __init__(
         self,
         user_password_repository: UserPasswordRepository,

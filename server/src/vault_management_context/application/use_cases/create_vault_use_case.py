@@ -24,7 +24,8 @@ from shared_kernel.application.gateways import DomainEventPublisher
 logger = logging.getLogger(__name__)
 
 
-class CreateVaultUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class CreateVaultUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repo: VaultRepository,

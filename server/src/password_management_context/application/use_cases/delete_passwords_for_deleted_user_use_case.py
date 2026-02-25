@@ -11,7 +11,8 @@ from password_management_context.domain.events import PasswordDeletedEvent
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class DeletePasswordsForDeletedUserUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class DeletePasswordsForDeletedUserUseCase(TracedUseCase):
     """
     System-level use case triggered by UserDeletedEvent.
     This is a COMPENSATING action that deletes all passwords owned by a deleted user's personal group.

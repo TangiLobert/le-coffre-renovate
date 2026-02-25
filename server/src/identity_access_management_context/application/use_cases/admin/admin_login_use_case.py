@@ -19,7 +19,8 @@ from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 logger = logging.getLogger(__name__)
 
 
-class AdminLoginUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class AdminLoginUseCase(TracedUseCase):
     def __init__(
         self,
         user_password_repository: UserPasswordRepository,

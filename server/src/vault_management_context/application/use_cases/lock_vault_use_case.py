@@ -18,7 +18,8 @@ from shared_kernel.application.gateways import DomainEventPublisher
 logger = logging.getLogger(__name__)
 
 
-class LockVaultUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class LockVaultUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repository: VaultRepository,

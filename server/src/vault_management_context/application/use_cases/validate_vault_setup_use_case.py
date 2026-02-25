@@ -13,7 +13,8 @@ from vault_management_context.domain.exceptions import (
 )
 
 
-class ValidateVaultSetupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class ValidateVaultSetupUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repo: VaultRepository,

@@ -18,7 +18,8 @@ from identity_access_management_context.domain.exceptions import (
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class RemoveUserFromGroupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+class RemoveUserFromGroupUseCase(TracedUseCase):
     def __init__(
         self,
         user_repository: UserRepository,
