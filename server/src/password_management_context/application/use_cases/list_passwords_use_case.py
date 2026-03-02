@@ -38,7 +38,9 @@ class ListPasswordsUseCase(TracedUseCase):
             raise FolderNotFoundError(command.folder)
 
         if AdminPermissionChecker.is_admin(command.requester):
-            return self._build_admin_responses(password_entities)
+            return self._build_admin_responses(
+                command.requester.user_id, password_entities
+            )
 
         accessible_passwords = []
 
@@ -79,23 +81,39 @@ class ListPasswordsUseCase(TracedUseCase):
         return password_responses
 
     def _build_admin_responses(
-        self, password_entities
+        self, user_id: UUID, password_entities
     ) -> List[PasswordMetadataResponse]:
         accessible_passwords = []
         for password_entity in password_entities:
             owner_group_id = self._find_owner_group_id(password_entity.id)
             if owner_group_id is not None:
-                accessible_passwords.append((password_entity, owner_group_id))
+                access_info = self._user_has_access_through_groups(
+                    user_id, password_entity.id
+                )
+                if access_info is not None:
+                    _, _, is_owner_access = access_info
+                    accessible_passwords.append(
+                        (password_entity, owner_group_id, True, is_owner_access)
+                    )
+                else:
+                    accessible_passwords.append(
+                        (password_entity, owner_group_id, False, False)
+                    )
 
         if not accessible_passwords:
             return []
 
         timestamp_service = PasswordTimestampService(self.password_event_repository)
-        password_ids = [pwd.id for pwd, _ in accessible_passwords]
+        password_ids = [pwd.id for pwd, _, __, ___ in accessible_passwords]
         timestamps_map = timestamp_service.get_timestamps_bulk(password_ids)
 
         password_responses = []
-        for password_entity, owner_group_id in accessible_passwords:
+        for (
+            password_entity,
+            owner_group_id,
+            can_read,
+            can_write,
+        ) in accessible_passwords:
             created_at, last_password_updated_at = timestamps_map.get(
                 password_entity.id, (None, None)
             )
@@ -107,8 +125,8 @@ class ListPasswordsUseCase(TracedUseCase):
                     group_id=owner_group_id,
                     created_at=created_at,
                     last_password_updated_at=last_password_updated_at,
-                    can_read=False,
-                    can_write=False,
+                    can_read=can_read,
+                    can_write=can_write,
                 )
             )
         return password_responses

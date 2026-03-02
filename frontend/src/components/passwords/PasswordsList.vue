@@ -4,10 +4,7 @@
       <ProgressSpinner />
     </div>
 
-    <div
-      v-else-if="error"
-      class="surface-ground border border-red-500 text-red-700 px-4 py-3 rounded mb-4"
-    >
+    <div v-else-if="error" class="surface-ground border border-red-500 text-red-700 px-4 py-3 rounded mb-4">
       {{ error }}
     </div>
 
@@ -16,16 +13,9 @@
     </div>
 
     <div v-else class="space-y-2">
-      <FolderCard
-        v-for="folder in folders"
-        :key="folder.name"
-        :folder="folder"
-        :initialOpen="selectedFolder === folder.name"
-        @edit="handleEdit"
-        @share="handleShare"
-        @history="handleHistory"
-        @deleted="handleDeleted"
-      />
+      <FolderCard v-for="folder in folders" :key="folder.name" :folder="folder"
+        :initialOpen="selectedFolder === folder.name" @edit="handleEdit" @share="handleShare" @history="handleHistory"
+        @deleted="handleDeleted" />
     </div>
   </div>
 </template>

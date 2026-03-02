@@ -243,9 +243,11 @@ def test_complete_password_management_workflow(
     print(f"✓ SSO user password created: {sso_password_id}")
 
     # Step 1.11: ADMIN LISTS ALL PASSWORDS
-    # Admin should see every password regardless of ownership, all with can_read=False, can_write=False
+    # Admin should see every password regardless of ownership.
+    # Passwords the admin owns → can_read=True, can_write=True.
+    # Passwords the admin has no group access to → can_read=False, can_write=False.
     print(
-        "Step 1.11: Admin lists all passwords (should see all, can_read=False and can_write=False)..."
+        "Step 1.11: Admin lists all passwords (should see all, with access flags reflecting group membership)..."
     )
     admin_list_response = admin_client.get("/api/passwords/list")
     assert admin_list_response.status_code == 200
@@ -254,15 +256,24 @@ def test_complete_password_management_workflow(
     all_ids = [p["id"] for p in admin_passwords]
     assert sso_password_id in all_ids, "Admin should see SSO user's password"
 
-    for p in admin_passwords:
-        assert p["can_read"] is False, (
-            f"Admin password {p['id']} should have can_read=False"
+    sso_password_entry = next(p for p in admin_passwords if p["id"] == sso_password_id)
+    assert sso_password_entry["can_read"] is False, (
+        "Admin should have can_read=False for SSO user's password"
+    )
+    assert sso_password_entry["can_write"] is False, (
+        "Admin should have can_write=False for SSO user's password"
+    )
+
+    admin_owned = [p for p in admin_passwords if p["id"] != sso_password_id]
+    for p in admin_owned:
+        assert p["can_read"] is True, (
+            f"Admin password {p['id']} (owned by admin) should have can_read=True"
         )
-        assert p["can_write"] is False, (
-            f"Admin password {p['id']} should have can_write=False"
+        assert p["can_write"] is True, (
+            f"Admin password {p['id']} (owned by admin) should have can_write=True"
         )
     print(
-        f"✓ Admin sees {len(admin_passwords)} passwords, all with can_read=False and can_write=False"
+        f"✓ Admin sees {len(admin_passwords)} passwords, own passwords with full access and SSO user's password with no access"
     )
 
     # Step 1.12: SSO USER LISTS THEIR OWN PASSWORDS
