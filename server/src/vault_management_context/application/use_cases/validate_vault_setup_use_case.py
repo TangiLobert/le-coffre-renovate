@@ -34,7 +34,7 @@ class ValidateVaultSetupUseCase(TracedUseCase):
             VaultAlreadySetuped: If vault is not in pending state
             VaultSetupIdNotFound: If setup_id doesn't match
         """
-        existing_vault: Optional[Vault] = self.vault_repo.get()
+        existing_vault: Vault | None = self.vault_repo.get()
 
         if existing_vault is None:
             raise NoVaultExisting()

@@ -28,7 +28,7 @@ class CryptoShamirGateway(ShamirGateway):
             [Share(f"{share[0]}:{share[1].hex()}") for share in shares], secret.hex()
         )
 
-    def reconstruct_secret(self, shares: List[Share]) -> str:
+    def reconstruct_secret(self, shares: list[Share]) -> str:
         try:
             # Extract index from the embedded format "index:hexsecret"
             crypto_shares = []

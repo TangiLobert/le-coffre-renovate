@@ -10,7 +10,7 @@ class ValidatedUser:
     user_id: UUID
     email: str
     display_name: str
-    roles: List[str]
+    roles: list[str]
 
     def to_authenticated_user(self) -> AuthenticatedUser:
         return AuthenticatedUser(

@@ -25,7 +25,7 @@ class GetVaultStatusUseCase(TracedUseCase):
         self.share_repository = share_repository
 
     def execute(self, command: GetVaultStatusCommand) -> VaultStatus:
-        existing_vault: Optional[Vault] = self.vault_repository.get()
+        existing_vault: Vault | None = self.vault_repository.get()
         if existing_vault is None:
             return VaultStatus.NOT_SETUP
 

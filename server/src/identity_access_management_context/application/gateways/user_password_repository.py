@@ -13,10 +13,10 @@ class UserPasswordRepository(Protocol):
         """Update an existing user password, password"""
         ...
 
-    def get_by_id(self, id: UUID) -> Optional[UserPassword]:
+    def get_by_id(self, id: UUID) -> UserPassword | None:
         """Get user password by ID"""
         ...
 
-    def get_by_email(self, email: str) -> Optional[UserPassword]:
+    def get_by_email(self, email: str) -> UserPassword | None:
         """Get user password by email"""
         ...

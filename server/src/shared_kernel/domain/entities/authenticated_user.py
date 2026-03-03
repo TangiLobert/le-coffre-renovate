@@ -6,4 +6,4 @@ from uuid import UUID
 @dataclass
 class AuthenticatedUser:
     user_id: UUID
-    roles: List[str]
+    roles: list[str]

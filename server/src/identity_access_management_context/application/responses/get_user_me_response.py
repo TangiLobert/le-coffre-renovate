@@ -9,5 +9,5 @@ class GetUserMeResponse:
     username: str
     email: str
     name: str
-    roles: List[str]
+    roles: list[str]
     is_sso: bool

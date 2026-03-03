@@ -8,7 +8,7 @@ from vault_management_context.application.responses.vault_status import VaultSta
 
 class VaultCreationService:
     @staticmethod
-    def ensure_creation_allowed(existing_vault: Optional[Vault]) -> None:
+    def ensure_creation_allowed(existing_vault: Vault | None) -> None:
         """Validate that vault creation is allowed according to business rules
 
         Args:

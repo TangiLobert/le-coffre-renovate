@@ -11,4 +11,4 @@ class PasswordTable(SQLModel, table=True):
     )
     name: str = Field(description="Password name")
     encrypted_value: str = Field(description="encrypted Password")
-    folder: Optional[str] = Field(description="Path to folder")
+    folder: str | None = Field(description="Path to folder")

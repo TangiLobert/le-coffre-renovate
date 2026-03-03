@@ -43,7 +43,7 @@ class CreateVaultUseCase(TracedUseCase):
         self._vault_event_repository = vault_event_repository
 
     def execute(self, command: CreateVaultCommand) -> VaultSetupResponse:
-        existing_vault: Optional[Vault] = self.vault_repo.get()
+        existing_vault: Vault | None = self.vault_repo.get()
         configuration = VaultConfiguration.create(command.nb_shares, command.threshold)
 
         VaultCreationService.ensure_creation_allowed(existing_vault)

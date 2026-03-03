@@ -8,8 +8,8 @@ class Token:
     value: str
     user_id: UUID
     email: str
-    roles: List[str]
-    claims: Dict[str, Any]
+    roles: list[str]
+    claims: dict[str, Any]
 
     def has_role(self, role: str) -> bool:
         return role in self.roles
@@ -20,17 +20,17 @@ class TokenGateway(Protocol):
         self,
         user_id: UUID,
         email: str,
-        roles: List[str],
-        claims: Dict[str, Any] | None = None,
+        roles: list[str],
+        claims: dict[str, Any] | None = None,
     ) -> Token: ...
 
     async def generate_refresh_token(
         self,
         user_id: UUID,
         email: str,
-        roles: List[str],
+        roles: list[str],
     ) -> str: ...
 
-    async def validate_token(self, token: str) -> Optional[Token]: ...
+    async def validate_token(self, token: str) -> Token | None: ...
 
-    async def validate_refresh_token(self, refresh_token: str) -> Optional[Token]: ...
+    async def validate_refresh_token(self, refresh_token: str) -> Token | None: ...

@@ -18,7 +18,7 @@ class SqlUserRepository(SQLBaseRepository, UserRepository):
     def __init__(self, session: Session):
         super().__init__(session)
 
-    def get_by_id(self, user_id: UUID) -> Optional[User]:
+    def get_by_id(self, user_id: UUID) -> User | None:
         statement = select(UserTable).where(UserTable.id == user_id)
         result = self._session.exec(statement).first()
         if result is None:
@@ -31,7 +31,7 @@ class SqlUserRepository(SQLBaseRepository, UserRepository):
             roles=json.loads(result.roles),
         )
 
-    def get_by_email(self, email: str) -> List[User]:
+    def get_by_email(self, email: str) -> list[User]:
         statement = select(UserTable).where(UserTable.email == email)
         results = self._session.exec(statement).all()
         if not results:
@@ -47,7 +47,7 @@ class SqlUserRepository(SQLBaseRepository, UserRepository):
             for row in results
         ]
 
-    def list_all(self) -> List[User]:
+    def list_all(self) -> list[User]:
         statement = select(UserTable)
         results = self._session.exec(statement).all()
         if not results:
@@ -93,7 +93,7 @@ class SqlUserRepository(SQLBaseRepository, UserRepository):
         self._session.add(db_obj)
         self.commit_and_refresh(db_obj)
 
-    def get_admin(self) -> Optional[User]:
+    def get_admin(self) -> User | None:
         statement = select(UserTable).where(UserTable.roles.like(f'%"{ADMIN_ROLE}"%'))
         result = self._session.exec(statement).first()
         if result is None:

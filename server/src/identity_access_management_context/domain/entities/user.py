@@ -14,7 +14,7 @@ class User:
     username: str
     email: str
     name: str
-    roles: List[str] = field(default_factory=list)
+    roles: list[str] = field(default_factory=list)
 
     def promote_to_admin(self) -> None:
         if ADMIN_ROLE in self.roles:

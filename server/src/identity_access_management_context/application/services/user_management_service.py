@@ -74,7 +74,7 @@ class UserManagementService:
         email: str,
         username: str,
         name: str,
-        roles: List[str] | None = None,
+        roles: list[str] | None = None,
     ) -> User:
         """
         Create a regular user (non-admin).

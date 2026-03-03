@@ -10,4 +10,4 @@ class CreatePasswordCommand:
     id: UUID
     name: str
     decrypted_password: str
-    folder: Optional[str] = None
+    folder: str | None = None

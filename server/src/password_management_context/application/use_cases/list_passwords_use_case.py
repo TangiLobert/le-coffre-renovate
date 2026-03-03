@@ -30,7 +30,7 @@ class ListPasswordsUseCase(TracedUseCase):
         self.group_access_gateway = group_access_gateway
         self.password_event_repository = password_event_repository
 
-    def execute(self, command: ListPasswordsCommand) -> List[PasswordMetadataResponse]:
+    def execute(self, command: ListPasswordsCommand) -> list[PasswordMetadataResponse]:
         password_entities = self.password_repository.list_all(command.folder)
 
         if command.folder and len(password_entities) == 0:
@@ -72,7 +72,7 @@ class ListPasswordsUseCase(TracedUseCase):
 
     def _user_has_access_through_groups(
         self, user_id: UUID, password_id: UUID
-    ) -> Optional[tuple[UUID, UUID]]:
+    ) -> tuple[UUID, UUID] | None:
         """Check if user has access to password through any of their groups.
 
         Returns a tuple of (user_group_id, owner_group_id) if access is granted, None otherwise.

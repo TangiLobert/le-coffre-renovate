@@ -17,7 +17,7 @@ class SsoConfigurationTable(SQLModel, table=True):
     userinfo_endpoint: str = Field(
         description="OAuth userinfo endpoint", nullable=False
     )
-    jwks_uri: Optional[str] = Field(
+    jwks_uri: str | None = Field(
         description="JWKS URI for token validation", nullable=True, default=None
     )
     updated_at: datetime = Field(

@@ -21,7 +21,7 @@ class SsoUsersTable(SQLModel, table=True):
         nullable=True,
         default_factory=lambda: datetime.now(timezone.utc),
     )
-    last_login: Optional[datetime] = Field(
+    last_login: datetime | None = Field(
         description="Last login timestamp",
         nullable=True,
         default_factory=lambda: datetime.now(timezone.utc),

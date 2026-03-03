@@ -39,7 +39,7 @@ class SqlSsoUserRepository(SQLBaseRepository):
 
     def get_by_sso_user_id(
         self, sso_user_id: str, sso_provider: str = "default"
-    ) -> Optional[SsoUser]:
+    ) -> SsoUser | None:
         statement = select(SsoUsersTable).where(
             SsoUsersTable.sso_user_id == str(sso_user_id),
             SsoUsersTable.sso_provider == sso_provider,
@@ -47,7 +47,7 @@ class SqlSsoUserRepository(SQLBaseRepository):
         results = self._session.exec(statement).first()
         return results
 
-    def get_by_user_id(self, user_id: UUID) -> Optional[SsoUser]:
+    def get_by_user_id(self, user_id: UUID) -> SsoUser | None:
         statement = select(SsoUsersTable).where(
             SsoUsersTable.internal_user_id == user_id
         )

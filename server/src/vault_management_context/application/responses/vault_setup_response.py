@@ -7,4 +7,4 @@ from vault_management_context.domain.entities.share import Share
 @dataclass
 class VaultSetupResponse:
     setup_id: str
-    shares: List[Share]
+    shares: list[Share]

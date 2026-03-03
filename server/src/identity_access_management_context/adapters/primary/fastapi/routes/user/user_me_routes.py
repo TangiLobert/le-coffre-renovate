@@ -26,8 +26,8 @@ class GetUserMeResponse(BaseModel):
     username: str
     email: str
     name: str
-    roles: List[str]
-    personal_group_id: Optional[UUID] = None  # Added for group-based permissions
+    roles: list[str]
+    personal_group_id: UUID | None = None  # Added for group-based permissions
     is_sso: bool  # Indicates if the user was created via SSO
 
 
