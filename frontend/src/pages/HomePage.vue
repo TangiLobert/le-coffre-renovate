@@ -113,18 +113,34 @@ onMounted(async () => {
         <Button label="New Password" icon="pi pi-plus" @click="showCreateModal = true" />
       </div>
 
-      <PasswordsList :passwords="passwords" :loading="loading" :error="error" :selectedFolder="selectedFolder"
-        :folderFilter="folderFilter" @edit="handleEdit" @share="handleShare" @history="handleHistory"
-        @deleted="handleDeleted" />
+      <PasswordsList
+        :passwords="passwords"
+        :loading="loading"
+        :error="error"
+        :selectedFolder="selectedFolder"
+        :folderFilter="folderFilter"
+        @edit="handleEdit"
+        @share="handleShare"
+        @history="handleHistory"
+        @deleted="handleDeleted"
+      />
     </div>
 
     <!-- Create/Edit Password Modal -->
-    <CreatePasswordModal v-model:visible="showCreateModal" :editPassword="editingPassword"
-      @created="handlePasswordCreated" @updated="handlePasswordUpdated" />
+    <CreatePasswordModal
+      v-model:visible="showCreateModal"
+      :editPassword="editingPassword"
+      @created="handlePasswordCreated"
+      @updated="handlePasswordUpdated"
+    />
 
     <!-- Share Password Modal -->
-    <SharePasswordModal v-model:visible="showShareModal" :password="sharingPassword" @shared="handleShared"
-      @unshared="handleUnshared" />
+    <SharePasswordModal
+      v-model:visible="showShareModal"
+      :password="sharingPassword"
+      @shared="handleShared"
+      @unshared="handleUnshared"
+    />
 
     <!-- Password History Modal -->
     <PasswordHistoryModal v-model:visible="showHistoryModal" :password="historyPassword" />
