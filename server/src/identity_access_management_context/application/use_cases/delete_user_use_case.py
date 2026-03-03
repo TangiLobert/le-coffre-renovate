@@ -10,7 +10,10 @@ from shared_kernel.domain.services import AdminPermissionChecker
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class DeleteUserUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class DeleteUserUseCase(TracedUseCase):
     def __init__(
         self,
         user_repository: UserRepository,

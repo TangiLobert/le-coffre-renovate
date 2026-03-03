@@ -38,6 +38,10 @@ from security import (
     InMemoryRateLimiter,
     RateLimitMiddleware,
 )
+from shared_kernel.adapters.primary.request_id_middleware import (
+    RequestIdFilter,
+    RequestIdMiddleware,
+)
 from shared_kernel.adapters.secondary import (
     UtcTimeGateway,
     InMemoryDomainEventPublisher,
@@ -77,6 +81,7 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
 )
 
 setup_logging()
+logging.getLogger().addFilter(RequestIdFilter())
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +194,13 @@ async def lifespan(app: FastAPI):
     logger.info("Application started — db=%s base_url=%s", db_type, base_url)
     yield
     logger.info("Application shutting down")
+    # Flush and shut down OTel providers to avoid losing buffered spans/metrics
+    if _otel_providers is not None:
+        tracer_provider, meter_provider = _otel_providers
+        tracer_provider.force_flush()
+        tracer_provider.shutdown()
+        meter_provider.force_flush()
+        meter_provider.shutdown()
 
 
 # Create the main app with lifespan
@@ -198,11 +210,12 @@ app = FastAPI(lifespan=lifespan, root_path="/api")
 
 # Add CSRF protection middleware
 app.add_middleware(CsrfMiddleware)
+app.add_middleware(RequestIdMiddleware)
 
 # Add rate limiting middleware (runs before CSRF since middlewares execute in reverse order)
 if get_rate_limit_enabled():
     app.add_middleware(RateLimitMiddleware)
-setup_monitoring(app)
+_otel_providers = setup_monitoring(app)
 
 
 @app.exception_handler(Exception)

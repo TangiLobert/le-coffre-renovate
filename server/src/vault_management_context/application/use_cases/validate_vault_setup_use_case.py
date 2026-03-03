@@ -13,7 +13,10 @@ from vault_management_context.domain.exceptions import (
 )
 
 
-class ValidateVaultSetupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class ValidateVaultSetupUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repo: VaultRepository,
@@ -31,7 +34,7 @@ class ValidateVaultSetupUseCase:
             VaultAlreadySetuped: If vault is not in pending state
             VaultSetupIdNotFound: If setup_id doesn't match
         """
-        existing_vault: Optional[Vault] = self.vault_repo.get()
+        existing_vault: Vault | None = self.vault_repo.get()
 
         if existing_vault is None:
             raise NoVaultExisting()

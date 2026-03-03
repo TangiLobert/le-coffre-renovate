@@ -3,7 +3,10 @@ from identity_access_management_context.application.gateways import UserReposito
 from identity_access_management_context.domain.entities import User
 
 
-class ListUserUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class ListUserUseCase(TracedUseCase):
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 

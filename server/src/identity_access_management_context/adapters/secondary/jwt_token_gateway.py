@@ -23,8 +23,8 @@ class JwtTokenGateway(TokenGateway):
         self,
         user_id: UUID,
         email: str,
-        roles: List[str],
-        claims: Dict[str, Any] | None = None,
+        roles: list[str],
+        claims: dict[str, Any] | None = None,
     ) -> Token:
         if claims is None:
             claims = {}
@@ -56,7 +56,7 @@ class JwtTokenGateway(TokenGateway):
         self,
         user_id: UUID,
         email: str,
-        roles: List[str],
+        roles: list[str],
     ) -> str:
         user_id_str = str(user_id)
 
@@ -75,7 +75,7 @@ class JwtTokenGateway(TokenGateway):
         )
         return refresh_token_value
 
-    async def validate_token(self, token: str) -> Optional[Token]:
+    async def validate_token(self, token: str) -> Token | None:
         try:
             payload = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
 
@@ -98,7 +98,7 @@ class JwtTokenGateway(TokenGateway):
         except jwt.InvalidTokenError:
             return None
 
-    async def validate_refresh_token(self, refresh_token: str) -> Optional[Token]:
+    async def validate_refresh_token(self, refresh_token: str) -> Token | None:
         try:
             payload = jwt.decode(
                 refresh_token, self._secret_key, algorithms=[self._algorithm]

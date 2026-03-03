@@ -15,11 +15,12 @@ from identity_access_management_context.domain.exceptions import (
 )
 from shared_kernel.domain.value_objects.constants import ADMIN_ROLE
 from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
+from shared_kernel.application.tracing import TracedUseCase
 
 logger = logging.getLogger(__name__)
 
 
-class AdminLoginUseCase:
+class AdminLoginUseCase(TracedUseCase):
     def __init__(
         self,
         user_password_repository: UserPasswordRepository,

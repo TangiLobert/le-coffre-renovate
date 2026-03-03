@@ -5,5 +5,5 @@ from vault_management_context.domain.entities import Share
 
 @dataclass(frozen=True)
 class ShamirResult:
-    shares: List[Share]
+    shares: list[Share]
     master_key: str

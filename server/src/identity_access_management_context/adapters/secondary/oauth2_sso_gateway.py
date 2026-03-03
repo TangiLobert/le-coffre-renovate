@@ -134,7 +134,7 @@ class OAuth2SsoGateway(SsoGateway):
         except Exception as e:
             raise InvalidSsoCodeException(f"Failed to validate SSO code: {str(e)}")
 
-    def _extract_email(self, user_info: Dict[str, Any]) -> str:
+    def _extract_email(self, user_info: dict[str, Any]) -> str:
         """Extract email from user info based on provider."""
         # Common email fields across providers
         email_fields = ["email", "mail", "userPrincipalName"]
@@ -145,7 +145,7 @@ class OAuth2SsoGateway(SsoGateway):
 
         raise InvalidSsoCodeException("Email not found in user information")
 
-    def _extract_display_name(self, user_info: Dict[str, Any]) -> str:
+    def _extract_display_name(self, user_info: dict[str, Any]) -> str:
         """Extract display name from user info based on provider."""
         # Try different name fields
         if "name" in user_info and user_info["name"]:
@@ -164,7 +164,7 @@ class OAuth2SsoGateway(SsoGateway):
         # Ultimate fallback: use email
         return self._extract_email(user_info)
 
-    def _extract_user_id(self, user_info: Dict[str, Any]) -> str:
+    def _extract_user_id(self, user_info: dict[str, Any]) -> str:
         """Extract unique user ID from user info based on provider."""
         # Common ID fields across providers
         id_fields = ["sub", "id", "oid", "objectId"]

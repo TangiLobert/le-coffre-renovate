@@ -19,7 +19,10 @@ from password_management_context.domain.events import (
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class DeletePasswordUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class DeletePasswordUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

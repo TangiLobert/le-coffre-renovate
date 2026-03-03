@@ -7,6 +7,6 @@ from uuid import UUID
 class UpdatePasswordCommand:
     requester_id: UUID
     id: UUID
-    name: Optional[str] = None
-    password: Optional[str] = None
-    folder: Optional[str] = None
+    name: str | None = None
+    password: str | None = None
+    folder: str | None = None

@@ -7,7 +7,10 @@ from identity_access_management_context.application.gateways import (
 from identity_access_management_context.domain.exceptions import GroupNotFoundException
 
 
-class GetGroupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class GetGroupUseCase(TracedUseCase):
     def __init__(
         self,
         group_repository: GroupRepository,

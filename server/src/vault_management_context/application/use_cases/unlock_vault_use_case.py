@@ -19,10 +19,13 @@ from vault_management_context.application.services import KeySessionManager
 from vault_management_context.domain.events import VaultUnlockedEvent
 from shared_kernel.application.gateways import DomainEventPublisher
 
+from shared_kernel.application.tracing import TracedUseCase
 logger = logging.getLogger(__name__)
 
 
-class UnlockVaultUseCase:
+
+
+class UnlockVaultUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repository: VaultRepository,

@@ -7,7 +7,10 @@ from identity_access_management_context.application.responses import GetUserMeRe
 from identity_access_management_context.domain.exceptions import UserNotFoundException
 
 
-class GetUserMeUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class GetUserMeUseCase(TracedUseCase):
     def __init__(
         self, user_repository: UserRepository, sso_user_repository: SsoUserRepository
     ):

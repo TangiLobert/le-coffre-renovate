@@ -23,7 +23,10 @@ from identity_access_management_context.domain.exceptions import (
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class RegisterAdminWithPasswordUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class RegisterAdminWithPasswordUseCase(TracedUseCase):
     def __init__(
         self,
         user_password_repository: UserPasswordRepository,

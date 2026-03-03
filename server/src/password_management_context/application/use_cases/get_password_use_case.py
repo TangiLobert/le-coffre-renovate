@@ -23,11 +23,12 @@ from password_management_context.domain.events import (
 )
 from password_management_context.domain.value_objects import PasswordPermission
 from shared_kernel.application.gateways import DomainEventPublisher
+from shared_kernel.application.tracing import TracedUseCase
 
 logger = logging.getLogger(__name__)
 
 
-class GetPasswordUseCase:
+class GetPasswordUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,
@@ -55,7 +56,7 @@ class GetPasswordUseCase:
         ):
             raise PasswordAccessDeniedError(command.requester_id, command.password_id)
 
-        logger.info("Password accessed", extra={"password_id": str(command.password_id), "user_id": str(command.requester_id)})
+        logger.info("Password accessed")
         decrypted_password = self.password_encryption_gateway.decrypt(
             password_entity.encrypted_value
         )

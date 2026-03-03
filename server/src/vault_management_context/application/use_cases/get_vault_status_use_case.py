@@ -10,7 +10,10 @@ from vault_management_context.application.responses import VaultStatus
 from vault_management_context.domain.entities.vault import Vault
 
 
-class GetVaultStatusUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class GetVaultStatusUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repository: VaultRepository,
@@ -22,7 +25,7 @@ class GetVaultStatusUseCase:
         self.share_repository = share_repository
 
     def execute(self, command: GetVaultStatusCommand) -> VaultStatus:
-        existing_vault: Optional[Vault] = self.vault_repository.get()
+        existing_vault: Vault | None = self.vault_repository.get()
         if existing_vault is None:
             return VaultStatus.NOT_SETUP
 

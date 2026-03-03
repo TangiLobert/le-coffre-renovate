@@ -11,7 +11,10 @@ from identity_access_management_context.application.services import (
 )
 
 
-class GetSsoAuthorizeUrlUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class GetSsoAuthorizeUrlUseCase(TracedUseCase):
     def __init__(
         self,
         sso_gateway: SsoGateway,

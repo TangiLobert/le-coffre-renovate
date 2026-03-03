@@ -5,7 +5,10 @@ from vault_management_context.application.gateways import (
 )
 
 
-class DecryptUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class DecryptUseCase(TracedUseCase):
     def __init__(
         self,
         encryption_gateway: EncryptionGateway,

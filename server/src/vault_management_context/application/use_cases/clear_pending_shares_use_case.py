@@ -2,7 +2,10 @@ from vault_management_context.application.commands import ClearPendingSharesComm
 from vault_management_context.application.gateways import ShareRepository
 
 
-class ClearPendingSharesUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class ClearPendingSharesUseCase(TracedUseCase):
     """Use case to clear all pending shares without unlocking"""
 
     def __init__(self, share_repository: ShareRepository) -> None:

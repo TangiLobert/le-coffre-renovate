@@ -13,7 +13,10 @@ from identity_access_management_context.domain.exceptions import UserNotFoundExc
 from shared_kernel.application.gateways import DomainEventPublisher
 
 
-class CreateGroupUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class CreateGroupUseCase(TracedUseCase):
     def __init__(
         self,
         user_repository: UserRepository,

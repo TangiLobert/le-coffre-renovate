@@ -16,7 +16,7 @@ router = APIRouter(prefix="/vault", tags=["Vault"])
 
 class VaultStatusResponse(BaseModel):
     status: VaultStatus
-    last_share_timestamp: Optional[datetime] = None
+    last_share_timestamp: datetime | None = None
 
 
 @router.get(

@@ -21,11 +21,12 @@ from password_management_context.domain.events import (
     PasswordUnsharedEvent,
 )
 from shared_kernel.application.gateways import DomainEventPublisher
+from shared_kernel.application.tracing import TracedUseCase
 
 logger = logging.getLogger(__name__)
 
 
-class UnshareAccessUseCase:
+class UnshareAccessUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

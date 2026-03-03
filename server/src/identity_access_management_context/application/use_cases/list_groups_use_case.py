@@ -9,7 +9,10 @@ from identity_access_management_context.application.responses import (
 )
 
 
-class ListGroupsUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class ListGroupsUseCase(TracedUseCase):
     def __init__(
         self,
         group_repository: GroupRepository,

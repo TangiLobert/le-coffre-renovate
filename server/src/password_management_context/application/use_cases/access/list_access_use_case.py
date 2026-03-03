@@ -18,7 +18,10 @@ from password_management_context.domain.exceptions import (
 from password_management_context.domain.value_objects import PasswordPermission
 
 
-class ListAccessUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class ListAccessUseCase(TracedUseCase):
     def __init__(
         self,
         password_repository: PasswordRepository,

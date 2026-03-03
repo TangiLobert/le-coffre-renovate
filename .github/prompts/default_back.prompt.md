@@ -230,9 +230,8 @@ uv run alembic downgrade -1
 ### Import Organization (MANDATORY)
 ```python
 # Standard library
-from uuid import UUID
-from typing import Optional
 import logging
+from uuid import UUID
 
 # Third-party
 from fastapi import APIRouter, HTTPException

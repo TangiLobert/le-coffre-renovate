@@ -62,7 +62,7 @@ def get_validate_token_usecase(
 
 
 async def get_current_user(
-    access_token: Optional[str] = Depends(cookie_scheme),
+    access_token: str | None = Depends(cookie_scheme),
     validate_usecase: ValidateUserTokenUseCase = Depends(get_validate_token_usecase),
 ) -> ValidatedUser:
     """

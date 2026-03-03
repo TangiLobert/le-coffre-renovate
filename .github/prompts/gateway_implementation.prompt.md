@@ -63,7 +63,7 @@ Used when the use case needs to persist/retrieve complete domain entities.
 class UserRepository(Protocol):
     """Repository for User aggregate root in IAM context"""
     def save(self, user: User) -> None: ...
-    def get_by_id(self, user_id: UUID) -> Optional[User]: ...
+    def get_by_id(self, user_id: UUID) -> User | None: ...
     def delete(self, user_id: UUID) -> None: ...
     def update(self, user: User) -> None: ...
 ```
@@ -99,7 +99,6 @@ Implementations MUST be in `<context>/adapters/secondary/<type>`:
 
 **MANDATORY Structure**:
 ```python
-from typing import Optional, List
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
@@ -112,11 +111,11 @@ from <context>.domain.exceptions import <Entity>NotFoundError, <Entity>AlreadyEx
 class Sql<Entity>Repository(<Entity>Repository):
     def __init__(self, session: Session):
         self._session = session
-    
+
     def save(self, entity: <Entity>) -> None:
         ...
-    
-    def get_by_id(self, id: UUID) -> Optional[<Entity>]:
+
+    def get_by_id(self, id: UUID) -> <Entity> | None:
         ...
 ```
 
@@ -124,15 +123,14 @@ class Sql<Entity>Repository(<Entity>Repository):
 ```python
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field
-from typing import Optional
 
 class <Entity>Table(SQLModel, table=True):
     __tablename__ = "<Entity>Table"
-    
+
     id: UUID = Field(default_factory=uuid4, nullable=False, primary_key=True, index=True)
     name: str = Field(nullable=False)
     field: str = Field(description="Field description")
-    optional_field: Optional[str] = Field(default=None, nullable=True)
+    optional_field: str | None = Field(default=None, nullable=True)
     # For lists: json_field: str = Field(default="[]", description="Field as JSON string")
 ```
 
@@ -141,7 +139,6 @@ class <Entity>Table(SQLModel, table=True):
 
 **MANDATORY Structure**:
 ```python
-from typing import Optional
 from uuid import UUID
 from <context>.application.gateways import <Entity>Repository
 from <context>.domain.entities import <Entity>
@@ -150,13 +147,13 @@ from <context>.domain.exceptions import <Entity>NotFoundError, <Entity>AlreadyEx
 class InMemory<Entity>Repository(<Entity>Repository):
     def __init__(self):
         self.storage: dict[UUID, <Entity>] = {}
-    
+
     def save(self, entity: <Entity>) -> None:
         if entity.id in self.storage:
             raise <Entity>AlreadyExistsError(entity.id)
         self.storage[entity.id] = entity
-    
-    def get_by_id(self, id: UUID) -> Optional[<Entity>]:
+
+    def get_by_id(self, id: UUID) -> <Entity> | None:
         return self.storage.get(id)
 ```
 
@@ -168,7 +165,6 @@ Depends entirely on the type of the gateway (api, messaging, etc.)
 
 **MANDATORY Structure**:
 ```python
-from typing import Optional
 from uuid import UUID
 from <context>.application.gateways import <Gateway>
 
@@ -333,7 +329,7 @@ Justification: Password is owned by password_management_context, CRUD operations
 Methods to implement:
 - save(password: Password) -> None
 - get_by_id(id: UUID) -> Password
-- list_all(folder: Optional[str]) -> List[Password]
+- list_all(folder: str | None) -> list[Password]
 - update(password: Password) -> None
 - delete(id: UUID) -> None
 

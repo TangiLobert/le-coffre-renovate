@@ -27,7 +27,7 @@ class SqlPasswordRepository(SQLBaseRepository, PasswordRepository):
             raise PasswordNotFoundError(id)
         return result
 
-    def list_all(self, folder: Optional[str] = None) -> List[Password]:
+    def list_all(self, folder: str | None = None) -> list[Password]:
         """List all passwords"""
         statement = select(PasswordTable)
         if folder:

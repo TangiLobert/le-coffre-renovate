@@ -45,7 +45,7 @@ class AesEncryptionGateway(EncryptionGateway):
         except ValueError as e:
             raise ValueError(f"Failed to decrypt vault key: {e}") from e
 
-    def _get_cipher(self, master_key, salt, nonce: Optional[bytes] = None):
+    def _get_cipher(self, master_key, salt, nonce: bytes | None = None):
         # Derive the same key using PBKDF2
         derived_key = PBKDF2(master_key, salt, 32, count=100000)
 

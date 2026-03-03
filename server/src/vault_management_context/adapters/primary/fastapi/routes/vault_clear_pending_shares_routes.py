@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
@@ -45,4 +47,5 @@ def clear_pending_shares(
         usecase.execute(command)
         return {"message": "Pending shares cleared successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        logging.error(e)
+        raise HTTPException(status_code=500, detail="Internal server error")

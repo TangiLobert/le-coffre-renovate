@@ -13,7 +13,7 @@ class SqlVaultRepository(SQLBaseRepository, VaultRepository):
     def __init__(self, session: Session):
         super().__init__(session)
 
-    def get(self) -> Optional[Vault]:
+    def get(self) -> Vault | None:
         statement = select(VaultTable).where(VaultTable.id == 1)
         vault_row = self._session.exec(statement).first()
 

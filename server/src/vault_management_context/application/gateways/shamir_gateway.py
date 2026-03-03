@@ -17,7 +17,7 @@ class ShamirGateway(Protocol):
         """
         ...
 
-    def reconstruct_secret(self, shares: List[Share]) -> str:
+    def reconstruct_secret(self, shares: list[Share]) -> str:
         """Reconstruct the master secret from shares
 
         Args:

@@ -14,7 +14,10 @@ from identity_access_management_context.domain.exceptions import (
 from shared_kernel.application.gateways import TimeGateway
 
 
-class RefreshAccessTokenUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class RefreshAccessTokenUseCase(TracedUseCase):
     def __init__(
         self,
         token_gateway: TokenGateway,

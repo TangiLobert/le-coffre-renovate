@@ -13,7 +13,7 @@ class PasswordRepository(Protocol):
         """Get password by UUID"""
         ...
 
-    def list_all(self, folder: Optional[str] = None) -> List[Password]:
+    def list_all(self, folder: str | None = None) -> list[Password]:
         """List all passwords"""
         ...
 

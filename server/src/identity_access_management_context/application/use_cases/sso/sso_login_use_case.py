@@ -31,7 +31,10 @@ from identity_access_management_context.domain.events import SsoLoginEvent
 from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 
 
-class SsoLoginUseCase:
+from shared_kernel.application.tracing import TracedUseCase
+
+
+class SsoLoginUseCase(TracedUseCase):
     """
     Use case for handling SSO login with authorization code.
 

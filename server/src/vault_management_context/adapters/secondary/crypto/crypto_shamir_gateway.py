@@ -28,7 +28,7 @@ class CryptoShamirGateway(ShamirGateway):
             [Share(f"{share[0]}:{share[1].hex()}") for share in shares], secret.hex()
         )
 
-    def reconstruct_secret(self, shares: List[Share]) -> str:
+    def reconstruct_secret(self, shares: list[Share]) -> str:
         try:
             # Extract index from the embedded format "index:hexsecret"
             crypto_shares = []
@@ -39,5 +39,7 @@ class CryptoShamirGateway(ShamirGateway):
 
             secret_bytes = Shamir.combine(crypto_shares, False)
             return secret_bytes.hex()
-        except Exception as e:
-            raise ValueError(f"Failed to reconstruct secret: {e}") from e
+        except Exception:
+            # Do not propagate the original exception — it may contain share data
+            # (e.g. hex decoding errors that echo the share value).
+            raise ValueError("Failed to reconstruct secret") from None

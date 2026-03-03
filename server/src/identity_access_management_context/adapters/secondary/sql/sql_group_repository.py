@@ -37,7 +37,7 @@ class SqlGroupRepository(SQLBaseRepository, GroupRepository):
             for result in results
         ]
 
-    def get_by_user_id(self, user_id: UUID) -> Optional[PersonalGroup]:
+    def get_by_user_id(self, user_id: UUID) -> PersonalGroup | None:
         """Get a personal group by user ID."""
         statement = select(GroupTable).where(
             GroupTable.user_id == user_id, GroupTable.is_personal
@@ -62,7 +62,7 @@ class SqlGroupRepository(SQLBaseRepository, GroupRepository):
         self._session.merge(group_table)
         self.commit()
 
-    def get_by_id(self, group_id: UUID) -> Optional[Group]:
+    def get_by_id(self, group_id: UUID) -> Group | None:
         """Get a group by ID."""
         statement = select(GroupTable).where(GroupTable.id == group_id)
         result = self._session.exec(statement).first()

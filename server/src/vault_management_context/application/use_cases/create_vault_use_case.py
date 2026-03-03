@@ -20,11 +20,12 @@ from vault_management_context.application.responses.vault_setup_response import 
 )
 from vault_management_context.domain.events import VaultCreatedEvent
 from shared_kernel.application.gateways import DomainEventPublisher
+from shared_kernel.application.tracing import TracedUseCase
 
 logger = logging.getLogger(__name__)
 
 
-class CreateVaultUseCase:
+class CreateVaultUseCase(TracedUseCase):
     def __init__(
         self,
         vault_repo: VaultRepository,
@@ -42,7 +43,7 @@ class CreateVaultUseCase:
         self._vault_event_repository = vault_event_repository
 
     def execute(self, command: CreateVaultCommand) -> VaultSetupResponse:
-        existing_vault: Optional[Vault] = self.vault_repo.get()
+        existing_vault: Vault | None = self.vault_repo.get()
         configuration = VaultConfiguration.create(command.nb_shares, command.threshold)
 
         VaultCreationService.ensure_creation_allowed(existing_vault)

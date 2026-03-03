@@ -31,7 +31,7 @@ class SqlUserPasswordRepository(SQLBaseRepository):
             self._session.add(user_password_table)
             self.commit()
 
-    def get_by_id(self, id: UUID) -> Optional[UserPassword]:
+    def get_by_id(self, id: UUID) -> UserPassword | None:
         user_password_table = self._session.exec(
             select(UserPasswordTable).where(UserPasswordTable.id == id)
         ).first()
@@ -44,7 +44,7 @@ class SqlUserPasswordRepository(SQLBaseRepository):
             )
         return None
 
-    def get_by_email(self, email: str) -> Optional[UserPassword]:
+    def get_by_email(self, email: str) -> UserPassword | None:
         user_password_table = self._session.exec(
             select(UserPasswordTable).where(UserPasswordTable.email == email)
         ).first()

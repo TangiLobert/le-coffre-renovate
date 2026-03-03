@@ -31,7 +31,7 @@ class UnlockVaultPostRequest(BaseModel):
         }
     )
 
-    shares: List[str] = Field(
+    shares: list[str] = Field(
         ...,
         min_length=1,
         description="List of share secrets (hex strings with embedded index)",

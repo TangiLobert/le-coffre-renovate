@@ -9,4 +9,4 @@ class ValidateUserTokenResponse:
     user_id: UUID
     email: str
     display_name: str
-    roles: List[str]
+    roles: list[str]

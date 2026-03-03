@@ -13,6 +13,6 @@ class SsoConfiguration:
     authorization_endpoint: str
     token_endpoint: str
     userinfo_endpoint: str
-    client_secret_decrypted: Optional[str] = None
-    jwks_uri: Optional[str] = None
-    updated_at: Optional[datetime] = None
+    client_secret_decrypted: str | None = None
+    jwks_uri: str | None = None
+    updated_at: datetime | None = None
