@@ -8,12 +8,16 @@ class Password:
     name: str
     encrypted_value: str
     folder: str
+    login: str | None
+    url: str | None
 
     @classmethod
-    def create(cls, id: UUID, name: str, encrypted_value: str, folder: str | None) -> "Password":
+    def create(cls, id: UUID, name: str, encrypted_value: str, folder: str | None, login: str | None, url: str | None) -> "Password":
         return cls(
             id=id,
             name=name,
             encrypted_value=encrypted_value,
             folder=folder if folder else "default",
+            login=login,
+            url=url,
         )
