@@ -100,9 +100,7 @@ def test_complete_password_management_workflow(
     # PHASE 1: BASIC CRUD OPERATIONS
     # ===================================================================
 
-
     print("\n=== PHASE 1: BASIC CRUD OPERATIONS ===")
-
 
     # Step 1.1: CREATE - Create a password and verify timestamps
     print("Step 1.1: Creating password...")
@@ -137,7 +135,6 @@ def test_complete_password_management_workflow(
     assert password_data["created_at"] is not None
     assert "last_password_updated_at" in password_data
     assert password_data["last_password_updated_at"] is not None
-
 
     original_created_at = password_data["created_at"]
     original_updated_at = password_data["last_password_updated_at"]
@@ -175,20 +172,15 @@ def test_complete_password_management_workflow(
 
     # Verify timestamps: created_at should stay same, last_password_updated_at should change
     assert updated_data["created_at"] == original_created_at, (
-    assert updated_data["created_at"] == original_created_at, (
         "created_at should not change after update"
     )
-    assert updated_data["last_password_updated_at"] != original_updated_at, (
-    )
+    assert updated_data["last_password_updated_at"] != original_updated_at, ()
     assert updated_data["last_password_updated_at"] != original_updated_at, (
         "last_password_updated_at should change after update"
     )
-    assert updated_data["last_password_updated_at"] > original_updated_at, (
-    )
+    assert updated_data["last_password_updated_at"] > original_updated_at, ()
     assert updated_data["last_password_updated_at"] > original_updated_at, (
         "last_password_updated_at should be more recent"
-    )
-
     )
 
     print(f"✓ created_at unchanged: {updated_data['created_at']}")
