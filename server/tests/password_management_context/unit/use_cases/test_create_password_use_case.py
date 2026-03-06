@@ -40,7 +40,7 @@ def use_case(
     )
 
 
-def test_given_user_owns_group_when_creating_password_should_return_password_id(
+def test_given_user_owns_group_when_creating_password_with_all_optional_fields_should_return_password_id(
     use_case: CreatePasswordUseCase,
     password_repository: FakePasswordRepository,
     group_access_gateway: FakeGroupAccessGateway,
@@ -73,6 +73,37 @@ def test_given_user_owns_group_when_creating_password_should_return_password_id(
     assert saved_password.name == name
     assert saved_password.login == login
     assert saved_password.url == url
+
+
+def test_given_user_owns_group_when_creating_password_without_optional_fields_should_return_password_id(
+    use_case: CreatePasswordUseCase,
+    password_repository: FakePasswordRepository,
+    group_access_gateway: FakeGroupAccessGateway,
+):
+    password_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    user_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
+    group_id = UUID("2d742e0e-bb76-4728-83ef-8d546d7c62e7")
+    name = "My Password"
+    decrypted_password = ANY_PASSWORD
+
+    group_access_gateway.set_group_owner(group_id, user_id)
+
+    command = CreatePasswordCommand(
+        user_id=user_id,
+        group_id=group_id,
+        id=password_id,
+        name=name,
+        decrypted_password=decrypted_password,
+    )
+
+    result_id = use_case.execute(command)
+
+    assert result_id == password_id
+    saved_password = password_repository.get_by_id(password_id)
+    assert saved_password is not None
+    assert saved_password.name == name
+    assert saved_password.login is None
+    assert saved_password.url is None
 
 
 def test_given_user_not_owner_when_creating_password_should_raise_user_not_owner_error(
