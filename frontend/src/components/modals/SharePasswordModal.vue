@@ -295,6 +295,8 @@ onMounted(async () => {
             optionValue="id"
             placeholder="Select a group to share with"
             :disabled="loading"
+            filter
+            filterPlaceholder="Search groups..."
             class="flex-1"
           >
             <template #option="slotProps">
