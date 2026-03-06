@@ -342,7 +342,7 @@ const handlePasswordBlur = () => {
 <template>
   <Dialog v-model:visible="visible" modal :header="isEditMode ? 'Edit Password' : 'Create New Password'"
     :style="{ width: '32rem' }">
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4" @keydown.enter.prevent="!loading && hasChanges && handleSubmit()">
       <div class="flex flex-col gap-2">
         <label for="password-name" class="font-semibold">Name</label>
         <InputText id="password-name" v-model="name" placeholder="e.g., Gmail Account" :disabled="loading" autofocus />
