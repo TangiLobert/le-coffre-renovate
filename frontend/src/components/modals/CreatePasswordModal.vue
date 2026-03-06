@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { storeToRefs } from 'pinia'
-import { createPasswordPasswordsPost, updatePasswordPasswordsPasswordIdPut } from '@/client/sdk.gen'
+import { createPasswordPasswordsPost, updatePasswordPasswordsPasswordIdPut, getPasswordPasswordsPasswordIdGet } from '@/client/sdk.gen'
 import type { GetPasswordListResponse } from '@/client/types.gen'
 import PasswordGenerator from '@/components/passwords/PasswordGenerator.vue'
 import { useGroupsStore } from '@/stores/groups'
@@ -24,6 +24,8 @@ const { groupsForPasswordCreation } = storeToRefs(groupsStore)
 
 const name = ref('')
 const password = ref('')
+const login = ref('')
+const url = ref('')
 const folder = ref('')
 const selectedGroupId = ref<string>('')
 const loading = ref(false)
@@ -75,11 +77,24 @@ watch(
       isEditMode.value = true
       name.value = newValue.name
       password.value = '' // Don't prefill password for security
+      login.value = ''
+      url.value = ''
       folder.value = newValue.folder || ''
+      // Fetch detail to pre-fill optional fields
+      getPasswordPasswordsPasswordIdGet({ path: { password_id: newValue.id } }).then(
+        (response) => {
+          if (response.data) {
+            login.value = response.data.login || ''
+            url.value = response.data.url || ''
+          }
+        },
+      )
     } else {
       isEditMode.value = false
       name.value = ''
       password.value = ''
+      login.value = ''
+      url.value = ''
       folder.value = ''
       // Set default group to personal group
       if (groupsStore.currentUserPersonalGroupId) {
@@ -130,9 +145,11 @@ const handleSubmit = async () => {
 
     if (isEditMode.value && props.editPassword) {
       // Update existing password
-      const updateBody: { name: string; folder: string | null; password?: string } = {
+      const updateBody: { name: string; folder: string | null; password?: string; login?: string | null; url?: string | null } = {
         name: name.value,
         folder: folder.value || null,
+        login: login.value || null,
+        url: url.value || null,
       }
 
       // Only include password if it was changed
@@ -172,6 +189,8 @@ const handleSubmit = async () => {
         body: {
           name: name.value,
           password: password.value,
+          login: login.value || null,
+          url: url.value || null,
           folder: folder.value || null,
           group_id: selectedGroupId.value!,
         },
@@ -203,6 +222,8 @@ const handleSubmit = async () => {
     // Reset form
     name.value = ''
     password.value = ''
+    login.value = ''
+    url.value = ''
     folder.value = ''
     // Reset to personal group instead of empty
     if (groupsStore.currentUserPersonalGroupId) {
@@ -233,6 +254,8 @@ const handleSubmit = async () => {
 const handleCancel = () => {
   name.value = ''
   password.value = ''
+  login.value = ''
+  url.value = ''
   folder.value = ''
   // Reset to personal group instead of empty
   if (groupsStore.currentUserPersonalGroupId) {
@@ -278,59 +301,32 @@ const handlePasswordBlur = () => {
 </script>
 
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    :header="isEditMode ? 'Edit Password' : 'Create New Password'"
-    :style="{ width: '32rem' }"
-  >
+  <Dialog v-model:visible="visible" modal :header="isEditMode ? 'Edit Password' : 'Create New Password'"
+    :style="{ width: '32rem' }">
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <label for="password-name" class="font-semibold">Name</label>
-        <InputText
-          id="password-name"
-          v-model="name"
-          placeholder="e.g., Gmail Account"
-          :disabled="loading"
-          autofocus
-        />
+        <InputText id="password-name" v-model="name" placeholder="e.g., Gmail Account" :disabled="loading" autofocus />
       </div>
 
       <!-- Group Selection (only for create mode) -->
       <div v-if="!isEditMode" class="flex flex-col gap-2">
         <label for="password-group" class="font-semibold">Owner</label>
-        <Select
-          id="password-group"
-          v-model="selectedGroupId"
-          :options="groupsForPasswordCreation"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Select owner group"
-          :disabled="loading"
-          class="w-full"
-        >
+        <Select id="password-group" v-model="selectedGroupId" :options="groupsForPasswordCreation" optionLabel="name"
+          optionValue="id" placeholder="Select owner group" :disabled="loading" class="w-full">
           <template #option="slotProps">
             <div class="flex items-center gap-2">
-              <i
-                :class="slotProps.option.is_personal ? 'pi pi-user' : 'pi pi-users'"
-                class="text-sm"
-              ></i>
+              <i :class="slotProps.option.is_personal ? 'pi pi-user' : 'pi pi-users'" class="text-sm"></i>
               <span>{{ slotProps.option.name }}</span>
-              <span v-if="slotProps.option.is_personal" class="text-xs text-muted-color"
-                >(Personal)</span
-              >
+              <span v-if="slotProps.option.is_personal" class="text-xs text-muted-color">(Personal)</span>
             </div>
           </template>
           <template #value="slotProps">
             <div v-if="slotProps.value" class="flex items-center gap-2">
-              <i
-                :class="
-                  groupsForPasswordCreation.find((g) => g.id === slotProps.value)?.is_personal
-                    ? 'pi pi-user'
-                    : 'pi pi-users'
-                "
-                class="text-sm"
-              ></i>
+              <i :class="groupsForPasswordCreation.find((g) => g.id === slotProps.value)?.is_personal
+                ? 'pi pi-user'
+                : 'pi pi-users'
+                " class="text-sm"></i>
               <span>{{
                 groupsForPasswordCreation.find((g) => g.id === slotProps.value)?.name
               }}</span>
@@ -344,53 +340,38 @@ const handlePasswordBlur = () => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label for="password-value" class="font-semibold"
-          >Password{{ isEditMode ? ' (leave empty to keep current)' : '' }}</label
-        >
-        <InputText
-          id="password-value"
-          :value="displayedPassword"
-          @input="handlePasswordInput"
-          @focus="handlePasswordFocus"
-          @blur="handlePasswordBlur"
-          type="text"
-          :placeholder="isEditMode ? 'Leave empty to keep current password' : 'Enter password'"
-          :disabled="loading"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          name="stored-password-value"
-          data-protonpass-ignore="true"
-          data-1p-ignore="true"
-          data-lpignore="true"
-          class="font-mono"
-          fluid
-        />
+        <label for="password-value" class="font-semibold">Password{{ isEditMode ? ' (leave empty to keep current)' : ''
+        }}</label>
+        <InputText id="password-value" :value="displayedPassword" @input="handlePasswordInput"
+          @focus="handlePasswordFocus" @blur="handlePasswordBlur" type="text"
+          :placeholder="isEditMode ? 'Leave empty to keep current password' : 'Enter password'" :disabled="loading"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="stored-password-value"
+          data-protonpass-ignore="true" data-1p-ignore="true" data-lpignore="true" class="font-mono" fluid />
       </div>
 
       <!-- Password Generator -->
       <PasswordGenerator @generate="handleGenerate" />
 
       <div class="flex flex-col gap-2">
+        <label for="password-login" class="font-semibold">Login (optional)</label>
+        <InputText id="password-login" v-model="login" :disabled="loading" autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="password-url" class="font-semibold">URL (optional)</label>
+        <InputText id="password-url" v-model="url" placeholder="e.g., https://example.com" :disabled="loading"
+          autocomplete="off" />
+      </div>
+
+      <div class="flex flex-col gap-2">
         <label for="password-folder" class="font-semibold">Folder (optional)</label>
-        <InputText
-          id="password-folder"
-          v-model="folder"
-          placeholder="e.g., Personal, Work"
-          :disabled="loading"
-        />
+        <InputText id="password-folder" v-model="folder" placeholder="e.g., Personal, Work" :disabled="loading" />
       </div>
     </div>
 
     <template #footer>
       <Button label="Cancel" severity="secondary" @click="handleCancel" :disabled="loading" />
-      <Button
-        :label="isEditMode ? 'Update' : 'Create'"
-        @click="handleSubmit"
-        :loading="loading"
-        icon="pi pi-check"
-      />
+      <Button :label="isEditMode ? 'Update' : 'Create'" @click="handleSubmit" :loading="loading" icon="pi pi-check" />
     </template>
   </Dialog>
 </template>
