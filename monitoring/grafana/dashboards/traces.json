@@ -1,0 +1,214 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Distributed traces for le-coffre via Tempo — search, flamegraph and log correlation",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "icon": "external link",
+      "tags": ["le-coffre"],
+      "title": "le-coffre dashboards",
+      "type": "dashboards"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "Request Duration P50 / P95 / P99",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+          "expr": "histogram_quantile(0.50, sum(rate(duration_bucket{resource_service_name=\"le-coffre\"}[$__rate_interval])) by (le))",
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"le-coffre\"} | quantile_over_time(duration, 0.50) by (span.http.route)",
+          "legendFormat": "P50",
+          "refId": "A",
+          "tableType": "spans"
+        },
+        {
+          "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"le-coffre\"} | quantile_over_time(duration, 0.95) by (span.http.route)",
+          "legendFormat": "P95",
+          "refId": "B",
+          "tableType": "spans"
+        },
+        {
+          "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"le-coffre\"} | quantile_over_time(duration, 0.99) by (span.http.route)",
+          "legendFormat": "P99",
+          "refId": "C",
+          "tableType": "spans"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "errors" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "title": "Span Rate (total vs errors)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"le-coffre\"} | rate() by (status)",
+          "legendFormat": "{{status}}",
+          "refId": "A",
+          "tableType": "spans"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 8 },
+      "id": 3,
+      "options": {
+        "dedupStrategy": "none",
+        "enableNodeGraph": true
+      },
+      "title": "Trace Search",
+      "type": "traces",
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${tempo_datasource}" },
+          "queryType": "traceql",
+          "query": "{resource.service.name=\"le-coffre\" && duration > ${min_duration}ms}",
+          "limit": 20,
+          "tableType": "traces",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["le-coffre"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "tempo_datasource",
+        "options": [],
+        "query": "tempo",
+        "refresh": 1,
+        "type": "datasource"
+      },
+      {
+        "current": { "selected": false, "text": "0", "value": "0" },
+        "hide": 0,
+        "label": "Min duration (ms)",
+        "name": "min_duration",
+        "options": [
+          { "selected": true, "text": "0", "value": "0" },
+          { "selected": false, "text": "100", "value": "100" },
+          { "selected": false, "text": "500", "value": "500" },
+          { "selected": false, "text": "1000", "value": "1000" },
+          { "selected": false, "text": "2000", "value": "2000" }
+        ],
+        "query": "0,100,500,1000,2000",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "le-coffre - Traces",
+  "uid": "le-coffre-traces",
+  "version": 1
+}
