@@ -63,7 +63,7 @@ class JsonFormatter(logging.Formatter):
         if _OTEL_AVAILABLE:
             span = otel_trace.get_current_span()
             ctx = span.get_span_context()
-            if ctx.is_valid:
+            if ctx.is_valid and isinstance(ctx.trace_id, int) and isinstance(ctx.span_id, int):
                 entry["trace_id"] = format(ctx.trace_id, "032x")
                 entry["span_id"] = format(ctx.span_id, "016x")
         return json.dumps(entry, ensure_ascii=False)
