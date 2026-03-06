@@ -34,7 +34,7 @@ interface GroupAccessWithName extends GroupAccessItem {
 
 const toast = useToast()
 const groupsStore = useGroupsStore()
-const { sharedGroups } = storeToRefs(groupsStore)
+const { groups: allGroups } = storeToRefs(groupsStore)
 
 const selectedGroupId = ref<string>('')
 const loading = ref(false)
@@ -50,7 +50,7 @@ const currentUserId = computed(() => groupsStore.currentUserId)
 const availableGroupsForSharing = computed(() => {
   // Filter out groups that already have access
   const groupsWithAccessIds = new Set(groupAccessList.value.map((g) => g.user_id)) // user_id contains group_id
-  return sharedGroups.value.filter((g) => !groupsWithAccessIds.has(g.id))
+  return allGroups.value.filter((g) => !groupsWithAccessIds.has(g.id))
 })
 
 // Track which groups give the current user access
@@ -71,13 +71,7 @@ const fetchUserDisplayName = async (userId: string): Promise<string> => {
 
 // Fetch group name by group ID
 const fetchGroupName = async (groupId: string): Promise<string> => {
-  // First check in loaded groups
-  const allGroups = [...sharedGroups.value]
-  if (groupsStore.userPersonalGroup) {
-    allGroups.push(groupsStore.userPersonalGroup)
-  }
-
-  const group = allGroups.find((g) => g.id === groupId)
+  const group = allGroups.value.find((g) => g.id === groupId)
   return group?.name || groupId
 }
 
@@ -128,9 +122,7 @@ const loadAccessList = async () => {
       const userAccessGroupIds = new Set<string>()
       for (const groupItem of groupAccessList.value) {
         const groupId = groupItem.user_id // user_id contains group_id
-        const group = [...sharedGroups.value, groupsStore.userPersonalGroup].find(
-          (g) => g?.id === groupId,
-        )
+        const group = allGroups.value.find((g) => g?.id === groupId)
 
         if (group && group.owners?.includes(currentUserId.value || '')) {
           userAccessGroupIds.add(groupId)
