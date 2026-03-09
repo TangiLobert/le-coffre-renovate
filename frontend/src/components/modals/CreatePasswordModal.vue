@@ -439,14 +439,25 @@ const handlePasswordBlur = () => {
 
       <div class="flex flex-col gap-2">
         <label for="password-login" class="font-semibold">Login (optional)</label>
-        <InputText id="password-login" v-model="login" placeholder="e.g., user@example.com" :disabled="loading"
-          autocomplete="off" />
+        <InputText
+          id="password-login"
+          v-model="login"
+          placeholder="e.g., user@example.com"
+          :disabled="loading"
+          autocomplete="off"
+        />
       </div>
 
       <div class="flex flex-col gap-2">
         <label for="password-url" class="font-semibold">URL (optional)</label>
-        <InputText id="password-url" v-model="url" placeholder="e.g., https://example.com" :disabled="loading"
-          :invalid="!!urlError" autocomplete="off" />
+        <InputText
+          id="password-url"
+          v-model="url"
+          placeholder="e.g., https://example.com"
+          :disabled="loading"
+          :invalid="!!urlError"
+          autocomplete="off"
+        />
         <small v-if="urlError" class="text-red-500">{{ urlError }}</small>
       </div>
 
