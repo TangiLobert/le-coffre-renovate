@@ -71,7 +71,9 @@ When you add or modify a SQLModel table:
    uv run alembic revision --autogenerate -m "Add new_column to UserTable"
    ```
 
-3. Review the generated file in `alembic/versions/`
+3. Review the generated file in `alembic/versions/`.
+See [server/tests/alembic/test_migrations.py](tests/alembic/test_migrations.py) for complete migrations test.
+
 4. Test the migration:
 
    ```bash
