@@ -293,7 +293,12 @@ async def test_complete_authentication_workflow(
     print("\n🔄 Step 4.9: Verifying refresh token endpoint is exempt from CSRF...")
     refresh_csrf_response = e2e_client.post("/api/auth/refresh-token")
     assert refresh_csrf_response.status_code != 403 or "CSRF" not in refresh_csrf_response.json().get("detail", "")
+    # logged_in cookie must be renewed alongside the access_token
+    assert refresh_csrf_response.cookies.get("logged_in") == "true", (
+        "logged_in cookie should be set to 'true' after refresh"
+    )
     print("✅ Refresh token endpoint correctly exempt from CSRF protection")
+    print("✅ logged_in cookie renewed after refresh")
 
     # =========================================================================
     # PHASE 5: SSO AUTHENTICATION
@@ -459,6 +464,11 @@ async def test_complete_authentication_workflow(
     print("✅ New access token obtained successfully")
     print(f"   Old token: {sso_access_token[:20]}...")
     print(f"   New token: {new_access_token[:20]}...")
+
+    # logged_in cookie must be present so the frontend can detect the active session
+    new_logged_in = refresh_response.cookies.get("logged_in")
+    assert new_logged_in == "true", "logged_in cookie should be set to 'true' after token refresh"
+    print("✅ logged_in cookie correctly renewed after token refresh")
 
     # Step 6.2: Validate new access token works
     print("\n✅ Step 6.2: Validating new access token...")
