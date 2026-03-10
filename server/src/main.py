@@ -237,15 +237,22 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
-# Health check endpoint for Kubernetes
+# Liveness probe: process is alive and event loop is responsive
 # Note: With root_path="/api", this will be accessible at /api/health
 @app.get("/health")
-async def health_check(request: Request):
+async def health_check():
+    return {"status": "healthy"}
+
+
+# Readiness probe: process is ready to serve traffic (DB reachable)
+# Note: With root_path="/api", this will be accessible at /api/health/ready
+@app.get("/health/ready")
+async def readiness_check(request: Request):
     try:
         session_maker = request.app.state.session_maker
         with session_maker() as session:
             session.exec(text("SELECT 1"))
-        return {"status": "healthy"}
+        return {"status": "ready"}
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Database unhealthy: {e}") from e
 
