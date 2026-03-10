@@ -496,7 +496,7 @@ async def test_should_return_admin_role_in_token_when_sso_user_has_been_promoted
 
     # When the SSO user logs in again (e.g. next day after token expiry)
     command = SsoLoginCommand(code=sso_code)
-    response = await use_case.execute(command)
+    await use_case.execute(command)
 
     # Then the generated token should reflect the current DB roles
     generated_token = token_gateway.get_last_generated_token()

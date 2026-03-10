@@ -136,9 +136,7 @@ class SsoLoginUseCase(TracedUseCase):
         # (e.g. to admin) are reflected immediately in the new token.
         user = self._user_repository.get_by_id(user_id)
         if not user:
-            raise RuntimeError(
-                "User should exist at this point, but was not found in UserRepository"
-            )
+            raise RuntimeError("User should exist at this point, but was not found in UserRepository")
         roles = user.roles
 
         # Step 5: Generate JWT token
