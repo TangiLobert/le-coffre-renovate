@@ -49,25 +49,6 @@ Le Coffre uses the following security measures to ensure the safety of your pass
 3. Once completed, user is redirected to the admin panel where the user can setup providers, manage users,
    password entries...
 
-## TODO
-
-- [x] Setup an ORM for database - Using SQLModel with Alembic migrations
-- [x] Generate encryption key when master key is created
-- [x] Add a password generator
-- [x] Permission system (groups with owners and members)
-- [x] Organize passwords in folders
-- [x] Sharing passwords with groups
-- [x] Audit log for all actions (who, when, what, where)
-- [x] Versioning of passwords (keep track of changes)
-- [ ] Customize folders (name, colors, icons)
-- [ ] Add metadata to passwords (url, tags, notes, etc.)
-- [ ] Search function
-- [ ] Rotate passwords (notify user when password is about to expire)
-- [ ] Clear clipboard after a certain time
-- [ ] Add a bin for deleted passwords (soft delete)
-- [ ] Allow regeneration of Shamir shares / encryption key generation and reencryption of all passwords
-- [ ] Allow import/export of passwords from other password managers (Keepass, CSV, JSON, etc.)
-
 ## Library used
 
 **Frontend**
