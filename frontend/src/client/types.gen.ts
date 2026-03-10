@@ -793,11 +793,11 @@ export type UpdatePasswordRequest = {
     /**
      * Name
      */
-    name?: string | null;
+    name: string;
     /**
      * Password
      */
-    password?: string | null;
+    password: string;
     /**
      * Folder
      */

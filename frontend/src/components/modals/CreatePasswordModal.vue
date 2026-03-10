@@ -43,14 +43,6 @@ const urlError = computed(() => {
   }
   return ''
 })
-// True when at least one field differs from the original in edit mode
-const hasChanges = computed(() => {
-  if (!isEditMode.value || !props.editPassword) return true // always allow submit in create mode
-  const nameChanged = name.value !== props.editPassword.name
-  const folderChanged = (folder.value || '') !== (props.editPassword.folder || '')
-  const passwordChanged = password.value !== ''
-  return nameChanged || folderChanged || passwordChanged
-})
 
 // Display bullets when password field is not focused
 const displayedPassword = computed(() => {
@@ -180,20 +172,14 @@ const handleSubmit = async () => {
         login?: string | null
         url?: string | null
       } = {
-        name: props.editPassword.name ? props.editPassword.name : '',
-        folder: props.editPassword.folder || null,
+        name: name.value,
+        folder: folder.value || null,
         login: login.value || null,
         url: url.value || null,
       }
 
       if (password.value) {
         updateBody.password = password.value
-      }
-
-      // Nothing changed — skip the API call
-      if (Object.keys(updateBody).length === 0) {
-        visible.value = false
-        return
       }
 
       const response = await updatePasswordPasswordsPasswordIdPut({
@@ -346,10 +332,7 @@ const handlePasswordBlur = () => {
     :header="isEditMode ? 'Edit Password' : 'Create New Password'"
     :style="{ width: '32rem' }"
   >
-    <div
-      class="flex flex-col gap-4"
-      @keydown.enter.prevent="!loading && hasChanges && handleSubmit()"
-    >
+    <div class="flex flex-col gap-4" @keydown.enter.prevent="!loading && handleSubmit()">
       <div class="flex flex-col gap-2">
         <label for="password-name" class="font-semibold">Name</label>
         <InputText
@@ -478,7 +461,6 @@ const handlePasswordBlur = () => {
         :label="isEditMode ? 'Update' : 'Create'"
         @click="handleSubmit"
         :loading="loading"
-        :disabled="!hasChanges"
         icon="pi pi-check"
       />
     </template>

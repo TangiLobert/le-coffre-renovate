@@ -71,20 +71,23 @@ class UpdatePasswordUseCase(TracedUseCase):
             existing_password.encrypted_value = self.password_encryption_gateway.encrypt(new_password.password)
             has_password_changed = True
 
-        if new_password.name:
+        if new_password.name != existing_password.name:
             existing_password.name = new_password.name
             has_name_changed = True
 
-        if new_password.folder:
-            existing_password.folder = new_password.folder
+        previous_folder = existing_password.folder
+        existing_password.folder = new_password.folder
+        if existing_password.folder != previous_folder:
             has_folder_changed = True
 
-        if new_password.login:
-            existing_password.login = new_password.login
+        new_login = new_password.login or None
+        if new_login != existing_password.login:
+            existing_password.login = new_login
             has_login_changed = True
 
-        if new_password.url:
-            existing_password.url = new_password.url
+        new_url = new_password.url or None
+        if new_url != existing_password.url:
+            existing_password.url = new_url
             has_url_changed = True
 
         self.password_repository.update(existing_password)
