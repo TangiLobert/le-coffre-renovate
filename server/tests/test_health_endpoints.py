@@ -103,3 +103,17 @@ def test_readiness_returns_503_when_db_unreachable(client):
 
     assert response.status_code == 503
     assert response.json()["detail"] == "Database unreachable"
+
+
+def test_background_task_sets_migration_failed_on_error(client):
+    """_run_migrations_in_background must set migration_failed=True when run_migrations raises."""
+    with patch("main.run_migrations", side_effect=Exception("DB connection refused")):
+        with TestClient(client.app) as c:
+            deadline = time.monotonic() + 5
+            while not c.app.state.migration_failed and time.monotonic() < deadline:
+                time.sleep(0.05)
+            assert c.app.state.migration_failed is True
+            assert c.app.state.ready is False
+    # Restore state for subsequent tests that rely on the module-scoped client.
+    client.app.state.migration_failed = False
+    client.app.state.ready = True
