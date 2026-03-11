@@ -2,10 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { storeToRefs } from 'pinia'
-import {
-  createPasswordPasswordsPost,
-  updatePasswordPasswordsPasswordIdPut,
-} from '@/client/sdk.gen'
+import { createPasswordPasswordsPost, updatePasswordPasswordsPasswordIdPut } from '@/client/sdk.gen'
 import type { GetPasswordListResponse } from '@/client/types.gen'
 import PasswordGenerator from '@/components/passwords/PasswordGenerator.vue'
 import { useGroupsStore } from '@/stores/groups'

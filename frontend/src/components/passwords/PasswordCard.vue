@@ -37,10 +37,7 @@
             @click="copyToClipboard"
           />
         </div>
-        <div
-          v-if="password.login || password.url"
-          class="flex items-center gap-4 mb-2 text-sm"
-        >
+        <div v-if="password.login || password.url" class="flex items-center gap-4 mb-2 text-sm">
           <span v-if="password.login" class="flex items-center gap-1 text-color-secondary">
             <i class="pi pi-user text-xs" />
             {{ password.login }}
