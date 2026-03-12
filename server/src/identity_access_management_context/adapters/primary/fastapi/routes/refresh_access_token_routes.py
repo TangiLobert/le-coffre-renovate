@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from pydantic import BaseModel
 
-from config import get_cookie_secure_setting, get_jwt_access_token_expiration_minutes
+from config import get_cookie_secure_setting, get_jwt_access_token_expiration_seconds
 from identity_access_management_context.adapters.primary.fastapi.app_dependencies import (
     get_refresh_access_token_usecase,
 )
@@ -62,13 +62,24 @@ async def refresh_access_token(
         # Set new access token in HTTP-only secure cookie
         result = await usecase.execute(command)
         is_secure = get_cookie_secure_setting()
+        access_token_max_age = get_jwt_access_token_expiration_seconds()
         response.set_cookie(
             key="access_token",
             value=result.access_token,
             httponly=True,
             secure=is_secure,
-            samesite="lax",
-            max_age=get_jwt_access_token_expiration_minutes() * 60,  # Convert minutes to seconds
+            samesite="strict",
+            max_age=access_token_max_age,
+        )
+        # Renew the non-httpOnly auth flag so the frontend can still detect the
+        # active session (it expires at the same time as the access token).
+        response.set_cookie(
+            key="logged_in",
+            value="true",
+            httponly=False,
+            secure=is_secure,
+            samesite="strict",
+            max_age=access_token_max_age,
         )
 
         return RefreshAccessTokenResponse(message="Access token refreshed successfully")

@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 from config import (
     get_cookie_secure_setting,
-    get_jwt_access_token_expiration_minutes,
-    get_jwt_refresh_token_expiration_days,
+    get_jwt_access_token_expiration_seconds,
+    get_jwt_refresh_token_expiration_seconds,
 )
 from identity_access_management_context.adapters.primary.fastapi.app_dependencies import (
     get_password_login_usecase,
@@ -71,8 +71,8 @@ async def admin_login(
             value=result.jwt_token,
             httponly=True,
             secure=is_secure,  # HTTPS only in production
-            samesite="lax",  # CSRF protection
-            max_age=get_jwt_access_token_expiration_minutes() * 60,  # Convert minutes to seconds
+            samesite="strict",  # CSRF protection
+            max_age=get_jwt_access_token_expiration_seconds(),
         )
 
         # Also set refresh token in cookie
@@ -81,8 +81,8 @@ async def admin_login(
             value=result.refresh_token,
             httponly=True,
             secure=is_secure,  # HTTPS only in production
-            samesite="lax",
-            max_age=get_jwt_refresh_token_expiration_days() * 86400,  # Convert days to seconds
+            samesite="strict",
+            max_age=get_jwt_refresh_token_expiration_seconds(),
         )
 
         # Set a non-httpOnly cookie that frontend can read to check auth status
@@ -91,8 +91,8 @@ async def admin_login(
             value="true",
             httponly=False,  # JavaScript can read this
             secure=is_secure,
-            samesite="lax",
-            max_age=get_jwt_access_token_expiration_minutes() * 60,
+            samesite="strict",
+            max_age=get_jwt_access_token_expiration_seconds(),
         )
 
         return AdminLoginResponse(
