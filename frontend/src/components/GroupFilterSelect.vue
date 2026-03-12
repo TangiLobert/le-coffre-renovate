@@ -93,11 +93,6 @@ const clearAll = () => {
     </div>
 
     <!-- "All" indicator when nothing is specifically selected -->
-    <span
-      v-else
-      class="text-sm text-surface-400 dark:text-surface-500 italic"
-    >
-      All groups
-    </span>
+    <span v-else class="text-sm text-surface-400 dark:text-surface-500 italic"> All groups </span>
   </div>
 </template>
