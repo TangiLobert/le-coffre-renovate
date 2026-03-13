@@ -97,6 +97,12 @@ def setup_logging() -> None:
     Called at module level in main.py — uvicorn configures its loggers before
     importing the app module, so all handlers are already present at call time.
     """
+    # Ensure the root logger propagates INFO and above so that application logs
+    # reach the OTel LoggingHandler added later by setup_monitoring().
+    # uvicorn sets --log-level on its own loggers but never touches the root
+    # logger level, which defaults to WARNING and would silently drop INFO logs.
+    logging.getLogger().setLevel(logging.INFO)
+
     if os.getenv("LOG_FORMAT", "").lower() != "json":
         return
 
