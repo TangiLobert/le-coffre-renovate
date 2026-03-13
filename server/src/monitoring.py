@@ -97,12 +97,6 @@ def setup_logging() -> None:
     Called at module level in main.py — uvicorn configures its loggers before
     importing the app module, so all handlers are already present at call time.
     """
-    # Ensure the root logger propagates INFO and above so that application logs
-    # reach the OTel LoggingHandler added later by setup_monitoring().
-    # uvicorn sets --log-level on its own loggers but never touches the root
-    # logger level, which defaults to WARNING and would silently drop INFO logs.
-    logging.getLogger().setLevel(logging.INFO)
-
     if os.getenv("LOG_FORMAT", "").lower() != "json":
         return
 
@@ -252,6 +246,14 @@ def _configure_otel(app) -> tuple:
     )
     set_logger_provider(logger_provider)
     otel_log_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+    # Raise the root logger level to INFO so application logs reach this handler.
+    # The root logger defaults to WARNING, silently dropping INFO records before
+    # they reach any handler. This is scoped here so it only applies when the
+    # OTel log bridge is active — no side effects in non-monitoring deployments.
+    # Note: third-party loggers (sqlalchemy, httpx, …) also inherit from root, but
+    # their own propagate=True + NOTSET level means only records that pass the
+    # root level reach handlers. Set per-library levels below if spam is observed.
+    logging.getLogger().setLevel(logging.INFO)
     logging.getLogger().addHandler(otel_log_handler)
 
     FastAPIInstrumentor.instrument_app(
