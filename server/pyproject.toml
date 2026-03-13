@@ -27,11 +27,11 @@ dev = [
   "ruff>=0.15.5",
 ]
 monitoring = [
-    "opentelemetry-instrumentation-fastapi>=0.52b0",
-    "opentelemetry-instrumentation-httpx>=0.52b0",
-    "opentelemetry-instrumentation-sqlalchemy>=0.52b0",
-    "opentelemetry-exporter-otlp-proto-http>=1.39.1",
-    "opentelemetry-sdk>=1.39.1",
+    "opentelemetry-instrumentation-fastapi>=0.61b0",
+    "opentelemetry-instrumentation-httpx>=0.61b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.61b0",
+    "opentelemetry-exporter-otlp-proto-http>=1.40.0",
+    "opentelemetry-sdk>=1.40.0",
 ]
 sqlite = ["sqlite-utils==3.39"]
 postgres = ["psycopg2==2.9.11", "psycopg[binary]==3.3.3"]
