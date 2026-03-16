@@ -10,6 +10,7 @@ import {
 } from '@/client/sdk.gen'
 import type { GetPasswordListResponse, UserAccessItem, GroupAccessItem } from '@/client/types.gen'
 import { useGroupsStore } from '@/stores/groups'
+import { sortGroupsByName } from '@/utils/groupSort'
 
 const visible = defineModel<boolean>('visible', { required: true })
 
@@ -46,11 +47,12 @@ const isOwner = ref(false)
 // Get current user ID from store
 const currentUserId = computed(() => groupsStore.currentUserId)
 
-// Get groups that can be shared with (excluding groups that already have access)
+// Get groups that can be shared with (excluding groups that already have access), sorted by name
 const availableGroupsForSharing = computed(() => {
   // Filter out groups that already have access
   const groupsWithAccessIds = new Set(groupAccessList.value.map((g) => g.user_id)) // user_id contains group_id
-  return allGroups.value.filter((g) => !groupsWithAccessIds.has(g.id))
+  const filtered = allGroups.value.filter((g) => !groupsWithAccessIds.has(g.id))
+  return sortGroupsByName(filtered)
 })
 
 // Track which groups give the current user access

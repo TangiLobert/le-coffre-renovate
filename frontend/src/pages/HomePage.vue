@@ -36,6 +36,15 @@ const selectedGroupIds = ref<string[] | null>(null)
 // Groups visible in the filter selector: all for admins, user's own for others
 const filterableGroups = computed(() => (isAdmin.value ? groups.value : userBelongingGroups.value))
 
+// Count how many passwords belong to each group (over the full unfiltered list)
+const groupPasswordCounts = computed<Record<string, number>>(() => {
+  const counts: Record<string, number> = {}
+  for (const p of passwords.value) {
+    counts[p.group_id] = (counts[p.group_id] ?? 0) + 1
+  }
+  return counts
+})
+
 // Passwords filtered by the selected groups (client-side only)
 const filteredPasswords = computed<GetPasswordListResponse[]>(() => {
   // null = ALL selected, no filtering needed
@@ -129,7 +138,11 @@ onMounted(async () => {
 
       <!-- Group filter -->
       <div class="mb-4">
-        <GroupFilterSelect :groups="filterableGroups" v-model="selectedGroupIds" />
+        <GroupFilterSelect
+          :groups="filterableGroups"
+          :passwordCounts="groupPasswordCounts"
+          v-model="selectedGroupIds"
+        />
       </div>
 
       <PasswordsList
