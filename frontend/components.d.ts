@@ -32,6 +32,8 @@ declare module 'vue' {
     Form: typeof import('@primevue/forms/form')['default']
     GroupDetailsModal: typeof import('./src/components/modals/GroupDetailsModal.vue')['default']
     GroupFilterSelect: typeof import('./src/components/GroupFilterSelect.vue')['default']
+    IconField: typeof import('primevue/iconfield')['default']
+    InputIcon: typeof import('primevue/inputicon')['default']
     InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
     LoginForm: typeof import('./src/components/LoginForm.vue')['default']
