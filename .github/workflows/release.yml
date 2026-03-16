@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag version to build and release (e.g. v1.2.3)'
+        required: true
+        type: string
 
 env:
   REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -11,6 +17,7 @@ env:
 permissions:
   contents: write
   packages: write
+  security-events: write
 
 jobs:
   release:
@@ -22,7 +29,12 @@ jobs:
 
       - name: Set image tag
         id: set_outputs
-        run: echo "image_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "image_tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "image_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.10.0
@@ -34,12 +46,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push backend image
+      - name: Build backend image
         uses: docker/build-push-action@v6.17.0
         with:
           context: ./server
           file: ./server/Dockerfile
-          push: true
+          push: false
+          load: true
           platforms: linux/amd64
           tags: |
             ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
@@ -47,18 +60,58 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/le-coffre-backend:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/le-coffre-backend:buildcache,mode=max,ignore-error=true
 
-      - name: Build and push frontend image
+      - name: Build frontend image
         uses: docker/build-push-action@v6.17.0
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: true
+          push: false
+          load: true
           platforms: linux/amd64
           tags: |
             ${{ env.REGISTRY }}/le-coffre-frontend:${{ steps.set_outputs.outputs.image_tag }}
             ${{ env.REGISTRY }}/le-coffre-frontend:latest
           cache-from: type=registry,ref=${{ env.REGISTRY }}/le-coffre-frontend:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/le-coffre-frontend:buildcache,mode=max,ignore-error=true
+
+      - name: Scan backend image (Grype)
+        uses: anchore/scan-action@v7.3.1
+        id: grype-backend
+        with:
+          image: ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
+          fail-build: true
+          severity-cutoff: critical
+          output-format: sarif
+
+      - name: Scan frontend image (Grype)
+        uses: anchore/scan-action@v7.3.1
+        id: grype-frontend
+        with:
+          image: ${{ env.REGISTRY }}/le-coffre-frontend:${{ steps.set_outputs.outputs.image_tag }}
+          fail-build: true
+          severity-cutoff: critical
+          output-format: sarif
+
+      - name: Upload backend scan results to GitHub Security
+        if: always() && steps.grype-backend.outputs.sarif != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype-backend.outputs.sarif }}
+          category: container-backend
+
+      - name: Upload frontend scan results to GitHub Security
+        if: always() && steps.grype-frontend.outputs.sarif != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype-frontend.outputs.sarif }}
+          category: container-frontend
+
+      - name: Push images
+        run: |
+          docker push ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
+          docker push ${{ env.REGISTRY }}/le-coffre-backend:latest
+          docker push ${{ env.REGISTRY }}/le-coffre-frontend:${{ steps.set_outputs.outputs.image_tag }}
+          docker push ${{ env.REGISTRY }}/le-coffre-frontend:latest
 
       - name: Generate changelog
         id: changelog
