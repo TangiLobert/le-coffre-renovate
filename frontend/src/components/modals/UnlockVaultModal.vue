@@ -189,6 +189,11 @@ const handleSubmit = async () => {
   }
 }
 
+const resetForm = () => {
+  shares.value = ['']
+  focusedShareIndex.value = null
+}
+
 const handleReset = async () => {
   confirm.require({
     message: 'This will clear all pending shares. Continue?',
@@ -363,10 +368,11 @@ const handleReset = async () => {
         <div class="flex gap-2">
           <Button
             type="button"
-            label="Cancel"
+            label="Reset"
             severity="secondary"
             class="p-button-text"
-            @click="visible = false"
+            :disabled="loading"
+            @click="resetForm"
           />
           <Button
             :label="isPendingUnlock ? 'Add Shares' : 'Submit Shares'"
