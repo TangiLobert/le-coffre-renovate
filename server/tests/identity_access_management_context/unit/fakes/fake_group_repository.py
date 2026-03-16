@@ -40,5 +40,11 @@ class FakeGroupRepository:
         if group_id in self._groups:
             del self._groups[group_id]
 
+    def get_by_name(self, name: str) -> Group | None:
+        for group in self._groups.values():
+            if group.name == name:
+                return group
+        return None
+
     def clear(self) -> None:
         self._groups.clear()

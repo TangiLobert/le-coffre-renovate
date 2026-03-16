@@ -5,8 +5,10 @@ import pytest
 from identity_access_management_context.application.commands import CreateGroupCommand
 from identity_access_management_context.application.use_cases import CreateGroupUseCase
 from identity_access_management_context.domain.entities import User
+from identity_access_management_context.domain.entities.group import Group
 from identity_access_management_context.domain.events import GroupCreatedEvent
 from identity_access_management_context.domain.exceptions import (
+    GroupAlreadyExistsException,
     UserNotFoundException,
 )
 from tests.fakes.fake_domain_event_publisher import FakeDomainEventPublisher
@@ -152,3 +154,23 @@ def test_given_valid_data_when_creating_group_then_should_store_group_created_ev
     stored = group_event_repository.events[0]
     assert stored["event_type"] == "GroupCreatedEvent"
     assert stored["actor_user_id"] == creator_id
+
+
+def test_given_group_already_existing_when_creating_group_then_should_raise_exception(
+    use_case: CreateGroupUseCase,
+    user_repository: FakeUserRepository,
+    group_repository: FakeGroupRepository,
+):
+    group_id = UUID("123e4567-e89b-12d3-a456-426614174000")
+    creator_id = UUID("223e4567-e89b-12d3-a456-426614174001")
+
+    user = User(id=creator_id, username="creator", email="creator@example.com", name="Creator User")
+    user_repository.save(user)
+
+    existing_group = Group(id=group_id, name="Development Team", is_personal=False)
+    group_repository.save_group(existing_group)
+
+    command = CreateGroupCommand(id=group_id, name="Development Team", creator_id=creator_id)
+
+    with pytest.raises(GroupAlreadyExistsException):
+        use_case.execute(command)

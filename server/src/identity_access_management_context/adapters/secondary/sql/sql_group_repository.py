@@ -81,3 +81,16 @@ class SqlGroupRepository(SQLBaseRepository, GroupRepository):
         if result is not None:
             self._session.delete(result)
             self.commit()
+
+    def get_by_name(self, name: str) -> Group | None:
+        """Get a group by name."""
+        statement = select(GroupTable).where(GroupTable.name == name)
+        result = self._session.exec(statement).first()
+        if result is None:
+            return None
+        return Group(
+            id=result.id,
+            name=result.name,
+            is_personal=result.is_personal,
+            user_id=result.user_id,
+        )

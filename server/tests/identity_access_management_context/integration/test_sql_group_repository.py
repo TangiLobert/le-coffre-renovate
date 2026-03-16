@@ -198,3 +198,34 @@ def test_given_nonexistent_group_when_deleting_then_no_error_raised(
 
     # When / Then - should not raise error
     sql_group_repository.delete_group(nonexistent_group_id)
+
+
+def test_given_nonexistent_group_when_get_by_name_then_none_received(
+    sql_group_repository,
+):
+    # Given
+    nonexistent_name = "Nonexistent Group Name"
+
+    # When
+    retrieved_group = sql_group_repository.get_by_name(nonexistent_name)
+
+    # Then
+    assert retrieved_group is None
+
+
+def test_given_existent_group_when_get_by_name_then_group_is_retrieved(
+    sql_group_repository,
+):
+    # Given
+    group_id = uuid4()
+    group_name = "Existing Group"
+    group = Group(id=group_id, name=group_name, is_personal=False)
+    sql_group_repository.save_group(group)
+
+    # When
+    retrieved_group = sql_group_repository.get_by_name(group_name)
+
+    # Then
+    assert retrieved_group is not None
+    assert retrieved_group.id == group_id
+    assert retrieved_group.name == group_name

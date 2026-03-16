@@ -10,6 +10,7 @@ from identity_access_management_context.adapters.primary.fastapi.app_dependencie
 from identity_access_management_context.application.commands import CreateGroupCommand
 from identity_access_management_context.application.use_cases import CreateGroupUseCase
 from identity_access_management_context.domain.exceptions import (
+    GroupAlreadyExistsException,
     UserNotFoundException,
 )
 from shared_kernel.adapters.primary.dependencies import get_current_user
@@ -69,6 +70,8 @@ def create_group(
 
     except UserNotFoundException as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except GroupAlreadyExistsException as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.exception("Unexpected error in create group")
         raise HTTPException(status_code=500, detail="Internal server error") from e

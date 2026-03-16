@@ -66,6 +66,13 @@ class SsoUserAlreadyExistsException(IdentityAccessManagementDomainError):
 
 
 # Group-related exceptions
+class GroupAlreadyExistsException(IdentityAccessManagementDomainError):
+    """Raised when attempting to create a group with a name that already exists"""
+
+    def __init__(self, group_name: str):
+        super().__init__(f"The group with name '{group_name}' already exists")
+
+
 class GroupNotFoundException(IdentityAccessManagementDomainError):
     """Raised when attempting to access a group that doesn't exist"""
 

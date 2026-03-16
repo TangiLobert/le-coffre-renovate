@@ -16,6 +16,7 @@ from identity_access_management_context.domain.entities import Group
 from identity_access_management_context.domain.events import GroupUpdatedEvent
 from identity_access_management_context.domain.exceptions import (
     CannotModifyPersonalGroupException,
+    GroupAlreadyExistsException,
     GroupNotFoundException,
     UserNotOwnerOfGroupException,
 )
@@ -224,3 +225,29 @@ def test_given_user_is_owner_when_updating_group_should_store_group_updated_even
     stored = group_event_repository.events[0]
     assert stored["event_type"] == "GroupUpdatedEvent"
     assert stored["actor_user_id"] == requester_id
+
+
+def test_given_group_when_updating_group_to_existing_name_should_raise_group_already_exists_exception(
+    use_case: UpdateGroupUseCase,
+    group_repository: GroupRepository,
+    group_member_repository: GroupMemberRepository,
+):
+    group_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    requester_id = UUID("1d742e0e-bb76-4728-83ef-8d546d7c62e6")
+
+    group = Group(id=group_id, name="Old Name", is_personal=False, user_id=None)
+    existing_group = Group(
+        id=UUID("8d742e0e-bb76-4728-83ef-8d546d7c62e5"), name="Existing Name", is_personal=False, user_id=None
+    )
+    group_repository.save_group(group)
+    group_repository.save_group(existing_group)
+    group_member_repository.add_member(group_id, requester_id, is_owner=True)
+
+    command = UpdateGroupCommand(
+        requesting_user=AuthenticatedUser(requester_id, []),
+        group_id=group_id,
+        name="Existing Name",
+    )
+
+    with pytest.raises(GroupAlreadyExistsException):
+        use_case.execute(command)
