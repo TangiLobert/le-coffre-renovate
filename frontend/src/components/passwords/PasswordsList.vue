@@ -202,7 +202,7 @@ onMounted(async () => {
     </div>
 
     <div v-else-if="filteredPasswords.length === 0" class="text-center py-8 text-surface-500">
-      <p>No passwords found. Create your first password!</p>
+      <p>No passwords to display.</p>
     </div>
 
     <div v-else class="space-y-2">
