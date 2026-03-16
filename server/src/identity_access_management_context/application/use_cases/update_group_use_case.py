@@ -44,7 +44,8 @@ class UpdateGroupUseCase(TracedUseCase):
         ) and not AdminPermissionChecker().is_admin(command.requesting_user):
             raise UserNotOwnerOfGroupException(command.requesting_user.user_id, command.group_id)
 
-        if self.group_repository.get_by_name(command.name) is not None:
+        existing_group = self.group_repository.get_by_name(command.name)
+        if existing_group is not None and existing_group.group_id != command.group_id:
             raise GroupAlreadyExistsException(command.name)
 
         group.name = command.name
