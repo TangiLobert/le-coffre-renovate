@@ -15,6 +15,15 @@ const userStore = useUserStore()
 const { sharedGroups, loading } = storeToRefs(groupsStore)
 const { isAdmin } = storeToRefs(userStore)
 
+// Search / filter
+const searchQuery = ref('')
+
+const filteredGroups = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return sharedGroups.value
+  return sharedGroups.value.filter((g) => g.name.toLowerCase().includes(q))
+})
+
 // State
 const showCreateDialog = ref(false)
 const showGroupDetailsModal = ref(false)
@@ -227,6 +236,14 @@ onMounted(async () => {
         <Button label="New Group" icon="pi pi-plus" @click="openCreateDialog" />
       </div>
 
+      <!-- Search field -->
+      <div class="mb-4">
+        <IconField>
+          <InputIcon class="pi pi-search" />
+          <InputText v-model="searchQuery" placeholder="Search groups…" class="w-full md:w-80" />
+        </IconField>
+      </div>
+
       <!-- Groups List -->
       <div v-if="loading" class="flex justify-center items-center py-8">
         <ProgressSpinner />
@@ -236,9 +253,13 @@ onMounted(async () => {
         <p class="text-muted-color">No groups found. Create your first group!</p>
       </div>
 
+      <div v-else-if="filteredGroups.length === 0" class="text-center py-8">
+        <p class="text-muted-color">No groups match "{{ searchQuery }}".</p>
+      </div>
+
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card
-          v-for="group in sharedGroups"
+          v-for="group in filteredGroups"
           :key="group.id"
           class="hover:shadow-lg transition-shadow"
         >
@@ -308,6 +329,7 @@ onMounted(async () => {
               v-model="newGroupName"
               placeholder="Enter group name"
               @keyup.enter="handleSubmit"
+              autofocus
             />
           </div>
         </div>

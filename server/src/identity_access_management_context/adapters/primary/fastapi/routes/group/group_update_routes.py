@@ -15,6 +15,7 @@ from identity_access_management_context.application.use_cases import (
 )
 from identity_access_management_context.domain.exceptions import (
     CannotModifyPersonalGroupException,
+    GroupAlreadyExistsException,
     GroupNotFoundException,
     IdentityAccessManagementDomainError,
     UserNotOwnerOfGroupException,
@@ -81,6 +82,8 @@ def update_group(
         raise HTTPException(status_code=403, detail=str(e)) from e
     except CannotModifyPersonalGroupException as e:
         raise HTTPException(status_code=403, detail=str(e)) from e
+    except GroupAlreadyExistsException as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except IdentityAccessManagementDomainError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:

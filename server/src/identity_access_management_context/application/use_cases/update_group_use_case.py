@@ -9,6 +9,7 @@ from identity_access_management_context.application.gateways import (
 from identity_access_management_context.domain.events import GroupUpdatedEvent
 from identity_access_management_context.domain.exceptions import (
     CannotModifyPersonalGroupException,
+    GroupAlreadyExistsException,
     GroupNotFoundException,
     UserNotOwnerOfGroupException,
 )
@@ -42,6 +43,10 @@ class UpdateGroupUseCase(TracedUseCase):
             command.group_id, command.requesting_user.user_id
         ) and not AdminPermissionChecker().is_admin(command.requesting_user):
             raise UserNotOwnerOfGroupException(command.requesting_user.user_id, command.group_id)
+
+        existing_group = self.group_repository.get_by_name(command.name)
+        if existing_group is not None and existing_group.id != command.group_id:
+            raise GroupAlreadyExistsException(command.name)
 
         group.name = command.name
         self.group_repository.save_group(group)

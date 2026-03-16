@@ -28,3 +28,7 @@ class GroupRepository(Protocol):
     def delete_group(self, group_id: UUID) -> None:
         """Delete a group from the repository."""
         ...
+
+    def get_by_name(self, group_name: str) -> Group | None:
+        """Get a group by name."""
+        ...

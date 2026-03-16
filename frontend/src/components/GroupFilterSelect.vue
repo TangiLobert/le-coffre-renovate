@@ -1,23 +1,38 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { GroupItem } from '@/client/types.gen'
+import { sortGroups, type GroupSortMode } from '@/utils/groupSort'
 
 const props = defineProps<{
   groups: GroupItem[]
+  /** When provided, enables the "sort by count" mode and shows the sort toggle. */
+  passwordCounts?: Record<string, number>
 }>()
 
 // null = all (no filter active), string[] = filtered to those ids
 const selectedGroupIds = defineModel<string[] | null>({ required: true })
 
-// Groups not yet selected — shown in the dropdown
-const availableGroups = computed(() =>
-  props.groups.filter((g) => !selectedGroupIds.value?.includes(g.id)),
-)
+const sortMode = ref<GroupSortMode>('name')
 
-// Groups currently selected — shown as tags
-const selectedGroups = computed(() =>
-  props.groups.filter((g) => selectedGroupIds.value?.includes(g.id)),
-)
+const toggleSortMode = () => {
+  sortMode.value = sortMode.value === 'name' ? 'count' : 'name'
+}
+
+// Groups not yet selected, sorted according to active mode — shown in the dropdown
+const availableGroups = computed(() => {
+  const unselected = props.groups.filter((g) => !selectedGroupIds.value?.includes(g.id))
+  return sortGroups(unselected, sortMode.value, props.passwordCounts)
+})
+
+// Groups currently selected — shown as tags, personal group always first
+const selectedGroups = computed(() => {
+  const selected = props.groups.filter((g) => selectedGroupIds.value?.includes(g.id))
+  return selected.sort((a, b) => {
+    if (a.is_personal && !b.is_personal) return -1
+    if (!a.is_personal && b.is_personal) return 1
+    return a.name.localeCompare(b.name)
+  })
+})
 
 const groupLabel = (group: GroupItem) => group.name
 
@@ -49,6 +64,23 @@ const clearAll = () => {
       Filter by group:
     </span>
 
+    <!-- Sort mode toggle (only when password counts are available) -->
+    <Button
+      v-if="passwordCounts !== undefined"
+      :icon="sortMode === 'name' ? 'pi pi-sort-alpha-down' : 'pi pi-sort-amount-down'"
+      v-tooltip.top="
+        sortMode === 'name'
+          ? 'Sorted by name — click to sort by password count'
+          : 'Sorted by password count — click to sort by name'
+      "
+      text
+      rounded
+      size="small"
+      severity="secondary"
+      aria-label="Toggle sort order"
+      @click="toggleSortMode"
+    />
+
     <!-- Dropdown for adding a group filter -->
     <Select
       :key="selectKey"
@@ -65,6 +97,12 @@ const clearAll = () => {
         <div class="flex items-center gap-2">
           <i :class="option.is_personal ? 'pi pi-user' : 'pi pi-users'" class="text-sm" />
           <span>{{ groupLabel(option) }}</span>
+          <span
+            v-if="passwordCounts !== undefined"
+            class="ml-auto text-xs text-surface-400 tabular-nums"
+          >
+            <Badge class="ml-auto" :value="passwordCounts[option.id] ?? 0" />
+          </span>
         </div>
       </template>
     </Select>

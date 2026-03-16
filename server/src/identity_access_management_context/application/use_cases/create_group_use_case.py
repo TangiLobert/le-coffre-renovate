@@ -9,7 +9,7 @@ from identity_access_management_context.application.gateways import (
 )
 from identity_access_management_context.domain.entities import Group
 from identity_access_management_context.domain.events import GroupCreatedEvent
-from identity_access_management_context.domain.exceptions import UserNotFoundException
+from identity_access_management_context.domain.exceptions import GroupAlreadyExistsException, UserNotFoundException
 from shared_kernel.application.gateways import DomainEventPublisher
 from shared_kernel.application.tracing import TracedUseCase
 
@@ -33,6 +33,9 @@ class CreateGroupUseCase(TracedUseCase):
         user = self.user_repository.get_by_id(command.creator_id)
         if user is None:
             raise UserNotFoundException(command.creator_id)
+
+        if self.group_repository.get_by_name(command.name) is not None:
+            raise GroupAlreadyExistsException(command.name)
 
         group = Group(
             id=command.id,

@@ -244,10 +244,10 @@ def test_complete_groups_workflow(authenticated_admin_client, sso_user_factory, 
     # =========================================================================
 
     # Step 4.1: Create group for member management tests
-    group_for_members = authenticated_admin_client.post("/api/groups/", json={"name": "Engineering Team"})
+    group_for_members = authenticated_admin_client.post("/api/groups/", json={"name": "Other group"})
     assert group_for_members.status_code == 201
     group = group_for_members.json()
-    assert group["name"] == "Engineering Team"
+    assert group["name"] == "Other group"
     assert "id" in group
     assert group["message"] == "Group created successfully"
     members_group_id = group["id"]
