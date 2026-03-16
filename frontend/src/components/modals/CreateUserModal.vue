@@ -17,8 +17,6 @@ const email = ref('')
 const name = ref('')
 const password = ref('')
 const loading = ref(false)
-const usernameInputRef = ref<{ $el: HTMLInputElement } | null>(null)
-const focusUsernameInput = () => setTimeout(() => usernameInputRef.value?.$el?.focus(), 100)
 
 // Reset form when modal is closed
 watch(visible, (isVisible) => {
@@ -128,22 +126,16 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    header="Create New User"
-    :style="{ width: '32rem' }"
-    @show="focusUsernameInput"
-  >
+  <Dialog v-model:visible="visible" modal header="Create New User" :style="{ width: '32rem' }">
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <label for="username" class="font-semibold">Username</label>
         <InputText
           id="username"
-          ref="usernameInputRef"
           v-model="username"
           placeholder="Enter username"
           required
+          autofocus
         />
         <small class="text-muted-color">Unique username for login</small>
       </div>
