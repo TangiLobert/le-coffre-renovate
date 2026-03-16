@@ -49,27 +49,6 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/le-coffre-backend:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/le-coffre-backend:buildcache,mode=max,ignore-error=true
 
-      - name: Scan backend image (Grype)
-        uses: anchore/scan-action@v7.3.1
-        id: grype-backend
-        with:
-          image: ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
-          fail-build: true
-          severity-cutoff: critical
-          output-format: sarif
-
-      - name: Upload backend scan results to GitHub Security
-        if: always() && steps.grype-backend.outputs.sarif != ''
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ${{ steps.grype-backend.outputs.sarif }}
-          category: container-backend
-
-      - name: Push backend image
-        run: |
-          docker push ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
-          docker push ${{ env.REGISTRY }}/le-coffre-backend:latest
-
       - name: Build frontend image
         uses: docker/build-push-action@v6.17.0
         with:
@@ -84,6 +63,15 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/le-coffre-frontend:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/le-coffre-frontend:buildcache,mode=max,ignore-error=true
 
+      - name: Scan backend image (Grype)
+        uses: anchore/scan-action@v7.3.1
+        id: grype-backend
+        with:
+          image: ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
+          fail-build: true
+          severity-cutoff: critical
+          output-format: sarif
+
       - name: Scan frontend image (Grype)
         uses: anchore/scan-action@v7.3.1
         id: grype-frontend
@@ -93,6 +81,13 @@ jobs:
           severity-cutoff: critical
           output-format: sarif
 
+      - name: Upload backend scan results to GitHub Security
+        if: always() && steps.grype-backend.outputs.sarif != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype-backend.outputs.sarif }}
+          category: container-backend
+
       - name: Upload frontend scan results to GitHub Security
         if: always() && steps.grype-frontend.outputs.sarif != ''
         uses: github/codeql-action/upload-sarif@v3
@@ -100,8 +95,10 @@ jobs:
           sarif_file: ${{ steps.grype-frontend.outputs.sarif }}
           category: container-frontend
 
-      - name: Push frontend image
+      - name: Push images
         run: |
+          docker push ${{ env.REGISTRY }}/le-coffre-backend:${{ steps.set_outputs.outputs.image_tag }}
+          docker push ${{ env.REGISTRY }}/le-coffre-backend:latest
           docker push ${{ env.REGISTRY }}/le-coffre-frontend:${{ steps.set_outputs.outputs.image_tag }}
           docker push ${{ env.REGISTRY }}/le-coffre-frontend:latest
 
