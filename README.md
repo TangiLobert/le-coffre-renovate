@@ -31,8 +31,8 @@ Le Coffre is an open-source password manager that allows you to securely store a
 ## Simple to deploy
 
 ### Docker images
-> rg.fr-par.scw.cloud/somait-cr:le-coffre-frontend:tag_version<br>
-> rg.fr-par.scw.cloud/somait-cr:le-coffre-backend:tag_version
+> ghcr.io/soma-smart/le-coffre-backend:tag_version (or latest)<br>
+> ghcr.io/soma-smart/le-coffre-frontend:tag_version (or latest)
 
 ### Docker compose
 ```bash
