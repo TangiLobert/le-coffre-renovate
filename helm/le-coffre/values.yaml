@@ -132,7 +132,7 @@ config:
   jwt:
     algorithm: "HS256"
     accessTokenExpirationMinutes: 15
-    refreshTokenExpirationDays: 7
+    refreshTokenExpirationHours: 168
     # Option 1 (recommended): provide an external secret created before deploying.
     #   kubectl create secret generic le-coffre \
     #     --from-literal=JWT_SECRET_KEY="$(openssl rand -base64 32)" \

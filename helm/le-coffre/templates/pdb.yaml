@@ -1,6 +1,6 @@
 {{- $frontendReplicas := .Values.frontend.replicaCount | int }}
 {{- $frontendMinReplicas := .Values.frontend.autoscaling.minReplicas | int }}
-{{- $frontendHasMultiple := or .Values.frontend.autoscaling.enabled (gt $frontendReplicas 1) }}
+{{- $frontendHasMultiple := or (gt $frontendReplicas 1) (and .Values.frontend.autoscaling.enabled (gt $frontendMinReplicas 1)) }}
 {{- if and .Values.frontend.podDisruptionBudget.enabled $frontendHasMultiple }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget

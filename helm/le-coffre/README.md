@@ -12,114 +12,108 @@ This Helm chart deploys Le Coffre password manager on a Kubernetes cluster.
 
 ### Quick Start
 
+Before installing, create the two required secrets:
+
 ```bash
-# Add your values
-helm install le-coffre ./helm/le-coffre \
-  --set ingress.hosts[0].host=le-coffre.yourdomain.com \
-  --set ingress.tls[0].hosts[0]=le-coffre.yourdomain.com \
-  --set config.appBaseUrl=https://le-coffre.yourdomain.com \
-  --set config.jwt.secretKey=$(openssl rand -base64 32)
-```
+# 1. JWT secret
+kubectl create secret generic le-coffre \
+  --from-literal=JWT_SECRET_KEY="$(openssl rand -base64 32)" \
+  -n le-coffre
 
-### With Custom Values File
-
-Create a `values-prod.yaml` file:
-
-```yaml
-image:
-  tag: "v1.0.0"
-
-ingress:
-  hosts:
-    - host: le-coffre.yourdomain.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: le-coffre-tls
-      hosts:
-        - le-coffre.yourdomain.com
-
-config:
-  appBaseUrl: "https://le-coffre.yourdomain.com"
-  database:
-    url: "postgresql://lecoffre:PASSWORD@postgresql:5432/lecoffre"
-  jwt:
-    secretKey: "YOUR_SECURE_JWT_SECRET_KEY"
-
-resources:
-  limits:
-    cpu: 1000m
-    memory: 1Gi
-  requests:
-    cpu: 200m
-    memory: 256Mi
+# 2. Database URL
+kubectl create secret generic le-coffre-db \
+  --from-literal=DATABASE_URL="postgresql://user:password@db-host:5432/lecoffre?sslmode=require" \
+  -n le-coffre
 ```
 
 Then install:
 
 ```bash
-helm install le-coffre ./helm/le-coffre -f values-prod.yaml
+helm install le-coffre ./helm/le-coffre \
+  --set config.jwt.existingSecretName=le-coffre \
+  --set config.database.existingSecretName=le-coffre-db \
+  --set ingress.enabled=true \
+  --set "ingress.hosts[0].host=le-coffre.yourdomain.com" \
+  --set "ingress.tls[0].secretName=le-coffre-tls" \
+  --set "ingress.tls[0].hosts[0]=le-coffre.yourdomain.com" \
+  --set config.appBaseUrl=https://le-coffre.yourdomain.com \
+  -n le-coffre
+```
+
+### With Custom Values File
+
+Copy `values-example.yaml` and adapt it for your environment:
+
+```bash
+cp helm/le-coffre/values-example.yaml values-prod.yaml
+# Edit values-prod.yaml, then:
+helm upgrade --install le-coffre ./helm/le-coffre -f values-prod.yaml -n le-coffre
 ```
 
 ## Configuration
 
-The following table lists the configurable parameters and their default values.
+The following table lists the main configurable parameters. See `values.yaml` for the full list with defaults.
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `replicaCount` | Number of replicas | `1` |
-| `image.repository` | Image repository | `rg.fr-par.scw.cloud/soma-smart-cr/le-coffre` |
-| `image.tag` | Image tag | `""` (uses chart appVersion) |
-| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
-| `ingress.enabled` | Enable ingress | `true` |
+| `frontend.replicaCount` | Frontend replica count | `1` |
+| `frontend.image.tag` | Frontend image tag | `""` (uses chart appVersion) |
+| `frontend.image.pullPolicy` | Frontend image pull policy | `IfNotPresent` |
+| `backend.replicaCount` | Backend replica count | `1` |
+| `backend.image.tag` | Backend image tag | `""` (uses chart appVersion) |
+| `backend.image.pullPolicy` | Backend image pull policy | `IfNotPresent` |
+| `ingress.enabled` | Enable ingress | `false` |
 | `ingress.className` | Ingress class name | `nginx` |
 | `ingress.hosts` | Ingress hosts configuration | See values.yaml |
 | `config.environment` | Environment (development/production) | `production` |
-| `config.database.url` | Database connection URL | PostgreSQL example |
-| `config.jwt.secretKey` | JWT secret key (REQUIRED) | `CHANGE_ME_GENERATE_A_SECURE_KEY` |
+| `config.jwt.existingSecretName` | Name of pre-existing secret containing `JWT_SECRET_KEY` | `""` (required) |
+| `config.jwt.secretKey` | Let Helm manage the JWT secret (not recommended for production) | `""` |
+| `config.database.existingSecretName` | Name of pre-existing secret containing `DATABASE_URL` | `"le-coffre-db"` |
 | `config.appBaseUrl` | Application base URL | `https://le-coffre.example.com` |
 | `persistence.enabled` | Enable persistence for SQLite | `false` |
-| `resources.limits.cpu` | CPU limit | `500m` |
-| `resources.limits.memory` | Memory limit | `512Mi` |
+| `backend.resources.limits.cpu` | Backend CPU limit | `500m` |
+| `backend.resources.limits.memory` | Backend memory limit | `512Mi` |
 
 ## Database Options
 
-### Option 1: SQLite (Development Only)
+### Option 1: External PostgreSQL (Recommended)
+
+Create the database secret before deploying:
+
+```bash
+kubectl create secret generic le-coffre-db \
+  --from-literal=DATABASE_URL="postgresql://user:password@host:5432/lecoffre?sslmode=require" \
+  -n le-coffre
+```
+
+Then reference it in your values:
 
 ```yaml
 config:
   database:
-    url: "sqlite:///data/le-coffre.db"
+    existingSecretName: "le-coffre-db"
+```
+
+### Option 2: SQLite (Development Only)
+
+```bash
+kubectl create secret generic le-coffre-db \
+  --from-literal=DATABASE_URL="sqlite:////data/le-coffre.db" \
+  -n le-coffre
+```
+
+```yaml
+config:
+  database:
+    existingSecretName: "le-coffre-db"
 
 persistence:
   enabled: true
   size: 1Gi
-  storageClass: "scw-bssd"
+  storageClass: "standard"
 ```
 
-### Option 2: External PostgreSQL (Recommended)
-
-```yaml
-config:
-  database:
-    url: "postgresql://user:password@host:5432/database"
-```
-
-### Option 3: Deploy PostgreSQL with the Chart
-
-```yaml
-postgresql:
-  enabled: true
-  auth:
-    username: lecoffre
-    password: changeme
-    database: lecoffre
-
-config:
-  database:
-    url: "postgresql://lecoffre:changeme@le-coffre-postgresql:5432/lecoffre"
-```
+> **Note:** SQLite with `replicaCount > 1` is not supported (ReadWriteOnce PVC).
 
 ## Upgrading
 
@@ -160,16 +154,11 @@ ingress:
 
 persistence:
   storageClass: "scw-bssd"  # or "scw-sbv" for slower, cheaper storage
-
-postgresql:
-  primary:
-    persistence:
-      storageClass: "scw-bssd"
 ```
 
 ## Monitoring
 
-The chart includes liveness and readiness probes that check the `/api/health` endpoint.
+The chart configures liveness and readiness probes on `/api/health` (backend) and `/` (frontend) by default.
 
 You can monitor the application with:
 

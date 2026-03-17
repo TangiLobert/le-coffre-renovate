@@ -85,7 +85,7 @@ config:
   jwt:
     algorithm: "HS256"
     accessTokenExpirationMinutes: 15
-    refreshTokenExpirationDays: 7
+    refreshTokenExpirationHours: 168
     # JWT_SECRET_KEY is managed via an external Kubernetes secret.
     # Generate and create before deploying:
     #
