@@ -84,6 +84,7 @@ config:
   # JWT configuration
   jwt:
     algorithm: "HS256"
+    # Access token lifetime in minutes.
     accessTokenExpirationMinutes: 15
     refreshTokenExpirationHours: 168
     # JWT_SECRET_KEY is managed via an external Kubernetes secret.
@@ -103,6 +104,17 @@ config:
     # Set to "json" to emit structured JSON logs (recommended for log aggregation).
     # Leave unset for standard text format.
     format: "json"
+
+  # Rate limiting (applied per-pod, in-memory sliding window)
+  rateLimit:
+    # Set to false to disable rate limiting entirely (not recommended in production).
+    enabled: true
+    # Max requests per window for auth routes (login, register, SSO).
+    authMaxRequests: 5
+    # Max requests per window for general API routes.
+    apiMaxRequests: 60
+    # Sliding window duration in seconds.
+    windowSeconds: 60
 
   # Monitoring — OpenTelemetry OTLP export.
   # To enable, set enabled: true and configure the endpoint and service name.
