@@ -105,13 +105,12 @@ config:
     format: "json"
 
   # Monitoring — OpenTelemetry OTLP export.
+  # To enable, set enabled: true and configure the endpoint and service name.
   monitoring:
     enabled: false
-    # OTLP collector endpoint (e.g. an OpenTelemetry Collector or Grafana Alloy).
-    # /v1/metrics and /v1/traces are appended automatically.
-    otlpEndpoint: "http://otel-collector.monitoring.svc.cluster.local:4318"
-    # Value used for the OTEL_SERVICE_NAME env var and job= label in Prometheus.
-    serviceName: "le-coffre"
+    # otlpEndpoint and serviceName are required when enabled: true.
+    # otlpEndpoint: "http://otel-collector.monitoring.svc.cluster.local:4318"
+    # serviceName: "le-coffre"
 
 # =============================================================================
 # Image pull secrets
@@ -237,18 +236,3 @@ persistence:
   size: 1Gi
   mountPath: /data
 
-# =============================================================================
-# Bundled PostgreSQL (not recommended for production)
-# =============================================================================
-# Use an external managed database in production.
-postgresql:
-  enabled: false
-  auth:
-    username: lecoffre
-    password: changeme
-    database: lecoffre
-  primary:
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: "standard"   # replace with your cluster's storage class

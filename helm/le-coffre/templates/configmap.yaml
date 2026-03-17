@@ -9,7 +9,7 @@ data:
   JWT_ALGORITHM: {{ .Values.config.jwt.algorithm | quote }}
   JWT_ACCESS_TOKEN_EXPIRATION_MINUTES: {{ .Values.config.jwt.accessTokenExpirationMinutes | quote }}
   JWT_REFRESH_TOKEN_EXPIRATION_HOURS: {{ .Values.config.jwt.refreshTokenExpirationHours | quote }}
-  APP_BASE_URL: {{ .Values.config.appBaseUrl | quote }}
+  APP_BASE_URL: {{ required "config.appBaseUrl is required. Set it to your application's public URL (e.g. https://le-coffre.yourdomain.com)" .Values.config.appBaseUrl | quote }}
   {{- if .Values.config.monitoring.enabled }}
   OTEL_EXPORTER_OTLP_ENDPOINT: {{ required "config.monitoring.otlpEndpoint is required when config.monitoring.enabled is true" .Values.config.monitoring.otlpEndpoint | quote }}
   OTEL_SERVICE_NAME: {{ required "config.monitoring.serviceName is required when config.monitoring.enabled is true" .Values.config.monitoring.serviceName | quote }}

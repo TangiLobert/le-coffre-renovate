@@ -75,6 +75,7 @@ backend:
   securityContext:
     runAsNonRoot: true
     allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
     capabilities:
       drop: [ALL]
   autoscaling:
@@ -113,8 +114,8 @@ backend:
 config:
   environment: production
 
-  # Application base URL — used for SSO callbacks and CORS.
-  appBaseUrl: "https://le-coffre.example.com"
+  # Application base URL — used for SSO callbacks and CORS. Required.
+  appBaseUrl: ""
 
   # Database configuration
   # DATABASE_URL must be provided via an external Kubernetes secret.
@@ -231,21 +232,6 @@ serviceAccount:
   create: true
   name: ""
   annotations: {}
-
-# =============================================================================
-# Bundled PostgreSQL (not recommended for production)
-# =============================================================================
-postgresql:
-  enabled: false
-  auth:
-    username: lecoffre
-    password: changeme
-    database: lecoffre
-  primary:
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: ""
 
 nameOverride: ""
 fullnameOverride: ""

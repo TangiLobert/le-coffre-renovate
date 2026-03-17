@@ -16,7 +16,8 @@ spec:
 {{- end }}
 ---
 {{- $backendReplicas := .Values.backend.replicaCount | int }}
-{{- $backendHasMultiple := or .Values.backend.autoscaling.enabled (gt $backendReplicas 1) }}
+{{- $backendMinReplicas := .Values.backend.autoscaling.minReplicas | int }}
+{{- $backendHasMultiple := or (gt $backendReplicas 1) (and .Values.backend.autoscaling.enabled (gt $backendMinReplicas 1)) }}
 {{- if and .Values.backend.podDisruptionBudget.enabled $backendHasMultiple }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget

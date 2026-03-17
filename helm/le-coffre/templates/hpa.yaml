@@ -1,4 +1,7 @@
 {{- if .Values.frontend.autoscaling.enabled }}
+{{- if not .Values.frontend.autoscaling.targetCPUUtilizationPercentage }}
+{{- fail "frontend.autoscaling is enabled but no metrics are configured. Set frontend.autoscaling.targetCPUUtilizationPercentage." }}
+{{- end }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -24,6 +27,9 @@ spec:
 {{- end }}
 ---
 {{- if .Values.backend.autoscaling.enabled }}
+{{- if not (or .Values.backend.autoscaling.targetCPUUtilizationPercentage .Values.backend.autoscaling.targetMemoryUtilizationPercentage) }}
+{{- fail "backend.autoscaling is enabled but no metrics are configured. Set targetCPUUtilizationPercentage or targetMemoryUtilizationPercentage." }}
+{{- end }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

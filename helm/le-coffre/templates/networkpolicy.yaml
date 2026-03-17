@@ -1,4 +1,7 @@
 {{- if .Values.networkPolicy.enabled }}
+{{- if and (not .Values.networkPolicy.frontend.ingressRules) (not .Values.networkPolicy.backend.ingressRules) }}
+{{- fail "networkPolicy is enabled but no ingressRules are configured for frontend or backend. This will result in deny-all ingress for both services. Set networkPolicy.frontend.ingressRules and/or networkPolicy.backend.ingressRules." }}
+{{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
