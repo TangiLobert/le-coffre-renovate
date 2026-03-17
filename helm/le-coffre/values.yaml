@@ -63,8 +63,8 @@ backend:
     pullPolicy: IfNotPresent
     tag: ""
   service:
-    port: 8000
-    targetPort: 8000
+    port: 8080
+    targetPort: 8080
   resources:
     requests:
       cpu: 100m
@@ -91,20 +91,20 @@ backend:
     startupProbe:
       httpGet:
         path: /api/health
-        port: 8000
+        port: 8080
       initialDelaySeconds: 10
       failureThreshold: 30
       periodSeconds: 5
     livenessProbe:
       httpGet:
         path: /api/health
-        port: 8000
+        port: 8080
       periodSeconds: 30
       failureThreshold: 3
     readinessProbe:
       httpGet:
         path: /api/health
-        port: 8000
+        port: 8080
       periodSeconds: 10
       failureThreshold: 3
 
@@ -142,6 +142,13 @@ config:
     existingSecretName: ""
     # Option 2 (not recommended for production): let Helm manage the secret.
     # secretKey: ""
+
+  # Rate limiting
+  rateLimit:
+    enabled: true
+    authMaxRequests: 5
+    apiMaxRequests: 60
+    windowSeconds: 60
 
   # Logging
   logging:
