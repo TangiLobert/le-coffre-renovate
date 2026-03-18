@@ -69,7 +69,7 @@ The following table lists the main configurable parameters. See `values.yaml` fo
 | `config.jwt.existingSecretName` | Name of pre-existing secret containing `JWT_SECRET_KEY` | `""` (required) |
 | `config.jwt.secretKey` | Let Helm manage the JWT secret (not recommended for production) | `""` |
 | `config.database.existingSecretName` | Name of pre-existing secret containing `DATABASE_URL` | `"le-coffre-db"` |
-| `config.appBaseUrl` | Application base URL | `https://le-coffre.example.com` |
+| `config.appBaseUrl` | Application base URL (required) | `""` |
 | `persistence.enabled` | Enable persistence for SQLite | `false` |
 | `backend.resources.limits.cpu` | Backend CPU limit | `500m` |
 | `backend.resources.limits.memory` | Backend memory limit | `512Mi` |

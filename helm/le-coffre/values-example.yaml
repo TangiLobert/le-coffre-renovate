@@ -71,7 +71,7 @@ config:
   appBaseUrl: "https://le-coffre.yourdomain.com"
 
   # Database configuration
-  # DATABASE_URL is managed via an external Kubernetes secret (le-coffre-db).
+  # DATABASE_URL is managed via an external Kubernetes secret.
   # Create it before deploying:
   #
   #   kubectl create secret generic le-coffre-db \
@@ -80,6 +80,8 @@ config:
   #
   # Tip: URL-encode special characters in the password:
   #   python3 -c "import urllib.parse; print(urllib.parse.quote('your_password', safe=''))"
+  database:
+    existingSecretName: "le-coffre-db"
 
   # JWT configuration
   jwt:
@@ -95,8 +97,8 @@ config:
     #     --from-literal=JWT_SECRET_KEY="$JWT_SECRET" \
     #     -n le-coffre
     #
+    existingSecretName: "le-coffre"
     # Alternatively, pass it at deploy time (not recommended for production):
-    #   helm upgrade --set config.jwt.secretKey="$JWT_SECRET" ...
     # secretKey: ""
 
   # Logging
