@@ -144,18 +144,6 @@ helm uninstall le-coffre
 
 6. Enable network policies to restrict pod communication
 
-## Scaleway Specific Configuration
-
-For Scaleway Kubernetes (Kapsule):
-
-```yaml
-ingress:
-  className: "nginx"
-
-persistence:
-  storageClass: "scw-bssd"  # or "scw-sbv" for slower, cheaper storage
-```
-
 ## Monitoring
 
 The chart configures liveness and readiness probes on `/api/health` (backend) and `/` (frontend) by default.
