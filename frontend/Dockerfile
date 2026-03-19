@@ -14,13 +14,14 @@ RUN bun run build
 # =============================================================================
 # Stage 2: Production Image (nginx)
 # =============================================================================
-FROM nginx:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.27-alpine
+
+USER root
 
 # Apply latest security patches from Alpine repos
 RUN apk upgrade --no-cache
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+USER nginx
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -28,6 +29,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built frontend files
 COPY --from=builder /frontend/dist /usr/share/nginx/html
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
