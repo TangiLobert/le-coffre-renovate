@@ -288,15 +288,27 @@ onMounted(async () => {
       <ProgressSpinner />
     </div>
 
-    <div v-else class="flex flex-col gap-4"
-      @keydown.enter.prevent="canManageSharing && !!selectedGroupId && !loading && sharePassword()">
+    <div
+      v-else
+      class="flex flex-col gap-4"
+      @keydown.enter.prevent="canManageSharing && !!selectedGroupId && !loading && sharePassword()"
+    >
       <!-- Share with new group (only for users with write access) -->
       <div v-if="canManageSharing" class="flex flex-col gap-4 pb-4 border-b">
         <h3 class="font-semibold text-lg">Share with Group</h3>
         <div class="flex gap-2">
-          <Select id="group-select" v-model="selectedGroupId" :options="availableGroupsForSharing" optionLabel="name"
-            optionValue="id" placeholder="Select a group to share with" :disabled="loading" filter
-            filterPlaceholder="Search groups..." class="flex-1">
+          <Select
+            id="group-select"
+            v-model="selectedGroupId"
+            :options="availableGroupsForSharing"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Select a group to share with"
+            :disabled="loading"
+            filter
+            filterPlaceholder="Search groups..."
+            class="flex-1"
+          >
             <template #option="slotProps">
               <div class="flex items-center gap-2">
                 <i class="pi pi-users text-sm"></i>
@@ -304,8 +316,13 @@ onMounted(async () => {
               </div>
             </template>
           </Select>
-          <Button label="Share" icon="pi pi-share-alt" @click="sharePassword" :loading="loading"
-            :disabled="!selectedGroupId || loading" />
+          <Button
+            label="Share"
+            icon="pi pi-share-alt"
+            @click="sharePassword"
+            :loading="loading"
+            :disabled="!selectedGroupId || loading"
+          />
         </div>
       </div>
 
@@ -318,8 +335,11 @@ onMounted(async () => {
         </div>
 
         <div v-else class="space-y-2">
-          <Card v-for="accessItem in userAccessList" :key="accessItem.user_id"
-            class="hover:bg-surface-50 transition-colors">
+          <Card
+            v-for="accessItem in userAccessList"
+            :key="accessItem.user_id"
+            class="hover:bg-surface-50 transition-colors"
+          >
             <template #content>
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -339,16 +359,22 @@ onMounted(async () => {
                         Can read
                       </span>
                     </div>
-                    <div v-if="
-                      isCurrentUser(accessItem.user_id) &&
-                      getAccessGroupsForUser(accessItem.user_id).length > 0
-                    " class="flex flex-wrap gap-2 items-center text-sm text-muted-color mt-1">
+                    <div
+                      v-if="
+                        isCurrentUser(accessItem.user_id) &&
+                        getAccessGroupsForUser(accessItem.user_id).length > 0
+                      "
+                      class="flex flex-wrap gap-2 items-center text-sm text-muted-color mt-1"
+                    >
                       <span class="flex items-center gap-1">
                         <i class="pi pi-users"></i>
                         Via groups:
                       </span>
-                      <span v-for="group in getAccessGroupsForUser(accessItem.user_id)" :key="group.id"
-                        class="surface-100 px-2 py-1 rounded">
+                      <span
+                        v-for="group in getAccessGroupsForUser(accessItem.user_id)"
+                        :key="group.id"
+                        class="surface-100 px-2 py-1 rounded"
+                      >
                         {{ group.name }}
                       </span>
                     </div>
@@ -367,7 +393,11 @@ onMounted(async () => {
         </h3>
 
         <div class="space-y-2">
-          <Card v-for="group in groupAccessList" :key="group.user_id" class="hover:bg-surface-50 transition-colors">
+          <Card
+            v-for="group in groupAccessList"
+            :key="group.user_id"
+            class="hover:bg-surface-50 transition-colors"
+          >
             <template #content>
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -392,8 +422,17 @@ onMounted(async () => {
 
                 <!-- Unshare button (only for users with write access and non-owner groups) -->
                 <div v-if="canManageSharing && !group.is_owner">
-                  <Button icon="pi pi-times" text rounded severity="danger" size="small" aria-label="Revoke access"
-                    :loading="loading" @click="unshareFromGroup(group.user_id)" v-tooltip="'Remove group access'" />
+                  <Button
+                    icon="pi pi-times"
+                    text
+                    rounded
+                    severity="danger"
+                    size="small"
+                    aria-label="Revoke access"
+                    :loading="loading"
+                    @click="unshareFromGroup(group.user_id)"
+                    v-tooltip="'Remove group access'"
+                  />
                 </div>
               </div>
             </template>
