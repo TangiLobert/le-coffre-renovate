@@ -7,7 +7,10 @@ export type GroupSortMode = 'name' | 'count'
  * If myPersonalGroupId is provided, that group is always pinned first.
  * Otherwise, any group flagged is_personal comes first.
  */
-export function sortGroupsByName(groups: GroupItem[], myPersonalGroupId?: string | null): GroupItem[] {
+export function sortGroupsByName(
+  groups: GroupItem[],
+  myPersonalGroupId?: string | null,
+): GroupItem[] {
   return [...groups].sort((a, b) => {
     if (myPersonalGroupId) {
       if (a.id === myPersonalGroupId) return -1

@@ -259,8 +259,11 @@ onMounted(async () => {
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card v-for="group in sortGroups(filteredGroups, 'name')" :key="group.id"
-          class="hover:shadow-lg transition-shadow">
+        <Card
+          v-for="group in sortGroups(filteredGroups, 'name')"
+          :key="group.id"
+          class="hover:shadow-lg transition-shadow"
+        >
           <template #title>
             <div class="flex items-center gap-2 justify-between">
               <div class="flex items-center gap-2">
@@ -268,10 +271,26 @@ onMounted(async () => {
                 <span>{{ group.name }}</span>
               </div>
               <div class="flex gap-1">
-                <Button v-if="canEditGroup(group)" icon="pi pi-pencil" text rounded severity="secondary" size="small"
-                  @click="openEditDialog(group)" v-tooltip.top="'Edit group'" />
-                <Button v-if="canEditGroup(group)" icon="pi pi-times" text rounded severity="danger" size="small"
-                  @click="openDeleteGroupDialog(group)" v-tooltip.top="'Delete group'" />
+                <Button
+                  v-if="canEditGroup(group)"
+                  icon="pi pi-pencil"
+                  text
+                  rounded
+                  severity="secondary"
+                  size="small"
+                  @click="openEditDialog(group)"
+                  v-tooltip.top="'Edit group'"
+                />
+                <Button
+                  v-if="canEditGroup(group)"
+                  icon="pi pi-times"
+                  text
+                  rounded
+                  severity="danger"
+                  size="small"
+                  @click="openDeleteGroupDialog(group)"
+                  v-tooltip.top="'Delete group'"
+                />
               </div>
             </div>
           </template>
@@ -283,8 +302,13 @@ onMounted(async () => {
                 <span v-else>Shared Group</span>
               </div>
               <div class="flex gap-2 mt-4">
-                <Button label="View Members" icon="pi pi-users" size="small" outlined
-                  @click="openGroupDetails(group)" />
+                <Button
+                  label="View Members"
+                  icon="pi pi-users"
+                  size="small"
+                  outlined
+                  @click="openGroupDetails(group)"
+                />
               </div>
             </div>
           </template>
@@ -292,31 +316,57 @@ onMounted(async () => {
       </div>
 
       <!-- Create/Edit Group Dialog -->
-      <Dialog v-model:visible="showCreateDialog" :header="isEditMode ? 'Edit Group' : 'Create New Group'" :modal="true"
-        :style="{ width: '30rem' }">
+      <Dialog
+        v-model:visible="showCreateDialog"
+        :header="isEditMode ? 'Edit Group' : 'Create New Group'"
+        :modal="true"
+        :style="{ width: '30rem' }"
+      >
         <div class="flex flex-col gap-4 py-4">
           <div class="flex flex-col gap-2">
             <label for="group-name" class="font-semibold">Group Name</label>
-            <InputText id="group-name" v-model="newGroupName" placeholder="Enter group name" @keyup.enter="handleSubmit"
-              autofocus />
+            <InputText
+              id="group-name"
+              v-model="newGroupName"
+              placeholder="Enter group name"
+              @keyup.enter="handleSubmit"
+              autofocus
+            />
           </div>
         </div>
         <template #footer>
           <Button label="Cancel" icon="pi pi-times" text @click="showCreateDialog = false" />
-          <Button :label="isEditMode ? 'Update' : 'Create'" :icon="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
-            @click="handleSubmit" />
+          <Button
+            :label="isEditMode ? 'Update' : 'Create'"
+            :icon="isEditMode ? 'pi pi-check' : 'pi pi-plus'"
+            @click="handleSubmit"
+          />
         </template>
       </Dialog>
 
       <!-- Group Details Modal -->
-      <GroupDetailsModal v-model:visible="showGroupDetailsModal" :group="selectedGroup"
-        @member-added="handleMemberChanged" @member-removed="handleMemberChanged" />
+      <GroupDetailsModal
+        v-model:visible="showGroupDetailsModal"
+        :group="selectedGroup"
+        @member-added="handleMemberChanged"
+        @member-removed="handleMemberChanged"
+      />
 
       <!-- Delete Group Confirmation Modal -->
-      <ConfirmationModal v-model:visible="showDeleteGroupModal" title="Delete Group" :question="deleteModalQuestion"
-        :description="deleteModalDescription" :warning-message="deleteWarningMessage" confirm-label="Delete Group"
-        cancel-label="Cancel" severity="danger" icon="pi pi-exclamation-triangle" :countdown-seconds="6"
-        :can-proceed="canDeleteGroup" @confirm="handleDeleteGroup" />
+      <ConfirmationModal
+        v-model:visible="showDeleteGroupModal"
+        title="Delete Group"
+        :question="deleteModalQuestion"
+        :description="deleteModalDescription"
+        :warning-message="deleteWarningMessage"
+        confirm-label="Delete Group"
+        cancel-label="Cancel"
+        severity="danger"
+        icon="pi pi-exclamation-triangle"
+        :countdown-seconds="6"
+        :can-proceed="canDeleteGroup"
+        @confirm="handleDeleteGroup"
+      />
     </div>
   </MainLayout>
 </template>
