@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import type { GetPasswordListResponse } from '@/client/types.gen'
+import type { GetPasswordListResponse, GroupItem } from '@/client/types.gen'
 import FolderCard from './FolderCard.vue'
 import GroupFilterSelect from '@/components/GroupFilterSelect.vue'
 import CreatePasswordModal from '@/components/modals/CreatePasswordModal.vue'
@@ -22,8 +22,8 @@ const { passwords, loading, error } = storeToRefs(passwordsStore)
 const { groups, userBelongingGroups, currentUserPersonalGroupId } = storeToRefs(groupsStore)
 const { isAdmin } = storeToRefs(userStore)
 
-// Folder state
-const selectedFolder = ref<string | null>(null)
+const openFolderKey = ref<string | null>(null)
+const openGroupId = ref<string | null>(null)
 
 // Modal state
 const showCreateModal = ref(false)
@@ -133,28 +133,77 @@ const filteredPasswords = computed<GetPasswordListResponse[]>(() => {
 
 const folderFilter = computed(() => route.query.folder as string | undefined)
 
-// Folder grouping applied on filtered passwords
-const folders = computed(() => {
-  const folderMap = new Map<string, GetPasswordListResponse[]>()
+type GroupedFolder = {
+  name: string
+  count: number
+  passwords: GetPasswordListResponse[]
+}
 
-  filteredPasswords.value.forEach((password) => {
-    const folderName = password.folder
-    if (!folderMap.has(folderName)) folderMap.set(folderName, [])
-    folderMap.get(folderName)!.push(password)
-  })
+type GroupedSection = {
+  id: string
+  name: string
+  isPersonal: boolean
+  count: number
+  folders: GroupedFolder[]
+}
 
-  if (folderFilter.value) {
-    const filtered = folderMap.get(folderFilter.value)
-    if (filtered) {
-      return [{ name: folderFilter.value, count: filtered.length, passwords: filtered }]
+const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
+  const groupsById = new Map<string, GroupItem>(filterableGroups.value.map((g) => [g.id, g]))
+  const visibleGroupIds =
+    selectedGroupIds.value === null
+      ? new Set(filterableGroups.value.map((g) => g.id))
+      : new Set(selectedGroupIds.value)
+
+  const groupPasswordMap = new Map<string, GetPasswordListResponse[]>()
+
+  for (const password of filteredPasswords.value) {
+    const accessibleGroupIds = getAccessibleGroupIdsForPassword(password)
+    for (const groupId of accessibleGroupIds) {
+      if (!visibleGroupIds.has(groupId)) continue
+      if (!groupPasswordMap.has(groupId)) groupPasswordMap.set(groupId, [])
+      groupPasswordMap.get(groupId)!.push(password)
     }
   }
 
-  return Array.from(folderMap.entries()).map(([name, items]) => ({
-    name,
-    count: items.length,
-    passwords: items,
-  }))
+  const orderedGroupIds =
+    selectedGroupIds.value === null
+      ? filterableGroups.value.map((g) => g.id)
+      : selectedGroupIds.value
+
+  const sections: GroupedSection[] = []
+
+  for (const groupId of orderedGroupIds) {
+    const groupPasswords = groupPasswordMap.get(groupId)
+    if (!groupPasswords || groupPasswords.length === 0) continue
+
+    const folderMap = new Map<string, GetPasswordListResponse[]>()
+    for (const password of groupPasswords) {
+      const folderName = password.folder
+      if (!folderMap.has(folderName)) folderMap.set(folderName, [])
+      folderMap.get(folderName)!.push(password)
+    }
+
+    const folders = Array.from(folderMap.entries())
+      .filter(([folderName]) => !folderFilter.value || folderName === folderFilter.value)
+      .map(([name, items]) => ({
+        name,
+        count: items.length,
+        passwords: items,
+      }))
+
+    if (folders.length === 0) continue
+
+    const group = groupsById.get(groupId)
+    sections.push({
+      id: groupId,
+      name: group?.name ?? groupId,
+      isPersonal: group?.is_personal ?? false,
+      count: groupPasswords.length,
+      folders,
+    })
+  }
+
+  return sections
 })
 
 // Handlers
@@ -193,6 +242,21 @@ const handleUnshared = async () => {
   await passwordsStore.refresh()
 }
 
+const handleFolderToggle = (folderKey: string) => {
+  openFolderKey.value = openFolderKey.value === folderKey ? null : folderKey
+}
+
+const handleGroupToggle = (groupId: string) => {
+  if (openGroupId.value === groupId) {
+    openGroupId.value = null
+    openFolderKey.value = null
+    return
+  }
+
+  openGroupId.value = groupId
+  openFolderKey.value = null
+}
+
 // Reset editing state when modals close
 watch(showCreateModal, (isVisible) => {
   if (!isVisible) editingPassword.value = null
@@ -212,18 +276,14 @@ watch(
   { immediate: true },
 )
 
-// Sync folder filter from route
-watch(
-  () => route.query.folder,
-  (folderQuery) => {
-    selectedFolder.value = folderQuery as string | null
-  },
-)
+watch(groupedByGroupAndFolder, (sections) => {
+  if (openGroupId.value && !sections.some((section) => section.id === openGroupId.value)) {
+    openGroupId.value = null
+    openFolderKey.value = null
+  }
+})
 
 onMounted(async () => {
-  const folderQuery = route.query.folder as string | undefined
-  if (folderQuery) selectedFolder.value = folderQuery
-
   await Promise.all([passwordsStore.fetchPasswords(), groupsStore.fetchAllGroups()])
 })
 </script>
@@ -265,21 +325,60 @@ onMounted(async () => {
       {{ error }}
     </div>
 
-    <div v-else-if="filteredPasswords.length === 0" class="text-center py-8 text-surface-500">
+    <div v-else-if="groupedByGroupAndFolder.length === 0" class="text-center py-8 text-surface-500">
       <p>No passwords to display.</p>
     </div>
 
-    <div v-else class="space-y-2">
-      <FolderCard
-        v-for="folder in folders"
-        :key="folder.name"
-        :folder="folder"
-        :initialOpen="selectedFolder === folder.name"
-        @edit="handleEdit"
-        @share="handleShare"
-        @history="handleHistory"
-        @deleted="handleDeleted"
-      />
+    <div v-else class="space-y-4">
+      <Card v-for="groupSection in groupedByGroupAndFolder" :key="groupSection.id">
+        <template #content>
+          <div
+            class="flex items-center justify-between gap-3 cursor-pointer"
+            @click="handleGroupToggle(groupSection.id)"
+          >
+            <div class="flex items-center gap-3">
+              <i
+                :class="[
+                  'pi',
+                  groupSection.isPersonal ? 'pi-user' : 'pi-users',
+                  'text-xl text-primary',
+                ]"
+              />
+              <div>
+                <h2 class="text-xl font-semibold">{{ groupSection.name }}</h2>
+                <p class="text-sm text-surface-500">
+                  {{ groupSection.count }}
+                  {{ groupSection.count === 1 ? 'password' : 'passwords' }}
+                </p>
+              </div>
+            </div>
+            <i
+              :class="[
+                'pi',
+                openGroupId === groupSection.id ? 'pi-chevron-up' : 'pi-chevron-down',
+                'text-gray-400',
+              ]"
+            />
+          </div>
+
+          <div
+            v-if="openGroupId === groupSection.id"
+            class="space-y-2 mt-4 pt-4 border-t border-surface"
+          >
+            <FolderCard
+              v-for="folder in groupSection.folders"
+              :key="`${groupSection.id}-${folder.name}`"
+              :folder="folder"
+              :isOpen="openFolderKey === `${groupSection.id}-${folder.name}`"
+              @toggle="handleFolderToggle(`${groupSection.id}-${folder.name}`)"
+              @edit="handleEdit"
+              @share="handleShare"
+              @history="handleHistory"
+              @deleted="handleDeleted"
+            />
+          </div>
+        </template>
+      </Card>
     </div>
 
     <!-- Modals -->

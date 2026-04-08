@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import type { GetPasswordListResponse } from '@/client/types.gen'
 import PasswordCard from './PasswordCard.vue'
 
@@ -43,20 +43,21 @@ const props = defineProps<{
     count: number
     passwords: GetPasswordListResponse[]
   }
-  initialOpen?: boolean
+  isOpen?: boolean
 }>()
 
 const emit = defineEmits<{
+  (e: 'toggle'): void
   (e: 'edit', password: GetPasswordListResponse): void
   (e: 'share', password: GetPasswordListResponse): void
   (e: 'history', password: GetPasswordListResponse): void
   (e: 'deleted'): void
 }>()
 
-const isOpen = ref(props.initialOpen ?? false)
+const isOpen = computed(() => props.isOpen ?? false)
 
 const toggleFolder = () => {
-  isOpen.value = !isOpen.value
+  emit('toggle')
 }
 
 const handleEdit = (password: GetPasswordListResponse) => {
