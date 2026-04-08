@@ -369,6 +369,7 @@ onMounted(async () => {
               v-for="folder in groupSection.folders"
               :key="`${groupSection.id}-${folder.name}`"
               :folder="folder"
+              :contextGroupId="groupSection.id"
               :isOpen="openFolderKey === `${groupSection.id}-${folder.name}`"
               @toggle="handleFolderToggle(`${groupSection.id}-${folder.name}`)"
               @edit="handleEdit"

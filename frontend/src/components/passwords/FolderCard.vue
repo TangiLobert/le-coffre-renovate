@@ -22,6 +22,7 @@
           v-for="password in folder.passwords"
           :key="password.id"
           :password="password"
+          :contextGroupId="contextGroupId"
           @edit="handleEdit"
           @share="handleShare"
           @history="handleHistory"
@@ -43,8 +44,11 @@ const props = defineProps<{
     count: number
     passwords: GetPasswordListResponse[]
   }
+  contextGroupId: string
   isOpen?: boolean
 }>()
+
+const contextGroupId = computed(() => props.contextGroupId)
 
 const emit = defineEmits<{
   (e: 'toggle'): void

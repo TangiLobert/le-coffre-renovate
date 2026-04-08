@@ -18,9 +18,9 @@
             severity="secondary"
             :aria-label="isVisible ? 'Hide password' : 'Show password'"
             :loading="isLoading"
-            :disabled="!password.can_read"
+            :disabled="!canReadInContext"
             v-tooltip.top="
-              !password.can_read ? 'You don\'t have read access to this password' : undefined
+              !canReadInContext ? 'You don\'t have read access to this password' : undefined
             "
             @click="toggleVisibility"
           />
@@ -31,9 +31,9 @@
             size="small"
             severity="secondary"
             aria-label="Copy password"
-            :disabled="!password.can_read"
+            :disabled="!canReadInContext"
             v-tooltip.top="
-              !password.can_read ? 'You don\'t have read access to this password' : undefined
+              !canReadInContext ? 'You don\'t have read access to this password' : undefined
             "
             @click="copyToClipboard"
           />
@@ -57,20 +57,20 @@
             size="small"
             severity="secondary"
             :aria-label="
-              !password.can_read
+              !canReadInContext
                 ? 'You don\'t have read access to this password'
-                : password.can_write
-                  ? 'Manage sharing'
-                  : 'View who has access'
+                : !canWriteInContext
+                  ? 'You don\'t have write access to this password'
+                  : 'Manage sharing'
             "
-            :disabled="!password.can_read"
+            :disabled="!canReadInContext || !canWriteInContext"
             @click="handleShare"
             v-tooltip.top="
-              !password.can_read
+              !canReadInContext
                 ? 'You don\'t have read access to this password'
-                : password.can_write
-                  ? 'Manage sharing'
-                  : 'View who has access'
+                : !canWriteInContext
+                  ? 'You don\'t have write access to this password'
+                  : 'Manage sharing'
             "
           />
           <Button
@@ -80,9 +80,9 @@
             size="small"
             severity="secondary"
             aria-label="Edit"
-            :disabled="!password.can_write"
+            :disabled="!canWriteInContext"
             v-tooltip.top="
-              !password.can_write ? 'You don\'t have write access to this password' : undefined
+              !canWriteInContext ? 'You don\'t have write access to this password' : undefined
             "
             @click="handleEdit"
           />
@@ -94,9 +94,9 @@
             severity="danger"
             aria-label="Delete"
             :loading="isDeleting"
-            :disabled="!password.can_write"
+            :disabled="!canWriteInContext"
             v-tooltip.top="
-              !password.can_write ? 'You don\'t have write access to this password' : undefined
+              !canWriteInContext ? 'You don\'t have write access to this password' : undefined
             "
             @click="handleDelete"
           />
@@ -169,6 +169,7 @@ type SharedAccessInfo = {
 
 const props = defineProps<{
   password: GetPasswordListResponse
+  contextGroupId?: string
 }>()
 
 const emit = defineEmits<{
@@ -197,6 +198,26 @@ const needsUpdate = computed(() => {
   const diffInMs = now.getTime() - lastUpdated.getTime()
   const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
   return diffInDays > 90
+})
+
+const canWriteInContext = computed(() => {
+  if (!props.password.can_write) {
+    return false
+  }
+
+  if (!props.contextGroupId) {
+    return props.password.can_write
+  }
+
+  return props.contextGroupId === props.password.group_id
+})
+
+const canReadInContext = computed(() => {
+  if (!props.password.can_read) {
+    return false
+  }
+
+  return true
 })
 
 const formatDate = (dateString: string): string => {
@@ -236,12 +257,19 @@ const loadSharedAccessInfo = async () => {
   const currentVersion = ++sharedAccessLoadVersion
   sharedAccessInfo.value = null
 
-  if (props.password.can_write) {
+  if (canWriteInContext.value) {
     return
   }
 
-  const belongingGroupIds = new Set(userBelongingGroups.value.map((group) => group.id))
-  if (belongingGroupIds.size === 0) {
+  const targetGroupId = props.contextGroupId
+  if (!targetGroupId) {
+    const belongingGroupIds = new Set(userBelongingGroups.value.map((group) => group.id))
+    if (belongingGroupIds.size === 0) {
+      return
+    }
+  }
+
+  if (targetGroupId && targetGroupId === props.password.group_id) {
     return
   }
 
@@ -257,7 +285,15 @@ const loadSharedAccessInfo = async () => {
       .filter((event) => event.event_type === 'PasswordSharedEvent')
       .filter((event) => {
         const sharedWithGroupId = getEventDataString(event.event_data, 'shared_with_group_id')
-        return !!sharedWithGroupId && belongingGroupIds.has(sharedWithGroupId)
+        if (!sharedWithGroupId) {
+          return false
+        }
+
+        if (targetGroupId) {
+          return sharedWithGroupId === targetGroupId
+        }
+
+        return userBelongingGroups.value.some((group) => group.id === sharedWithGroupId)
       })
       .sort((a, b) => new Date(b.occurred_on).getTime() - new Date(a.occurred_on).getTime())[0]
 
@@ -395,7 +431,12 @@ const handleDelete = () => {
 }
 
 watch(
-  [() => props.password.id, () => props.password.can_write, userBelongingGroups],
+  [
+    () => props.password.id,
+    () => props.password.can_write,
+    () => props.contextGroupId,
+    userBelongingGroups,
+  ],
   async () => {
     await loadSharedAccessInfo()
   },
