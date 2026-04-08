@@ -26,7 +26,7 @@ const filteredGroups = computed(() => {
 })
 
 const sortedFilteredGroups = computed(() => {
-  return sortGroups(filteredGroups.value, 'name')
+  return sortGroups(filteredGroups.value)
 })
 
 // State

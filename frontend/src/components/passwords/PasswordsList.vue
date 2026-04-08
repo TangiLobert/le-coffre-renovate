@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import type { GetPasswordListResponse, GroupItem } from '@/client/types.gen'
 import FolderCard from './FolderCard.vue'
-import GroupFilterSelect from '@/components/GroupFilterSelect.vue'
 import CreatePasswordModal from '@/components/modals/CreatePasswordModal.vue'
 import SharePasswordModal from '@/components/modals/SharePasswordModal.vue'
 import PasswordHistoryModal from '@/components/modals/PasswordHistoryModal.vue'
@@ -12,6 +11,7 @@ import { listPasswordAccessPasswordsPasswordIdAccessGet } from '@/client/sdk.gen
 import { usePasswordsStore } from '@/stores/passwords'
 import { useGroupsStore } from '@/stores/groups'
 import { useUserStore } from '@/stores/user'
+import { sortGroupsByName } from '@/utils/groupSort'
 
 const route = useRoute()
 const passwordsStore = usePasswordsStore()
@@ -36,9 +36,7 @@ const historyPassword = ref<GetPasswordListResponse | null>(null)
 
 // Filter state
 const searchQuery = ref('')
-const selectedGroupIds = ref<string[] | null>(null)
 const passwordAccessibleGroupIds = ref<Record<string, string[]>>({})
-const loadingGroupAccessMap = ref(false)
 let accessMapLoadVersion = 0
 
 // Groups visible in the filter selector: all for admins, user's own for others
@@ -49,76 +47,35 @@ const getAccessibleGroupIdsForPassword = (password: GetPasswordListResponse): st
 
 const loadPasswordAccessibleGroupIds = async () => {
   const currentVersion = ++accessMapLoadVersion
-  loadingGroupAccessMap.value = true
 
   if (passwords.value.length === 0) {
     passwordAccessibleGroupIds.value = {}
-    if (currentVersion === accessMapLoadVersion) {
-      loadingGroupAccessMap.value = false
-    }
     return
   }
 
-  try {
-    const entries = await Promise.all(
-      passwords.value.map(async (password) => {
-        try {
-          const response = await listPasswordAccessPasswordsPasswordIdAccessGet({
-            path: { password_id: password.id },
-          })
+  const entries = await Promise.all(
+    passwords.value.map(async (password) => {
+      try {
+        const response = await listPasswordAccessPasswordsPasswordIdAccessGet({
+          path: { password_id: password.id },
+        })
 
-          const groupIds = [
-            ...new Set((response.data?.group_access_list ?? []).map((item) => item.user_id)),
-          ]
-          return [password.id, groupIds.length > 0 ? groupIds : [password.group_id]] as const
-        } catch {
-          return [password.id, [password.group_id]] as const
-        }
-      }),
-    )
+        const groupIds = [
+          ...new Set((response.data?.group_access_list ?? []).map((item) => item.user_id)),
+        ]
+        return [password.id, groupIds.length > 0 ? groupIds : [password.group_id]] as const
+      } catch {
+        return [password.id, [password.group_id]] as const
+      }
+    }),
+  )
 
-    if (currentVersion !== accessMapLoadVersion) {
-      return
-    }
-
-    passwordAccessibleGroupIds.value = Object.fromEntries(entries)
-  } finally {
-    if (currentVersion === accessMapLoadVersion) {
-      loadingGroupAccessMap.value = false
-    }
+  if (currentVersion !== accessMapLoadVersion) {
+    return
   }
+
+  passwordAccessibleGroupIds.value = Object.fromEntries(entries)
 }
-
-// Count how many passwords belong to each group (over the full unfiltered list)
-const groupPasswordCounts = computed<Record<string, number>>(() => {
-  const counts: Record<string, number> = {}
-  const visibleGroupIds = new Set(filterableGroups.value.map((g) => g.id))
-
-  for (const p of passwords.value) {
-    for (const groupId of getAccessibleGroupIdsForPassword(p)) {
-      if (!visibleGroupIds.has(groupId)) continue
-      counts[groupId] = (counts[groupId] ?? 0) + 1
-    }
-  }
-
-  return counts
-})
-
-// Passwords filtered by selected groups (text search is applied in group context later)
-const filteredPasswords = computed<GetPasswordListResponse[]>(() => {
-  let result = passwords.value
-
-  // Group filter: null = ALL
-  if (selectedGroupIds.value !== null) {
-    if (selectedGroupIds.value.length === 0) return []
-    result = result.filter((p) => {
-      const accessibleGroupIds = getAccessibleGroupIdsForPassword(p)
-      return selectedGroupIds.value!.some((groupId) => accessibleGroupIds.includes(groupId))
-    })
-  }
-
-  return result
-})
 
 const matchesSearchQuery = (password: GetPasswordListResponse, groupName?: string): boolean => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -151,16 +108,17 @@ type GroupedSection = {
 }
 
 const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
-  const groupsById = new Map<string, GroupItem>(filterableGroups.value.map((g) => [g.id, g]))
+  const sortedVisibleGroups = sortGroupsByName(
+    filterableGroups.value,
+    currentUserPersonalGroupId.value,
+  )
+  const groupsById = new Map<string, GroupItem>(sortedVisibleGroups.map((g) => [g.id, g]))
   const currentUserId = currentUser.value?.id
-  const visibleGroupIds =
-    selectedGroupIds.value === null
-      ? new Set(filterableGroups.value.map((g) => g.id))
-      : new Set(selectedGroupIds.value)
+  const visibleGroupIds = new Set(sortedVisibleGroups.map((g) => g.id))
 
   const groupPasswordMap = new Map<string, GetPasswordListResponse[]>()
 
-  for (const password of filteredPasswords.value) {
+  for (const password of passwords.value) {
     const accessibleGroupIds = getAccessibleGroupIdsForPassword(password)
     for (const groupId of accessibleGroupIds) {
       if (!visibleGroupIds.has(groupId)) continue
@@ -171,10 +129,7 @@ const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
     }
   }
 
-  const orderedGroupIds =
-    selectedGroupIds.value === null
-      ? filterableGroups.value.map((g) => g.id)
-      : selectedGroupIds.value
+  const orderedGroupIds = sortedVisibleGroups.map((g) => g.id)
 
   const sections: GroupedSection[] = []
 
@@ -315,21 +270,12 @@ onMounted(async () => {
       <Button label="New Password" icon="pi pi-plus" @click="showCreateModal = true" />
     </div>
 
-    <!-- Filters row: text search + group filter on the same line -->
+    <!-- Filters row -->
     <div class="flex flex-wrap items-center gap-4 mb-4">
       <IconField>
         <InputIcon class="pi pi-search" />
         <InputText v-model="searchQuery" placeholder="Filter" class="min-w-64" />
       </IconField>
-
-      <GroupFilterSelect
-        v-if="filterableGroups.length > 0"
-        :groups="filterableGroups"
-        :passwordCounts="groupPasswordCounts"
-        :loading="loadingGroupAccessMap"
-        :myPersonalGroupId="currentUserPersonalGroupId"
-        v-model="selectedGroupIds"
-      />
     </div>
 
     <!-- List -->
