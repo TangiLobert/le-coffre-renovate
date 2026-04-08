@@ -23,7 +23,7 @@ const { groups, userBelongingGroups, currentUserPersonalGroupId } = storeToRefs(
 const { isAdmin, currentUser } = storeToRefs(userStore)
 
 const openFolderKey = ref<string | null>(null)
-const openGroupId = ref<string | null>(null)
+const selectedGroupTabId = ref<string | null>(null)
 
 // Modal state
 const showCreateModal = ref(false)
@@ -226,24 +226,45 @@ const handleFolderToggle = (folderKey: string) => {
   openFolderKey.value = openFolderKey.value === folderKey ? null : folderKey
 }
 
-const handleGroupToggle = (groupId: string) => {
-  if (openGroupId.value === groupId) {
-    openGroupId.value = null
-    openFolderKey.value = null
+const handleSelectGroupTab = (groupId: string) => {
+  if (selectedGroupTabId.value === groupId) {
     return
   }
 
-  openGroupId.value = groupId
+  selectedGroupTabId.value = groupId
   openFolderKey.value = null
 }
+
+const selectedGroupSection = computed(() => {
+  if (!selectedGroupTabId.value) return null
+  return (
+    groupedByGroupAndFolder.value.find((section) => section.id === selectedGroupTabId.value) ?? null
+  )
+})
 
 const handleAdminView = async () => {
   if (!isAdmin.value) return
 
   adminViewEnabled.value = !adminViewEnabled.value
-  openGroupId.value = null
+  selectedGroupTabId.value = null
   openFolderKey.value = null
 }
+
+watch(groupedByGroupAndFolder, (sections) => {
+  if (sections.length === 0) {
+    selectedGroupTabId.value = null
+    openFolderKey.value = null
+    return
+  }
+
+  if (
+    !selectedGroupTabId.value ||
+    !sections.some((section) => section.id === selectedGroupTabId.value)
+  ) {
+    selectedGroupTabId.value = sections[0].id
+    openFolderKey.value = null
+  }
+})
 
 // Reset editing state when modals close
 watch(showCreateModal, (isVisible) => {
@@ -266,13 +287,6 @@ watch(
   },
   { immediate: true },
 )
-
-watch(groupedByGroupAndFolder, (sections) => {
-  if (openGroupId.value && !sections.some((section) => section.id === openGroupId.value)) {
-    openGroupId.value = null
-    openFolderKey.value = null
-  }
-})
 
 onMounted(async () => {
   await Promise.all([passwordsStore.fetchPasswords(), groupsStore.fetchAllGroups()])
@@ -321,66 +335,78 @@ onMounted(async () => {
     </div>
 
     <div v-else class="space-y-4">
-      <Card v-for="groupSection in groupedByGroupAndFolder" :key="groupSection.id">
-        <template #content>
-          <div
-            class="flex items-center justify-between gap-3 cursor-pointer"
-            @click="handleGroupToggle(groupSection.id)"
+      <div
+        class="flex items-end gap-1 overflow-x-auto pt-1 pb-0"
+        role="tablist"
+        aria-label="Groups"
+      >
+        <div
+          v-for="groupSection in groupedByGroupAndFolder"
+          :key="groupSection.id"
+          class="flex items-center gap-1 shrink-0 border border-b-0 rounded-t-md px-2 transition-all"
+          :class="
+            selectedGroupTabId === groupSection.id
+              ? 'bg-primary border-primary text-primary-contrast shadow-sm py-2 min-h-11'
+              : 'bg-surface-100 border-surface-300 cursor-pointer py-1 min-h-8'
+          "
+          role="tab"
+          :aria-selected="selectedGroupTabId === groupSection.id"
+          @click="handleSelectGroupTab(groupSection.id)"
+        >
+          <i :class="['pi', groupSection.isPersonal ? 'pi pi-user' : 'pi pi-users', 'text-sm']" />
+          <span
+            class="font-medium whitespace-nowrap"
+            :class="selectedGroupTabId === groupSection.id ? 'text-sm' : 'text-xs'"
+            >{{ groupSection.name }}</span
           >
-            <div class="flex items-center gap-3">
-              <i
-                :class="[
-                  'pi',
-                  groupSection.isPersonal ? 'pi-user' : 'pi-users',
-                  'text-xl text-primary',
-                ]"
-              />
-              <div>
-                <h2 class="text-xl font-semibold">{{ groupSection.name }}</h2>
-                <p class="text-sm text-surface-500">
-                  {{ groupSection.count }}
-                  {{ groupSection.count === 1 ? 'password' : 'passwords' }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Button
-                v-if="groupSection.isOwnedByCurrentUser"
-                label="New Password"
-                icon="pi pi-plus"
-                size="small"
-                outlined
-                @click.stop="handleCreateInGroup(groupSection.id)"
-              />
-              <i
-                :class="[
-                  'pi',
-                  openGroupId === groupSection.id ? 'pi-chevron-up' : 'pi-chevron-down',
-                  'text-gray-400',
-                ]"
-              />
-            </div>
-          </div>
+          <Button
+            v-if="selectedGroupTabId === groupSection.id && groupSection.isOwnedByCurrentUser"
+            icon="pi pi-plus"
+            size="small"
+            class="!bg-white !text-primary !border !border-primary !w-6 !h-6 !p-0 !rounded-sm"
+            @click.stop="
+              (handleSelectGroupTab(groupSection.id), handleCreateInGroup(groupSection.id))
+            "
+          />
+        </div>
+      </div>
 
-          <div
-            v-if="openGroupId === groupSection.id"
-            class="space-y-2 mt-4 pt-4 border-t border-surface"
-          >
-            <FolderCard
-              v-for="folder in groupSection.folders"
-              :key="`${groupSection.id}-${folder.name}`"
-              :folder="folder"
-              :contextGroupId="groupSection.id"
-              :isOpen="openFolderKey === `${groupSection.id}-${folder.name}`"
-              @toggle="handleFolderToggle(`${groupSection.id}-${folder.name}`)"
-              @edit="handleEdit"
-              @share="handleShare"
-              @history="handleHistory"
-              @deleted="handleDeleted"
-            />
+      <div
+        v-if="selectedGroupSection"
+        class="border border-surface rounded-b-md rounded-tr-md bg-surface-0 p-4"
+      >
+        <div class="flex items-center gap-3 mb-4">
+          <i
+            :class="[
+              'pi',
+              selectedGroupSection.isPersonal ? 'pi-user' : 'pi-users',
+              'text-xl text-primary',
+            ]"
+          />
+          <div>
+            <h2 class="text-xl font-semibold">{{ selectedGroupSection.name }}</h2>
+            <p class="text-sm text-surface-500">
+              {{ selectedGroupSection.count }}
+              {{ selectedGroupSection.count === 1 ? 'password' : 'passwords' }}
+            </p>
           </div>
-        </template>
-      </Card>
+        </div>
+
+        <div class="space-y-2 mt-4 pt-4 border-t border-surface">
+          <FolderCard
+            v-for="folder in selectedGroupSection.folders"
+            :key="`${selectedGroupSection.id}-${folder.name}`"
+            :folder="folder"
+            :contextGroupId="selectedGroupSection.id"
+            :isOpen="openFolderKey === `${selectedGroupSection.id}-${folder.name}`"
+            @toggle="handleFolderToggle(`${selectedGroupSection.id}-${folder.name}`)"
+            @edit="handleEdit"
+            @share="handleShare"
+            @history="handleHistory"
+            @deleted="handleDeleted"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Modals -->
