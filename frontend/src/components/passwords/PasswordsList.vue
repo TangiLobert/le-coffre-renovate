@@ -20,7 +20,7 @@ const userStore = useUserStore()
 
 const { passwords, loading, error } = storeToRefs(passwordsStore)
 const { groups, userBelongingGroups, currentUserPersonalGroupId } = storeToRefs(groupsStore)
-const { isAdmin } = storeToRefs(userStore)
+const { isAdmin, currentUser } = storeToRefs(userStore)
 
 const openFolderKey = ref<string | null>(null)
 const openGroupId = ref<string | null>(null)
@@ -29,6 +29,7 @@ const openGroupId = ref<string | null>(null)
 const showCreateModal = ref(false)
 const showShareModal = ref(false)
 const showHistoryModal = ref(false)
+const defaultCreateGroupId = ref<string | null>(null)
 const editingPassword = ref<GetPasswordListResponse | null>(null)
 const sharingPassword = ref<GetPasswordListResponse | null>(null)
 const historyPassword = ref<GetPasswordListResponse | null>(null)
@@ -103,7 +104,7 @@ const groupPasswordCounts = computed<Record<string, number>>(() => {
   return counts
 })
 
-// Passwords filtered by group and text search
+// Passwords filtered by selected groups (text search is applied in group context later)
 const filteredPasswords = computed<GetPasswordListResponse[]>(() => {
   let result = passwords.value
 
@@ -116,20 +117,21 @@ const filteredPasswords = computed<GetPasswordListResponse[]>(() => {
     })
   }
 
-  // Text search filter on name, login, url — case-insensitive LIKE
-  const q = searchQuery.value.trim().toLowerCase()
-  if (q) {
-    result = result.filter(
-      (p) =>
-        p.folder.toLowerCase().includes(q) ||
-        p.name?.toLowerCase().includes(q) ||
-        p.login?.toLowerCase().includes(q) ||
-        p.url?.toLowerCase().includes(q),
-    )
-  }
-
   return result
 })
+
+const matchesSearchQuery = (password: GetPasswordListResponse, groupName?: string): boolean => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return true
+
+  return (
+    (groupName?.toLowerCase().includes(q) ?? false) ||
+    password.folder.toLowerCase().includes(q) ||
+    (password.name?.toLowerCase().includes(q) ?? false) ||
+    (password.login?.toLowerCase().includes(q) ?? false) ||
+    (password.url?.toLowerCase().includes(q) ?? false)
+  )
+}
 
 const folderFilter = computed(() => route.query.folder as string | undefined)
 
@@ -143,12 +145,14 @@ type GroupedSection = {
   id: string
   name: string
   isPersonal: boolean
+  isOwnedByCurrentUser: boolean
   count: number
   folders: GroupedFolder[]
 }
 
 const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
   const groupsById = new Map<string, GroupItem>(filterableGroups.value.map((g) => [g.id, g]))
+  const currentUserId = currentUser.value?.id
   const visibleGroupIds =
     selectedGroupIds.value === null
       ? new Set(filterableGroups.value.map((g) => g.id))
@@ -160,6 +164,8 @@ const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
     const accessibleGroupIds = getAccessibleGroupIdsForPassword(password)
     for (const groupId of accessibleGroupIds) {
       if (!visibleGroupIds.has(groupId)) continue
+      const groupName = groupsById.get(groupId)?.name
+      if (!matchesSearchQuery(password, groupName)) continue
       if (!groupPasswordMap.has(groupId)) groupPasswordMap.set(groupId, [])
       groupPasswordMap.get(groupId)!.push(password)
     }
@@ -194,10 +200,13 @@ const groupedByGroupAndFolder = computed<GroupedSection[]>(() => {
     if (folders.length === 0) continue
 
     const group = groupsById.get(groupId)
+    const isOwnedByCurrentUser = !!(group && currentUserId && group.owners?.includes(currentUserId))
+
     sections.push({
       id: groupId,
       name: group?.name ?? groupId,
       isPersonal: group?.is_personal ?? false,
+      isOwnedByCurrentUser,
       count: groupPasswords.length,
       folders,
     })
@@ -215,7 +224,14 @@ const handlePasswordUpdated = async () => {
   await passwordsStore.refresh()
 }
 
+const handleCreateInGroup = (groupId: string) => {
+  editingPassword.value = null
+  defaultCreateGroupId.value = groupId
+  showCreateModal.value = true
+}
+
 const handleEdit = (password: GetPasswordListResponse) => {
+  defaultCreateGroupId.value = null
   editingPassword.value = password
   showCreateModal.value = true
 }
@@ -259,7 +275,10 @@ const handleGroupToggle = (groupId: string) => {
 
 // Reset editing state when modals close
 watch(showCreateModal, (isVisible) => {
-  if (!isVisible) editingPassword.value = null
+  if (!isVisible) {
+    editingPassword.value = null
+    defaultCreateGroupId.value = null
+  }
 })
 watch(showShareModal, (isVisible) => {
   if (!isVisible) sharingPassword.value = null
@@ -352,13 +371,23 @@ onMounted(async () => {
                 </p>
               </div>
             </div>
-            <i
-              :class="[
-                'pi',
-                openGroupId === groupSection.id ? 'pi-chevron-up' : 'pi-chevron-down',
-                'text-gray-400',
-              ]"
-            />
+            <div class="flex items-center gap-2">
+              <Button
+                v-if="groupSection.isOwnedByCurrentUser"
+                label="New Password"
+                icon="pi pi-plus"
+                size="small"
+                outlined
+                @click.stop="handleCreateInGroup(groupSection.id)"
+              />
+              <i
+                :class="[
+                  'pi',
+                  openGroupId === groupSection.id ? 'pi-chevron-up' : 'pi-chevron-down',
+                  'text-gray-400',
+                ]"
+              />
+            </div>
           </div>
 
           <div
@@ -386,6 +415,7 @@ onMounted(async () => {
     <CreatePasswordModal
       v-model:visible="showCreateModal"
       :editPassword="editingPassword"
+      :defaultGroupId="defaultCreateGroupId"
       @created="handlePasswordCreated"
       @updated="handlePasswordUpdated"
     />
