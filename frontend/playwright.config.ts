@@ -96,15 +96,21 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   // outputDir: 'test-results/',
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    /**
-     * Use the dev server by default for faster feedback loop.
-     * Use the preview server on CI for more realistic testing.
-     * Playwright will re-use the local server if there is already a dev-server running.
-     */
-    command: process.env.CI ? 'npm run preview' : 'npm run dev',
-    port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
-  },
+  /* Run your local dev server before starting the tests.
+   * Skipped when PLAYWRIGHT_SKIP_WEB_SERVER is set — e.g. when the app is
+   * already served by a Helm/Minikube deployment via port-forward. */
+  ...(!process.env.PLAYWRIGHT_SKIP_WEB_SERVER
+    ? {
+        webServer: {
+          /**
+           * Use the dev server by default for faster feedback loop.
+           * Use the preview server on CI for more realistic testing.
+           * Playwright will re-use the local server if there is already a dev-server running.
+           */
+          command: process.env.CI ? 'npm run preview' : 'npm run dev',
+          port: process.env.CI ? 4173 : 5173,
+          reuseExistingServer: !process.env.CI,
+        },
+      }
+    : {}),
 })
