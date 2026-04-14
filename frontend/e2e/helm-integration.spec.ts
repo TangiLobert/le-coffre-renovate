@@ -186,6 +186,59 @@ test.describe('Helm Integration - Full Lifecycle', () => {
     await expect(passwordCode).toHaveText(TEST_PASSWORD_VALUE, { timeout: 10000 })
   })
 
+  test('Lock the vault', async ({ page }) => {
+    await loginAsAdmin(page)
+    await unlockVaultIfNeeded(page)
+
+    await expect(page.getByText('Password Manager')).toBeVisible({ timeout: 15000 })
+
+    // Open the main menu to find the lock option
+    await page.getByRole('button', { name: 'Menu' }).click()
+
+    // Look for lock button — it might be in a menu or settings
+    // Common patterns: "Lock", "Lock Vault", or similar
+    const lockButton = page.getByRole('button', { name: /lock/i })
+    await lockButton.click()
+
+    // After locking, the unlock modal should appear
+    await expect(page.getByText('Unlock Vault')).toBeVisible({ timeout: 15000 })
+  })
+
+  test('Unlock with first share only (partial)', async ({ page }) => {
+    await loginAsAdmin(page)
+
+    // The vault is already locked from the previous test
+    await expect(page.getByText('Unlock Vault')).toBeVisible({ timeout: 15000 })
+
+    // Fill in only the first share
+    await page.locator('#share-0').fill(storedShares[0])
+
+    // Try to submit with only one share (should fail or show error since threshold is 2)
+    const submitButton = page.getByRole('button', { name: 'Submit Shares' })
+    await submitButton.click()
+
+    // Expect either an error message or the unlock modal to remain (not unlocked)
+    // We should still see the unlock modal or an error indicating more shares are needed
+    await expect(
+      page.getByText('Unlock Vault').or(page.getByText(/more shares|insufficient|need/i)),
+    ).toBeVisible({ timeout: 10000 })
+  })
+
+  test('Unlock with remaining shares (complete unlock)', async ({ page }) => {
+    // Stay on the same page with the unlock modal still showing
+    // The first share should still be filled from the previous test
+
+    // Add the second share
+    await page.getByRole('button', { name: 'Add Share' }).click()
+    await page.locator('#share-1').fill(storedShares[1])
+
+    // Now submit with both shares
+    await page.getByRole('button', { name: 'Submit Shares' }).click()
+
+    // Vault should unlock — Password Manager becomes visible
+    await expect(page.getByText('Password Manager')).toBeVisible({ timeout: 30000 })
+  })
+
   // ── Helper functions ─────────────────────────────────────────
 
   async function loginAsAdmin(page: Page) {
