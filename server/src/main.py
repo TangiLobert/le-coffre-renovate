@@ -277,12 +277,16 @@ async def readiness_check(request: Request):
         raise HTTPException(status_code=503, detail="Migrations in progress")
     try:
         session_maker = request.app.state.session_maker
-        with session_maker() as session:
-            session.exec(text("SELECT 1"))
+
+        def _db_check():
+            with session_maker() as session:
+                session.exec(text("SELECT 1"))
+
+        await asyncio.to_thread(_db_check)
         return {"status": "ready"}
     except SQLAlchemyOperationalError:
         logger.error("Readiness probe DB check failed", exc_info=True)
-        raise HTTPException(status_code=503, detail="Database unreachable") from None
+        raise HTTPException(status_code=504, detail="Database unreachable") from None
 
 
 # Include API routers without additional prefix
