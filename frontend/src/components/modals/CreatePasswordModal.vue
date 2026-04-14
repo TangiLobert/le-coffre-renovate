@@ -11,6 +11,7 @@ const visible = defineModel<boolean>('visible', { required: true })
 
 const props = defineProps<{
   editPassword?: GetPasswordListResponse | null
+  defaultGroupId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -33,6 +34,23 @@ const passwordFieldFocused = ref(false)
 
 const isEditMode = ref(false)
 
+const resolveDefaultGroupId = (): string => {
+  const preferredGroupId = props.defaultGroupId
+  if (preferredGroupId && groupsForPasswordCreation.value.some((g) => g.id === preferredGroupId)) {
+    return preferredGroupId
+  }
+
+  if (groupsStore.currentUserPersonalGroupId) {
+    return groupsStore.currentUserPersonalGroupId
+  }
+
+  if (groupsForPasswordCreation.value.length > 0) {
+    return groupsForPasswordCreation.value[0].id
+  }
+
+  return ''
+}
+
 const urlError = computed(() => {
   if (url.value && !/^https?:\/\//i.test(url.value)) {
     return 'URL must start with http:// or https://'
@@ -52,12 +70,7 @@ const displayedPassword = computed(() => {
 // Initialize groups on mount
 onMounted(async () => {
   await groupsStore.fetchAllGroups()
-  // Set default group to personal group if available
-  if (groupsStore.currentUserPersonalGroupId) {
-    selectedGroupId.value = groupsStore.currentUserPersonalGroupId
-  } else if (groupsForPasswordCreation.value.length > 0) {
-    selectedGroupId.value = groupsForPasswordCreation.value[0].id
-  }
+  selectedGroupId.value = resolveDefaultGroupId()
 })
 
 // Refresh groups when modal becomes visible
@@ -65,13 +78,11 @@ watch(visible, async (isVisible) => {
   if (isVisible) {
     // Force refresh groups to get latest data
     await groupsStore.fetchAllGroups(true)
-    // Set default group if none selected
-    if (!selectedGroupId.value) {
-      if (groupsStore.currentUserPersonalGroupId) {
-        selectedGroupId.value = groupsStore.currentUserPersonalGroupId
-      } else if (groupsForPasswordCreation.value.length > 0) {
-        selectedGroupId.value = groupsForPasswordCreation.value[0].id
-      }
+
+    if (!isEditMode.value) {
+      selectedGroupId.value = resolveDefaultGroupId()
+    } else if (!selectedGroupId.value) {
+      selectedGroupId.value = resolveDefaultGroupId()
     }
   }
 })
@@ -94,15 +105,19 @@ watch(
       login.value = ''
       url.value = ''
       folder.value = ''
-      // Set default group to personal group
-      if (groupsStore.currentUserPersonalGroupId) {
-        selectedGroupId.value = groupsStore.currentUserPersonalGroupId
-      } else if (groupsForPasswordCreation.value.length > 0) {
-        selectedGroupId.value = groupsForPasswordCreation.value[0].id
-      }
+      selectedGroupId.value = resolveDefaultGroupId()
     }
   },
   { immediate: true },
+)
+
+watch(
+  () => props.defaultGroupId,
+  () => {
+    if (visible.value && !isEditMode.value) {
+      selectedGroupId.value = resolveDefaultGroupId()
+    }
+  },
 )
 
 const handleSubmit = async () => {
@@ -239,14 +254,7 @@ const handleSubmit = async () => {
     login.value = ''
     url.value = ''
     folder.value = ''
-    // Reset to personal group instead of empty
-    if (groupsStore.currentUserPersonalGroupId) {
-      selectedGroupId.value = groupsStore.currentUserPersonalGroupId
-    } else if (groupsForPasswordCreation.value.length > 0) {
-      selectedGroupId.value = groupsForPasswordCreation.value[0].id
-    } else {
-      selectedGroupId.value = ''
-    }
+    selectedGroupId.value = resolveDefaultGroupId()
   } catch (err: unknown) {
     const error = err as { detail?: string; message?: string }
     const errorMessage =
@@ -271,14 +279,7 @@ const handleCancel = () => {
   login.value = ''
   url.value = ''
   folder.value = ''
-  // Reset to personal group instead of empty
-  if (groupsStore.currentUserPersonalGroupId) {
-    selectedGroupId.value = groupsStore.currentUserPersonalGroupId
-  } else if (groupsForPasswordCreation.value.length > 0) {
-    selectedGroupId.value = groupsForPasswordCreation.value[0].id
-  } else {
-    selectedGroupId.value = ''
-  }
+  selectedGroupId.value = resolveDefaultGroupId()
   visible.value = false
 }
 
