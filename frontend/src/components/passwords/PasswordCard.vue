@@ -60,16 +60,16 @@
               !canReadInContext
                 ? 'You don\'t have read access to this password'
                 : !canWriteInContext
-                  ? 'You don\'t have write access to this password'
+                  ? 'View sharing access'
                   : 'Manage sharing'
             "
-            :disabled="!canReadInContext || !canWriteInContext"
+            :disabled="!canReadInContext"
             @click="handleShare"
             v-tooltip.top="
               !canReadInContext
                 ? 'You don\'t have read access to this password'
                 : !canWriteInContext
-                  ? 'You don\'t have write access to this password'
+                  ? 'View who has access to this password'
                   : 'Manage sharing'
             "
           />
