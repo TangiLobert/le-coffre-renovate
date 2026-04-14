@@ -14,8 +14,6 @@
         <span class="ml-2 transition-colors" :class="{ 'font-semibold': isPasswordsActive }"
           >Passwords</span
         >
-
-        <Badge :value="passwordsCount" />
       </div>
       <div class="pl-8 pb-2">
         <div
@@ -233,7 +231,6 @@ const route = useRoute()
 const toast = useToast()
 
 const passwordsStore = usePasswordsStore()
-const { passwordsCount } = storeToRefs(passwordsStore)
 
 const passwordAccessStore = usePasswordAccessStore()
 const { passwordCountByGroupId } = storeToRefs(passwordAccessStore)
