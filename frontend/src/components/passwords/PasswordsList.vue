@@ -267,10 +267,7 @@ watch(groupedByGroupAndFolder, (sections) => {
     return
   }
 
-  if (
-    selectedGroupIdFromRoute.value &&
-    sections.some((s) => s.id === selectedGroupIdFromRoute.value)
-  ) {
+  if (selectedGroupIdFromRoute.value) {
     if (selectedGroupTabId.value !== selectedGroupIdFromRoute.value) {
       selectedGroupTabId.value = selectedGroupIdFromRoute.value
       setDefaultOpenFolderForSelectedGroup()
