@@ -66,8 +66,9 @@ class ListPasswordsUseCase(TracedUseCase):
                 can_write=can_write,
                 login=password.login,
                 url=password.url,
+                accessible_group_ids=tuple(accessible_group_ids),
             )
-            for password, owner_group_id, can_read, can_write in accessible
+            for password, owner_group_id, can_read, can_write, accessible_group_ids in accessible
         ]
 
     def _resolve_access(
@@ -86,13 +87,14 @@ class ListPasswordsUseCase(TracedUseCase):
             if owner_group_id is None:
                 continue
 
+            accessible_group_ids = list(permissions.keys())
             user_access = self._find_user_access(user_id, permissions, membership_cache)
 
             if user_access is not None:
                 can_write = user_access
-                result.append((password, owner_group_id, True, can_write))
+                result.append((password, owner_group_id, True, can_write, accessible_group_ids))
             elif is_admin:
-                result.append((password, owner_group_id, False, False))
+                result.append((password, owner_group_id, False, False, accessible_group_ids))
 
         return result
 
