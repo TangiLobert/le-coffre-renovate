@@ -772,7 +772,7 @@ def test_given_password_owned_by_group_when_listing_should_return_accessible_gro
     assert set(result[0].accessible_group_ids) == {owner_group_id}
 
 
-def test_given_password_shared_with_read_group_when_listing_as_owner_should_return_accessible_group_ids_with_owner_group_only(
+def test_given_password_shared_with_read_group_when_listing_as_owner_group_member_should_return_all_accessible_group_ids(
     use_case: ListPasswordsUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -794,7 +794,7 @@ def test_given_password_shared_with_read_group_when_listing_as_owner_should_retu
     password_permissions_repository.set_owner(owner_group_id, password_id)
     password_permissions_repository.grant_access(read_group_id, password_id, PasswordPermission.READ)
     group_access_gateway.set_group_owner(owner_group_id, requester_id)
-    # requester is NOT a member of read_group_id
+    # requester belongs to owner_group — should see ALL groups to manage sharing
 
     password_event_repository.append_event(
         event_id=UUID("10e2eb69-5d6b-4500-947a-6636c8755b3f"),
@@ -811,10 +811,10 @@ def test_given_password_shared_with_read_group_when_listing_as_owner_should_retu
     assert len(result) == 1
     assert result[0].can_write is True
     assert result[0].can_read is True
-    assert set(result[0].accessible_group_ids) == {owner_group_id}
+    assert set(result[0].accessible_group_ids) == {owner_group_id, read_group_id}
 
 
-def test_given_password_shared_with_read_group_when_listing_as_shared_member_should_return_accessible_group_ids_with_shared_group_only(
+def test_given_password_shared_with_read_group_when_listing_as_shared_member_should_return_owner_and_shared_group_ids(
     use_case: ListPasswordsUseCase,
     password_repository: FakePasswordRepository,
     password_permissions_repository: FakePasswordPermissionsRepository,
@@ -838,7 +838,7 @@ def test_given_password_shared_with_read_group_when_listing_as_shared_member_sho
     password_permissions_repository.grant_access(read_group_id, password_id, PasswordPermission.READ)
     group_access_gateway.set_group_owner(owner_group_id, other_user_id)
     group_access_gateway.add_group_member(read_group_id, requester_id)
-    # requester belongs to read_group only, NOT to owner_group
+    # requester belongs to read_group only — should see owner group + their own group
 
     password_event_repository.append_event(
         event_id=UUID("10e2eb69-5d6b-4500-947a-6636c8755b3f"),
@@ -855,7 +855,7 @@ def test_given_password_shared_with_read_group_when_listing_as_shared_member_sho
     assert len(result) == 1
     assert result[0].can_read is True
     assert result[0].can_write is False
-    assert set(result[0].accessible_group_ids) == {read_group_id}
+    assert set(result[0].accessible_group_ids) == {owner_group_id, read_group_id}
 
 
 def test_given_admin_with_no_group_access_when_listing_should_return_accessible_group_ids_with_owner_only(
