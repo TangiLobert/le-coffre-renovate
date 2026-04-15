@@ -263,13 +263,17 @@ const setDefaultOpenFolderForSelectedGroup = () => {
   openFolderKey.value = `${section.id}-${folderToOpen.name}`
 }
 
-watch(selectedGroupIdFromRoute, (groupId) => {
-  if (!groupId) return
-  if (selectedGroupTabId.value !== groupId) {
-    selectedGroupTabId.value = groupId
-    setDefaultOpenFolderForSelectedGroup()
-  }
-})
+watch(
+  selectedGroupIdFromRoute,
+  (groupId) => {
+    if (!groupId) return
+    if (selectedGroupTabId.value !== groupId) {
+      selectedGroupTabId.value = groupId
+      setDefaultOpenFolderForSelectedGroup()
+    }
+  },
+  { immediate: true },
+)
 
 watch(groupedByGroupAndFolder, (sections) => {
   if (sections.length === 0) {
