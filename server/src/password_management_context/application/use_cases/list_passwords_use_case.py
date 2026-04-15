@@ -92,8 +92,12 @@ class ListPasswordsUseCase(TracedUseCase):
 
             if user_access is not None:
                 can_write = user_access
-                result.append((password, owner_group_id, True, can_write, accessible_group_ids))
+                user_accessible_group_ids = [
+                    gid for gid in accessible_group_ids if any(self._cached_membership(user_id, gid, membership_cache))
+                ]
+                result.append((password, owner_group_id, True, can_write, user_accessible_group_ids))
             elif is_admin:
+                # Admins should know everything
                 result.append((password, owner_group_id, False, False, accessible_group_ids))
 
         return result
