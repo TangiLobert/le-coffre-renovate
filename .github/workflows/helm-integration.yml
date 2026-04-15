@@ -111,8 +111,10 @@ jobs:
           kubectl create namespace le-coffre-ci
 
           # Create the database secret (SQLite, no real DB needed for integration test)
+          # Four slashes = absolute path: sqlite:////data/le-coffre-ci.db → /data/le-coffre-ci.db
+          # The PVC is mounted at /data in the backend container.
           kubectl create secret generic le-coffre-db \
-            --from-literal=DATABASE_URL="sqlite:///data/le-coffre-ci.db" \
+            --from-literal=DATABASE_URL="sqlite:////data/le-coffre-ci.db" \
             -n le-coffre-ci
 
           # Create the JWT secret
