@@ -82,6 +82,10 @@ def _create_app(
     async def sso_is_configured():
         return PlainTextResponse("configured", status_code=200)
 
+    @app.get("/vault/status")
+    async def vault_status():
+        return PlainTextResponse("status", status_code=200)
+
     @app.get("/other")
     async def other():
         return PlainTextResponse("other")
@@ -101,9 +105,21 @@ def client(app: FastAPI) -> Iterator[TestClient]:
 
 
 class TestExemptPaths:
-    def test_given_health_path_when_dispatching_should_pass_through(self, client: TestClient):
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/api/health",
+            "/api/vault/status",
+            "/api/auth/sso/url",
+            "/api/auth/sso/is-configured",
+        ],
+    )
+    def test_given_exempt_api_path_when_dispatching_should_pass_through(self, client: TestClient, path: str):
+        """Frequently-polled endpoints must never trip a bucket, even under the
+        tight fixture limits (unauth_max=5): the whole point of exempting them
+        is that a normal UI can call them on every page without running out."""
         for _ in range(20):
-            assert client.get("/api/health").status_code == 200
+            assert client.get(path).status_code != 429
 
     def test_given_docs_or_openapi_path_when_dispatching_should_pass_through(self, client: TestClient):
         for _ in range(20):
@@ -204,8 +220,6 @@ class TestAuthRouteFloor:
             ("post", "/api/auth/register-admin"),
             ("post", "/api/auth/refresh-token"),
             ("get", "/api/auth/sso/callback"),
-            ("get", "/api/auth/sso/url"),
-            ("get", "/api/auth/sso/is-configured"),
         ],
     )
     def test_given_non_login_auth_path_when_dispatching_should_not_consume_auth_floor(self, method: str, path: str):

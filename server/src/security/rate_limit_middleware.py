@@ -53,8 +53,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     # LoginLockoutGateway, not here.
     AUTH_ROUTES: tuple[str, ...] = ("/api/auth/login",)
 
+    # Frequently-polled read-only endpoints that every page / pre-login flow hits:
+    # exempting them prevents the normal UI from burning through its IP bucket
+    # on routine state checks.  Mutating or credential-submitting endpoints
+    # obviously stay rate-limited.
     EXEMPT_PREFIXES: tuple[str, ...] = (
         "/api/health",
+        "/api/vault/status",
+        "/api/auth/sso/url",
+        "/api/auth/sso/is-configured",
         "/docs",
         "/openapi",
     )
