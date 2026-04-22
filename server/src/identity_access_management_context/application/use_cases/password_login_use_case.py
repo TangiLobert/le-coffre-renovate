@@ -81,6 +81,7 @@ class PasswordLoginUseCase(TracedUseCase):
                     actor_user_id=None,
                     event_data={"email": command.email, "reason": "User not found"},
                 )
+                self._login_lockout_gateway.record_failed_login(command.email)
                 raise AdminNotFoundException("User not found")
 
             if not self._password_hashing_gateway.verify(command.password, user_password.password_hash):
@@ -94,6 +95,7 @@ class PasswordLoginUseCase(TracedUseCase):
                     actor_user_id=None,
                     event_data={"email": command.email, "reason": "Invalid credentials"},
                 )
+                self._login_lockout_gateway.record_failed_login(command.email)
                 raise InvalidCredentialsException("Invalid credentials")
 
             user = self._user_repository.get_by_id(user_password.id)

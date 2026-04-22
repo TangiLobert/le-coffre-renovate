@@ -441,3 +441,36 @@ async def test_given_locked_email_when_logging_in_should_not_record_a_new_failed
 
     assert login_lockout_gateway.failed_login_calls == []
     assert login_lockout_gateway.successful_login_calls == []
+
+
+@pytest.mark.asyncio
+async def test_given_unknown_email_when_logging_in_should_record_failed_login(
+    use_case: PasswordLoginUseCase,
+    login_lockout_gateway: FakeLoginLockoutGateway,
+):
+    command = AdminLoginCommand(email="nobody@lecoffre.com", password="any")
+
+    with pytest.raises(AdminNotFoundException):
+        await use_case.execute(command)
+
+    assert login_lockout_gateway.failed_login_calls == ["nobody@lecoffre.com"]
+    assert login_lockout_gateway.successful_login_calls == []
+
+
+@pytest.mark.asyncio
+async def test_given_wrong_password_when_logging_in_should_record_failed_login(
+    use_case: PasswordLoginUseCase,
+    user_password_repository: FakeUserPasswordRepository,
+    login_lockout_gateway: FakeLoginLockoutGateway,
+):
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    email = "admin@lecoffre.com"
+    user_password_repository.save(
+        UserPassword(id=user_id, email=email, password_hash=b"hashed(correct)", display_name="Admin User"),
+    )
+
+    with pytest.raises(InvalidCredentialsException):
+        await use_case.execute(AdminLoginCommand(email=email, password="wrong"))
+
+    assert login_lockout_gateway.failed_login_calls == [email]
+    assert login_lockout_gateway.successful_login_calls == []
