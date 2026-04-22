@@ -14,9 +14,12 @@ from config import (
     get_jwt_secret_key,
     get_login_lockout_seconds,
     get_login_max_failed_attempts,
-    get_rate_limit_api_max_requests,
     get_rate_limit_auth_max_requests,
     get_rate_limit_enabled,
+    get_rate_limit_trusted_proxies,
+    get_rate_limit_trusted_proxy_hops,
+    get_rate_limit_unauth_max_requests,
+    get_rate_limit_user_max_requests,
     get_rate_limit_window_seconds,
 )
 from fastapi import FastAPI, HTTPException, Request
@@ -185,9 +188,12 @@ async def lifespan(app: FastAPI):
     # Rate limiter (in-memory sliding window)
     rate_limiter = InMemoryRateLimiter()
     app.state.rate_limiter = rate_limiter
+    app.state.rate_limit_user_max_requests = get_rate_limit_user_max_requests()
+    app.state.rate_limit_unauth_max_requests = get_rate_limit_unauth_max_requests()
     app.state.rate_limit_auth_max_requests = get_rate_limit_auth_max_requests()
-    app.state.rate_limit_api_max_requests = get_rate_limit_api_max_requests()
     app.state.rate_limit_window_seconds = get_rate_limit_window_seconds()
+    app.state.rate_limit_trusted_proxies = get_rate_limit_trusted_proxies()
+    app.state.rate_limit_trusted_proxy_hops = get_rate_limit_trusted_proxy_hops()
 
     # Login lockout (per-email, in-memory)
     login_lockout_gateway = InMemoryLoginLockoutGateway(
