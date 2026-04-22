@@ -1,9 +1,13 @@
 import asyncio
 import logging
 
+from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
+from shared_kernel.application.tracing import TracedUseCase
+
 from identity_access_management_context.application.commands import AdminLoginCommand
 from identity_access_management_context.application.gateways import (
     AdminEventRepository,
+    LoginLockoutGateway,
     PasswordHashingGateway,
     TokenGateway,
     UserPasswordRepository,
@@ -18,8 +22,6 @@ from identity_access_management_context.domain.exceptions import (
     AdminNotFoundException,
     InvalidCredentialsException,
 )
-from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
-from shared_kernel.application.tracing import TracedUseCase
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,7 @@ class PasswordLoginUseCase(TracedUseCase):
         time_provider: TimeGateway,
         event_publisher: DomainEventPublisher,
         admin_event_repository: AdminEventRepository,
+        login_lockout_gateway: LoginLockoutGateway,
     ):
         self._user_password_repository = user_password_repository
         self._user_repository = user_repository
@@ -42,6 +45,7 @@ class PasswordLoginUseCase(TracedUseCase):
         self._time_provider = time_provider
         self._event_publisher = event_publisher
         self._admin_event_repository = admin_event_repository
+        self._login_lockout_gateway = login_lockout_gateway
 
     async def execute(self, command: AdminLoginCommand) -> AdminLoginResponse:
         # DB reads and bcrypt verification are synchronous and blocking — run
