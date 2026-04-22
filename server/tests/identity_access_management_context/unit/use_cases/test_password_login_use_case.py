@@ -474,3 +474,53 @@ async def test_given_wrong_password_when_logging_in_should_record_failed_login(
 
     assert login_lockout_gateway.failed_login_calls == [email]
     assert login_lockout_gateway.successful_login_calls == []
+
+
+@pytest.mark.asyncio
+async def test_given_correct_credentials_when_logging_in_should_record_successful_login(
+    use_case: PasswordLoginUseCase,
+    user_password_repository: FakeUserPasswordRepository,
+    user_repository: FakeUserRepository,
+    token_gateway: FakeTokenGateway,
+    login_lockout_gateway: FakeLoginLockoutGateway,
+):
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    email = "admin@lecoffre.com"
+    user_password_repository.save(
+        UserPassword(id=user_id, email=email, password_hash=b"hashed(secure123!)", display_name="Admin User"),
+    )
+    user_repository.save(User(id=user_id, username="admin", email=email, name="Admin User", roles=[ADMIN_ROLE]))
+    token_gateway.set_unique_jwt_part("x")
+
+    await use_case.execute(AdminLoginCommand(email=email, password="secure123!"))
+
+    assert login_lockout_gateway.successful_login_calls == [email]
+    assert login_lockout_gateway.failed_login_calls == []
+
+
+@pytest.mark.asyncio
+async def test_given_successful_login_when_previously_locked_state_exists_should_clear_lockout(
+    use_case: PasswordLoginUseCase,
+    user_password_repository: FakeUserPasswordRepository,
+    user_repository: FakeUserRepository,
+    token_gateway: FakeTokenGateway,
+    login_lockout_gateway: FakeLoginLockoutGateway,
+):
+    """After a successful login the gateway must forget any residual failure
+    state for this email — expired-but-uncleared entries are cleared as part of
+    the success contract."""
+    user_id = UUID("7d742e0e-bb76-4728-83ef-8d546d7c62e5")
+    email = "admin@lecoffre.com"
+    user_password_repository.save(
+        UserPassword(id=user_id, email=email, password_hash=b"hashed(secure123!)", display_name="Admin User"),
+    )
+    user_repository.save(User(id=user_id, username="admin", email=email, name="Admin User", roles=[ADMIN_ROLE]))
+    token_gateway.set_unique_jwt_part("x")
+    # Seed an expired residual lock (retry_after=0 → is_locked returns None but
+    # the entry still exists in the fake's internal state).
+    login_lockout_gateway.force_lock(email, retry_after=0)
+
+    await use_case.execute(AdminLoginCommand(email=email, password="secure123!"))
+
+    assert login_lockout_gateway.is_locked(email) is None
+    assert login_lockout_gateway.successful_login_calls == [email]

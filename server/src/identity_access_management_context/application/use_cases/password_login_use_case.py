@@ -104,6 +104,8 @@ class PasswordLoginUseCase(TracedUseCase):
 
         user_password, roles = await asyncio.to_thread(_lookup_and_verify)
 
+        self._login_lockout_gateway.record_successful_login(user_password.email)
+
         token = await self._token_gateway.generate_token(
             user_id=user_password.id,
             email=user_password.email,
