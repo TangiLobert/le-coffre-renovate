@@ -13,12 +13,16 @@ nearest hop we trust to have written an authentic value.
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Mapping, Protocol
 
 
 class _HasClientAndHeaders(Protocol):
     client: object | None
-    headers: dict[str, str]
+    # Starlette's ``Request.headers`` is a ``Headers`` mapping (case-insensitive,
+    # multi-value-aware), not a plain ``dict[str, str]``.  We only need ``.get``
+    # with a string key returning a string, so a read-only ``Mapping`` describes
+    # exactly the surface we depend on without over-constraining the shape.
+    headers: Mapping[str, str]
 
 
 def resolve_client_ip(

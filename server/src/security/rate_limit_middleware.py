@@ -57,13 +57,19 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     # exempting them prevents the normal UI from burning through its IP bucket
     # on routine state checks.  Mutating or credential-submitting endpoints
     # obviously stay rate-limited.
+    # Paths are matched against ``request.url.path`` as it enters the middleware,
+    # which is the externally-visible path (the backend runs with
+    # ``root_path="/api"`` but uvicorn does not strip it from the scope), so
+    # every prefix here includes the ``/api`` prefix — including the FastAPI
+    # docs/openapi routes, which are served at ``/api/docs`` and
+    # ``/api/openapi.json`` in this deployment.
     EXEMPT_PREFIXES: tuple[str, ...] = (
         "/api/health",
         "/api/vault/status",
         "/api/auth/sso/url",
         "/api/auth/sso/is-configured",
-        "/docs",
-        "/openapi",
+        "/api/docs",
+        "/api/openapi",
     )
 
     async def dispatch(self, request: Request, call_next):

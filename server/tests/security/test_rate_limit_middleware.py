@@ -128,9 +128,11 @@ def test_given_exempt_api_path_when_dispatching_should_pass_through(client: Test
 
 
 def test_given_docs_or_openapi_path_when_dispatching_should_pass_through(client: TestClient):
+    # Deployed paths are /api/docs and /api/openapi.json because FastAPI runs
+    # with root_path="/api" and nginx preserves the prefix on proxy.
     for _ in range(20):
-        assert client.get("/docs").status_code != 429
-        assert client.get("/openapi.json").status_code != 429
+        assert client.get("/api/docs").status_code != 429
+        assert client.get("/api/openapi.json").status_code != 429
 
 
 def test_given_non_api_path_when_dispatching_should_pass_through():
