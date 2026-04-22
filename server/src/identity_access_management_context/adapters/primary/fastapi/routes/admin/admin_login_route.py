@@ -1,14 +1,14 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response
-from pydantic import BaseModel
-
 from config import (
     get_cookie_secure_setting,
     get_jwt_access_token_expiration_seconds,
     get_jwt_refresh_token_expiration_seconds,
 )
+from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import BaseModel
+
 from identity_access_management_context.adapters.primary.fastapi.app_dependencies import (
     get_password_login_usecase,
 )
@@ -17,6 +17,7 @@ from identity_access_management_context.application.use_cases import (
     PasswordLoginUseCase,
 )
 from identity_access_management_context.domain.exceptions import (
+    AccountLockedException,
     AdminNotFoundException,
     InvalidCredentialsException,
 )
@@ -101,6 +102,12 @@ async def admin_login(
             message="Login successful",
         )
 
+    except AccountLockedException as e:
+        raise HTTPException(
+            status_code=401,
+            detail=str(e),
+            headers={"Retry-After": str(e.retry_after_seconds)},
+        ) from e
     except (InvalidCredentialsException, AdminNotFoundException) as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
     except Exception as e:

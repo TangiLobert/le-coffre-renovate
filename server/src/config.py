@@ -81,3 +81,16 @@ def get_rate_limit_api_max_requests() -> int:
 def get_rate_limit_window_seconds() -> int:
     """Sliding window duration in seconds. Default 60 (1 minute)."""
     return int(os.environ.get("RATE_LIMIT_WINDOW_SECONDS", "60"))
+
+
+# ── Login Lockout ────────────────────────────────────────────────
+
+
+def get_login_max_failed_attempts() -> int:
+    """Consecutive failed login attempts before an account is locked. Default 5."""
+    return int(os.environ.get("LOGIN_MAX_FAILED_ATTEMPTS", "5"))
+
+
+def get_login_lockout_seconds() -> int:
+    """Duration in seconds an account stays locked after hitting the failure threshold. Default 300."""
+    return int(os.environ.get("LOGIN_LOCKOUT_SECONDS", "300"))

@@ -1,4 +1,11 @@
 from fastapi import Depends
+from password_management_context.adapters.primary.private_api import GroupUsageApi
+from password_management_context.adapters.secondary import (
+    SqlPasswordPermissionsRepository,
+)
+from password_management_context.application.use_cases import IsGroupUsedUseCase
+from shared_kernel.adapters.primary.dependencies import get_session
+from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 from sqlmodel import Session
 from starlette.requests import Request
 
@@ -23,6 +30,7 @@ from identity_access_management_context.application.gateways import (
     GroupMemberRepository,
     GroupRepository,
     GroupUsageGateway,
+    LoginLockoutGateway,
     PasswordHashingGateway,
     SsoConfigurationRepository,
     SsoEncryptionGateway,
@@ -59,13 +67,6 @@ from identity_access_management_context.application.use_cases import (
     UpdateUserPasswordUseCase,
     UpdateUserUseCase,
 )
-from password_management_context.adapters.primary.private_api import GroupUsageApi
-from password_management_context.adapters.secondary import (
-    SqlPasswordPermissionsRepository,
-)
-from password_management_context.application.use_cases import IsGroupUsedUseCase
-from shared_kernel.adapters.primary.dependencies import get_session
-from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 
 
 def get_event_publisher(request: Request) -> DomainEventPublisher:
@@ -244,6 +245,10 @@ def get_get_user_me_usecase(
 
 
 # Authentication Use Cases
+def get_login_lockout_gateway(request: Request) -> LoginLockoutGateway:
+    return request.app.state.login_lockout_gateway
+
+
 def get_password_login_usecase(
     user_password_repository: UserPasswordRepository = Depends(get_user_password_repository),
     user_repository: UserRepository = Depends(get_user_repository),
@@ -252,6 +257,7 @@ def get_password_login_usecase(
     time_provider: TimeGateway = Depends(get_time_provider),
     event_publisher: DomainEventPublisher = Depends(get_event_publisher),
     admin_event_repository: AdminEventRepository = Depends(get_admin_event_repository),
+    login_lockout_gateway: LoginLockoutGateway = Depends(get_login_lockout_gateway),
 ):
     return PasswordLoginUseCase(
         user_password_repository,
@@ -261,6 +267,7 @@ def get_password_login_usecase(
         time_provider,
         event_publisher,
         admin_event_repository,
+        login_lockout_gateway,
     )
 
 

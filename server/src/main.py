@@ -4,33 +4,23 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from alembic.config import Config
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
-from sqlalchemy import text
-from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import Session, create_engine
-from tenacity import (
-    before_sleep_log,
-    retry,
-    retry_if_exception_type,
-    stop_after_delay,
-    wait_exponential_jitter,
-)
-
 from alembic import command
+from alembic.config import Config
 from config import (
     get_database_url,
     get_jwt_access_token_expiration_seconds,
     get_jwt_algorithm,
     get_jwt_refresh_token_expiration_seconds,
     get_jwt_secret_key,
+    get_login_lockout_seconds,
+    get_login_max_failed_attempts,
     get_rate_limit_api_max_requests,
     get_rate_limit_auth_max_requests,
     get_rate_limit_enabled,
     get_rate_limit_window_seconds,
 )
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
     get_group_management_router,
@@ -38,6 +28,7 @@ from identity_access_management_context.adapters.primary.fastapi.routes import (
 )
 from identity_access_management_context.adapters.secondary import (
     BcryptHashingGateway,
+    InMemoryLoginLockoutGateway,
     JwtTokenGateway,
     OAuth2SsoGateway,
     PrivateApiSsoEncryptionGateway,
@@ -63,6 +54,17 @@ from shared_kernel.adapters.primary.request_id_middleware import (
 from shared_kernel.adapters.secondary import (
     InMemoryDomainEventPublisher,
     UtcTimeGateway,
+)
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session, create_engine
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_delay,
+    wait_exponential_jitter,
 )
 from vault_management_context.adapters.primary.fastapi.routes import (
     get_vault_management_router,
@@ -186,6 +188,13 @@ async def lifespan(app: FastAPI):
     app.state.rate_limit_auth_max_requests = get_rate_limit_auth_max_requests()
     app.state.rate_limit_api_max_requests = get_rate_limit_api_max_requests()
     app.state.rate_limit_window_seconds = get_rate_limit_window_seconds()
+
+    # Login lockout (per-email, in-memory)
+    login_lockout_gateway = InMemoryLoginLockoutGateway(
+        max_failures=get_login_max_failed_attempts(),
+        lockout_seconds=get_login_lockout_seconds(),
+    )
+    app.state.login_lockout_gateway = login_lockout_gateway
 
     db_url = get_database_url()
     db_type = "postgresql" if db_url.startswith("postgresql") else "sqlite"
