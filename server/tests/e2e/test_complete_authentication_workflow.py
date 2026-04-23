@@ -11,6 +11,7 @@ This test covers the entire authentication system in one comprehensive workflow:
 7. Token validation with protected endpoints
 """
 
+import time
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -545,21 +546,10 @@ async def test_complete_authentication_workflow(
     assert "Retry-After" not in other_response.headers
     print("✅ Per-email isolation confirmed at the HTTP layer")
 
-    # Step 7.4: the lockout eventually releases. Trip a lockout on the session
-    # admin (registered in PHASE 1), wait past LOGIN_LOCKOUT_SECONDS (set to 1
-    # in tests/conftest.py), then confirm the correct password logs in again
-    # with 200 + cookies. Reusing the session admin avoids /auth/register-admin
-    # conflicts (it's first-admin-only); nothing after this phase depends on
-    # admin@example.com so locking it transiently is safe.
-    #
-    # This is the only step that proves the gateway's expiry path reaches the
-    # HTTP layer end-to-end. The integration test exercises the gateway in
-    # isolation, but a regression in the use case's ordering (e.g. forgetting
-    # to call is_locked before _lookup_and_verify after a refactor) would
-    # only surface here.
+    # Step 7.4: the lockout eventually releases. Reuses the session admin
+    # because /auth/register-admin is first-admin-only; transient lockout on
+    # admin@example.com is safe — nothing after PHASE 7 depends on it.
     print("\n🔒 Step 7.4: Lockout must release after LOGIN_LOCKOUT_SECONDS elapses...")
-    import time
-
     release_probe_email = "admin@example.com"
     release_probe_password = "securepassword123"
 

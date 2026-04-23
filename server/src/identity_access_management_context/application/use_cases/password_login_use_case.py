@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime
 
 from identity_access_management_context.application.commands import AdminLoginCommand
 from identity_access_management_context.application.gateways import (
@@ -139,7 +140,7 @@ class PasswordLoginUseCase(TracedUseCase):
             email=user_password.email,
         )
 
-    def _try_record_failed_login(self, email: str, now) -> None:
+    def _try_record_failed_login(self, email: str, now: datetime) -> None:
         """Increment the lockout counter, swallowing gateway outages.
 
         A broken counter write (future SQL/Redis adapter under load) must not
@@ -161,14 +162,7 @@ class PasswordLoginUseCase(TracedUseCase):
             )
 
     def _try_record_successful_login(self, email: str) -> None:
-        """Clear the lockout counter, swallowing gateway outages.
-
-        Denying tokens on a counter-reset outage would convert a lockout-store
-        blip into a full login outage for users who just typed the right
-        password. The worst case from swallowing is a stale failure count —
-        the user may hit the lockout a few attempts sooner on their next wrong
-        password, which is the conservative direction.
-        """
+        """Clear the lockout counter; swallow outages so a counter blip doesn't gate token issuance."""
         try:
             self._login_lockout_gateway.record_successful_login(email)
         except Exception:  # noqa: BLE001 - availability over strict counter consistency here
