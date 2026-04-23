@@ -372,26 +372,37 @@ def test_given_untrusted_peer_when_dispatching_should_ignore_xff():
 # ── Defensive app.state validation ────────────────────────────────────
 
 
+@pytest.mark.parametrize(
+    "missing_key",
+    [
+        "rate_limiter",
+        "rate_limit_user_max_requests",
+        "rate_limit_unauth_max_requests",
+        "rate_limit_auth_max_requests",
+        "rate_limit_window_seconds",
+        "rate_limit_trusted_proxies",
+        "rate_limit_trusted_proxy_hops",
+        "time_provider",
+    ],
+)
 def test_given_app_state_missing_required_key_when_dispatching_should_log_critical_and_500(
-    caplog: pytest.LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture, missing_key: str
 ):
-    """If a future refactor renames a rate_limit_* attr on app.state and forgets
-    one call site, EVERY /api/* request would generate a generic 500 — no
-    dedicated signal identifies this as "rate limiter misconfigured" rather
-    than "some other 500". Pin the CRITICAL log so SRE has a unique alertable
-    string and so the failure mode can't be silently absorbed into generic
-    error-rate graphs."""
+    """If a future refactor renames an app.state attr and forgets one call site,
+    EVERY /api/* request would generate a generic 500 — no dedicated signal
+    distinguishes "rate limiter misconfigured" from "some other 500". Pin the
+    CRITICAL log for every required key so a refactor that moves one read
+    outside the try/except is caught here rather than at runtime."""
     app = _create_app(user_max=10, unauth_max=5, auth_max=3, window=60)
-    # Simulate a lifespan wiring regression: one required key went missing.
-    del app.state.rate_limit_window_seconds
+    delattr(app.state, missing_key)
 
     with caplog.at_level("CRITICAL", logger="security.rate_limit_middleware"):
         with TestClient(app, raise_server_exceptions=False) as c:
             r = c.get("/api/passwords")
 
-    assert r.status_code >= 500, "Missing state must fail-closed, not silently pass traffic"
+    assert r.status_code >= 500, f"Missing {missing_key} must fail-closed, not silently pass traffic"
     critical = [rec for rec in caplog.records if rec.levelname == "CRITICAL"]
-    assert critical, "Missing rate-limit state must log at CRITICAL so ops can alert specifically on it"
+    assert critical, f"Missing {missing_key} must log at CRITICAL so ops can alert specifically on it"
     assert "misconfigured" in critical[0].message.lower() or "rate_limit" in critical[0].message.lower()
 
 
