@@ -83,6 +83,26 @@ def test_given_requests_spanning_window_when_checking_should_apply_sliding_windo
     assert at_61.remaining == 2
 
 
+def test_given_request_at_exact_window_boundary_when_checking_should_evict_oldest_timestamp(
+    limiter: InMemoryRateLimiter,
+):
+    """The eviction condition uses `<=` (equality evicts) so a request at exactly
+    `T0 + window_seconds` releases capacity. If a future refactor tightens to
+    `<` (strict), every caller would experience a 1-second dead zone on every
+    full bucket — subtle and hard to reproduce in manual testing. Pin the
+    boundary behavior so the regression fails loudly here instead."""
+    for _ in range(5):
+        limiter.check("key", max_requests=5, window_seconds=60, now=T0)
+
+    at_boundary = limiter.check("key", max_requests=5, window_seconds=60, now=T0 + timedelta(seconds=60))
+
+    assert at_boundary.is_limited is False, (
+        "A request at exactly T0 + window_seconds must evict the T0 timestamp; "
+        "strict `<` in the eviction check would create a 1-second dead zone at the window edge"
+    )
+    assert at_boundary.remaining == 4
+
+
 def test_given_concurrent_requests_when_checking_should_remain_correct(limiter: InMemoryRateLimiter):
     """Launch many requests in parallel; exactly max_requests must get through and the rest must be blocked."""
 
