@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import pytest
+
 from identity_access_management_context.application.commands import (
     RefreshAccessTokenCommand,
 )
@@ -11,7 +12,6 @@ from identity_access_management_context.domain.entities import User
 from identity_access_management_context.domain.exceptions import (
     InvalidRefreshTokenException,
 )
-
 from tests.shared_kernel.fakes import FakeTimeGateway
 
 from ..fakes import FakeTokenGateway, FakeUserRepository

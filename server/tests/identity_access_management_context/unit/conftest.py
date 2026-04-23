@@ -1,9 +1,9 @@
 from uuid import UUID
 
 import pytest
+
 from identity_access_management_context.application.gateways import SsoUserInfo
 from identity_access_management_context.domain.entities import SsoUser
-
 from tests.fakes import FakeDomainEventPublisher
 from tests.shared_kernel.fakes import FakeTimeGateway
 

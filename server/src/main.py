@@ -4,8 +4,22 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from alembic import command
 from alembic.config import Config
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session, create_engine
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_delay,
+    wait_exponential_jitter,
+)
+
+from alembic import command
 from config import (
     get_database_url,
     get_jwt_access_token_expiration_seconds,
@@ -22,8 +36,6 @@ from config import (
     get_rate_limit_user_max_requests,
     get_rate_limit_window_seconds,
 )
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
 from identity_access_management_context.adapters.primary.fastapi.routes import (
     get_authentication_router,
     get_group_management_router,
@@ -57,17 +69,6 @@ from shared_kernel.adapters.primary.request_id_middleware import (
 from shared_kernel.adapters.secondary import (
     InMemoryDomainEventPublisher,
     UtcTimeGateway,
-)
-from sqlalchemy import text
-from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import Session, create_engine
-from tenacity import (
-    before_sleep_log,
-    retry,
-    retry_if_exception_type,
-    stop_after_delay,
-    wait_exponential_jitter,
 )
 from vault_management_context.adapters.primary.fastapi.routes import (
     get_vault_management_router,

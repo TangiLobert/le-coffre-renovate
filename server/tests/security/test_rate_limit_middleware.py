@@ -6,11 +6,11 @@ from uuid import UUID
 import pytest
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
+from starlette.testclient import TestClient
+
 from identity_access_management_context.application.gateways import Token
 from security.rate_limit_middleware import RateLimitMiddleware
 from security.rate_limiter import InMemoryRateLimiter
-from starlette.testclient import TestClient
-
 from tests.shared_kernel.fakes import FakeTimeGateway
 
 

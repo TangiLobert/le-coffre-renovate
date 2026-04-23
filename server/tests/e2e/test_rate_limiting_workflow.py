@@ -17,6 +17,7 @@ Covered phases:
 
 import pytest
 from conftest import CsrfTestClient
+
 from main import app
 from security.rate_limiter import InMemoryRateLimiter
 

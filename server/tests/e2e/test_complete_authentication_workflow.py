@@ -496,39 +496,52 @@ async def test_complete_authentication_workflow(
     lockout_email = "lockout-probe@example.com"
     lockout_payload = {"email": lockout_email, "password": "irrelevant"}
 
+    # The 401 body is deliberately the same string across every failure mode
+    # (unknown email, wrong password, account locked) so an attacker cannot
+    # enumerate valid addresses by reading response bodies. The lockout signal
+    # is carried exclusively by the Retry-After header.
+    GENERIC_401_DETAIL = "Invalid credentials"
+
     # Step 7.1: five failed logins accumulate toward the lockout threshold (default 5)
-    # without tripping it; every response is a plain "credentials wrong" 401.
+    # without tripping it; every response is the generic 401 shape.
     print("\n🔒 Step 7.1: Exhausting the failure counter with five failed logins...")
     for attempt in range(1, 6):
         response = lockout_client.post("/api/auth/login", json=lockout_payload)
         assert response.status_code == 401, f"Attempt {attempt} status={response.status_code}"
-        assert "locked" not in response.json()["detail"].lower(), (
-            f"Attempt {attempt} unexpectedly reported locked state"
+        assert response.json()["detail"] == GENERIC_401_DETAIL, (
+            f"Attempt {attempt} returned detail={response.json()['detail']!r}; "
+            f"expected the generic {GENERIC_401_DETAIL!r} to avoid leaking account state"
         )
         assert "Retry-After" not in response.headers, f"Attempt {attempt} unexpectedly carried Retry-After"
-    print("✅ Five failed logins accepted as plain 'invalid credentials' 401s")
+    print("✅ Five failed logins return the generic 401 body with no Retry-After")
 
-    # Step 7.2: the sixth attempt flips to the locked-401 shape — same status,
-    # distinct detail substring, and a Retry-After header. The status code stays
-    # 401 to avoid leaking account existence via status alone.
-    print("\n🔒 Step 7.2: Sixth attempt should hit the lockout and carry Retry-After...")
+    # Step 7.2: the sixth attempt trips the lockout. The body must be BYTE-FOR-BYTE
+    # identical to the pre-lockout 401s — the only differentiator is the
+    # Retry-After header (which is not an enumeration oracle because the lockout
+    # gateway records failures for any email, valid or not).
+    print("\n🔒 Step 7.2: Sixth attempt should trip the lockout and surface Retry-After...")
     locked_response = lockout_client.post("/api/auth/login", json=lockout_payload)
     assert locked_response.status_code == 401
-    assert "locked" in locked_response.json()["detail"].lower()
+    assert locked_response.json()["detail"] == GENERIC_401_DETAIL, (
+        f"Locked 401 returned detail={locked_response.json()['detail']!r}; "
+        f"must match the invalid-credentials 401 exactly to avoid username enumeration"
+    )
     assert "Retry-After" in locked_response.headers
     assert int(locked_response.headers["Retry-After"]) > 0
-    print(f"✅ Lockout observed: detail='{locked_response.json()['detail']}'")
-    print(f"   Retry-After={locked_response.headers['Retry-After']}s")
+    print(
+        f"✅ Lockout observed via Retry-After only (body unchanged): Retry-After={locked_response.headers['Retry-After']}s"
+    )
 
     # Step 7.3: the lockout is per-email — a different address from the same
-    # client is still free to authenticate against the invalid-credentials path.
+    # client is still free to authenticate against the invalid-credentials path,
+    # with the same generic body and no Retry-After.
     print("\n🔒 Step 7.3: A different email from the same client is unaffected...")
     other_response = lockout_client.post(
         "/api/auth/login",
         json={"email": "different-user@example.com", "password": "irrelevant"},
     )
     assert other_response.status_code == 401
-    assert "locked" not in other_response.json()["detail"].lower()
+    assert other_response.json()["detail"] == GENERIC_401_DETAIL
     assert "Retry-After" not in other_response.headers
     print("✅ Per-email isolation confirmed at the HTTP layer")
 

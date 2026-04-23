@@ -1,11 +1,4 @@
 from fastapi import Depends
-from password_management_context.adapters.primary.private_api import GroupUsageApi
-from password_management_context.adapters.secondary import (
-    SqlPasswordPermissionsRepository,
-)
-from password_management_context.application.use_cases import IsGroupUsedUseCase
-from shared_kernel.adapters.primary.dependencies import get_session
-from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 from sqlmodel import Session
 from starlette.requests import Request
 
@@ -67,6 +60,13 @@ from identity_access_management_context.application.use_cases import (
     UpdateUserPasswordUseCase,
     UpdateUserUseCase,
 )
+from password_management_context.adapters.primary.private_api import GroupUsageApi
+from password_management_context.adapters.secondary import (
+    SqlPasswordPermissionsRepository,
+)
+from password_management_context.application.use_cases import IsGroupUsedUseCase
+from shared_kernel.adapters.primary.dependencies import get_session
+from shared_kernel.application.gateways import DomainEventPublisher, TimeGateway
 
 
 def get_event_publisher(request: Request) -> DomainEventPublisher:

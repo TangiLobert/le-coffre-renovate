@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from identity_access_management_context.adapters.secondary.in_memory_login_lockout_gateway import (
     InMemoryLoginLockoutGateway,
 )

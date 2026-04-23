@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import pytest
+
 from identity_access_management_context.application.commands import AdminLoginCommand
 from identity_access_management_context.application.use_cases import (
     PasswordLoginUseCase,
@@ -19,7 +20,6 @@ from identity_access_management_context.domain.exceptions import (
     AdminNotFoundException,
     InvalidCredentialsException,
 )
-
 from tests.fakes.fake_domain_event_publisher import FakeDomainEventPublisher
 from tests.shared_kernel.fakes import FakeTimeGateway
 

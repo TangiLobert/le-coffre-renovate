@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from security.rate_limiter import InMemoryRateLimiter
 
 T0 = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)

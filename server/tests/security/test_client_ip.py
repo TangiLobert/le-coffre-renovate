@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+
 from security.client_ip import resolve_client_ip
 
 
