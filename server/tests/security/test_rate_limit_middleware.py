@@ -313,7 +313,11 @@ def test_given_non_login_auth_path_when_dispatching_should_not_consume_auth_floo
         assert c.post("/api/auth/login").status_code == 429
 
 
-def test_given_successful_login_when_dispatching_should_consume_both_floor_and_principal_bucket():
+def test_given_principal_bucket_exhausted_when_logging_in_should_429_even_when_auth_floor_has_capacity():
+    """Login requests consume the principal (unauth/IP) bucket in addition to
+    the auth floor. With a tight unauth bucket and a roomy auth floor, the
+    principal bucket must still catch the third request — otherwise a flood on
+    /auth/login could starve every other /api/* call from the same IP."""
     app = _create_app(user_max=100, unauth_max=2, auth_max=100, login_status_code=401)
     with TestClient(app) as c:
         for _ in range(2):
@@ -321,6 +325,21 @@ def test_given_successful_login_when_dispatching_should_consume_both_floor_and_p
         r = c.post("/api/auth/login")
 
     assert r.status_code == 429
+
+
+def test_given_successful_login_when_auth_floor_exhausted_should_429_even_when_principal_bucket_has_capacity():
+    """The counterpart to the test above: a genuinely successful login
+    (status 200) still consumes the auth floor. With a tight auth_max and a
+    roomy unauth bucket, the third successful login must be refused by the
+    floor — proving the floor is not bypassed when the endpoint returns 2xx."""
+    app = _create_app(user_max=100, unauth_max=100, auth_max=2, login_status_code=200)
+    with TestClient(app) as c:
+        for _ in range(2):
+            assert c.post("/api/auth/login").status_code == 200
+        r = c.post("/api/auth/login")
+
+    assert r.status_code == 429
+    assert int(r.headers["Retry-After"]) > 0
 
 
 # ── X-Forwarded-For ───────────────────────────────────────────────────
