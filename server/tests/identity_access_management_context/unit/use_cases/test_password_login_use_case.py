@@ -432,7 +432,7 @@ def test_given_record_failed_login_raises_when_credentials_are_wrong_should_stil
     assert events[0].reason == "Invalid credentials"
     assert len(admin_event_repository.events) == 1
     # SRE signal: the counter outage surfaced at ERROR with exc_info so Sentry groups them.
-    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.message.lower()]
+    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.getMessage().lower()]
     assert errors, "counter-write failure must log at ERROR so operators can see the outage"
     assert errors[0].exc_info is not None
 
@@ -450,7 +450,7 @@ def test_given_record_failed_login_raises_when_email_is_unknown_should_still_rai
         with pytest.raises(AdminNotFoundException):
             use_case.execute(AdminLoginCommand(email="nobody@lecoffre.com", password="any"))
 
-    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.message.lower()]
+    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.getMessage().lower()]
     assert errors, "counter-write failure must log at ERROR"
 
 
@@ -483,5 +483,5 @@ def test_given_record_successful_login_raises_when_credentials_are_correct_shoul
 
     assert response.admin_id == user_id
     assert response.jwt_token
-    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.message.lower()]
+    errors = [rec for rec in caplog.records if rec.levelname == "ERROR" and "lockout" in rec.getMessage().lower()]
     assert errors, "counter-reset failure must log at ERROR"
