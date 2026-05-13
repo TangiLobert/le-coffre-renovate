@@ -1,0 +1,33 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "group:allNonMajor"
+  ],
+  "prConcurrentLimit": 1,
+  "automerge": false,
+  "automergeType": "pr",
+  "lockFileMaintenance": {
+    "enabled": false
+  },
+  "labels": ["dependencies"],
+  "commitMessagePrefix": "chore(deps):",
+  "packageRules": [
+    {
+      "description": "Ignore les mises à jour majeures",
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Ignore les remplacements de packages (ex: @tsconfig/node22 -> @tsconfig/node24)",
+      "matchUpdateTypes": ["replacement"],
+      "enabled": false
+    },
+    {
+      "description": "Automerge non-major hors v0.x",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": false
+    }
+  ]
+}
