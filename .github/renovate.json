@@ -8,7 +8,7 @@
   "automerge": false,
   "automergeType": "pr",
   "lockFileMaintenance": {
-    "enabled": false
+    "enabled": true
   },
   "labels": ["dependencies"],
   "commitMessagePrefix": "chore(deps):",
