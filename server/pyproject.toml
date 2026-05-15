@@ -34,7 +34,7 @@ monitoring = [
     "opentelemetry-sdk>=1.40.0",
 ]
 sqlite = ["sqlite-utils==3.39"]
-postgres = ["psycopg2==2.9.11", "psycopg[binary]==3.3.3"]
+postgres = ["psycopg2==2.9.12", "psycopg[binary]==3.3.4"]
 
 [tool.pytest.ini_options]
 pythonpath = "src"

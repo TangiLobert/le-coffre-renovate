@@ -21,7 +21,7 @@ services:
   # Reverse proxy — mirrors the Kubernetes ingress (routes /api and /)
   # ---------------------------------------------------------------------------
   proxy:
-    image: nginx:1.27-alpine
+    image: nginx:1.31-alpine
     ports:
       - "80:80"
     volumes:
