@@ -90,7 +90,7 @@ const handleSubmit = async () => {
       },
     })
 
-    if (!response.response.ok) {
+    if (!response.response?.ok) {
       const errorData = response.error as { detail?: string }
       const errorMessage = errorData?.detail || 'Failed to create user'
       toast.add({

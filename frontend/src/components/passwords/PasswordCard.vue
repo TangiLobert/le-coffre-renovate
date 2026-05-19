@@ -405,7 +405,7 @@ const handleDelete = () => {
           path: { password_id: props.password.id },
         })
 
-        if (response.response.ok) {
+        if (response.response?.ok) {
           toast.add({
             severity: 'success',
             summary: 'Deleted',

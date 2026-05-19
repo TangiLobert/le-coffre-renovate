@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Build Backend
 # =============================================================================
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS builder
 
 # Install build dependencies for psycopg2
 RUN apt-get update && apt-get install -y \
@@ -22,7 +22,7 @@ COPY . ./
 # =============================================================================
 # Stage 2: Production Image
 # =============================================================================
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Apply latest security patches, then install runtime dependencies
 RUN apt-get update \

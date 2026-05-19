@@ -47,7 +47,7 @@ const fetchUsers = async () => {
   try {
     const response = await listUsersUsersGet()
 
-    if (response.response.ok && response.data) {
+    if (response.response?.ok && response.data) {
       users.value = response.data
     } else {
       toast.add({
@@ -88,7 +88,7 @@ const handlePromoteConfirmed = async () => {
       path: { user_id: userId },
     })
 
-    if (response.response.ok) {
+    if (response.response?.ok) {
       toast.add({
         severity: 'success',
         summary: 'Success',
@@ -149,7 +149,7 @@ const handleDeleteConfirmed = async () => {
       path: { user_id: userId },
     })
 
-    if (response.response.ok) {
+    if (response.response?.ok) {
       toast.add({
         severity: 'success',
         summary: 'Success',
