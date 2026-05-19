@@ -218,7 +218,7 @@ const handleSubmit = async () => {
         body: updateBody,
       })
 
-      if (!response.response.ok) {
+      if (!response.response?.ok) {
         const errorData = response.error as { detail?: string }
         const errorMessage = errorData?.detail || 'Failed to update password'
         toast.add({
@@ -252,7 +252,7 @@ const handleSubmit = async () => {
         },
       })
 
-      if (!response.response.ok) {
+      if (!response.response?.ok) {
         const errorData = response.error as { detail?: string }
         const errorMessage = errorData?.detail || 'Failed to create password'
         toast.add({

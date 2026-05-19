@@ -128,7 +128,7 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { name },
       })
 
-      if (response.response.ok && response.data) {
+      if (response.response?.ok && response.data) {
         // Invalidate cache to force refresh
         invalidateCache()
         await fetchAllGroups(true)
@@ -152,7 +152,7 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { name },
       })
 
-      if (response.response.ok && response.data) {
+      if (response.response?.ok && response.data) {
         // Invalidate cache to force refresh
         invalidateCache()
         await fetchAllGroups(true)
@@ -176,7 +176,7 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { user_id: userId },
       })
 
-      if (response.response.ok && response.data) {
+      if (response.response?.ok && response.data) {
         return response.data
       } else {
         const errorData = response.error as { detail?: string }
@@ -195,7 +195,7 @@ export const useGroupsStore = defineStore('groups', () => {
         path: { group_id: groupId, user_id: userId },
       })
 
-      if (response.response.ok) {
+      if (response.response?.ok) {
         return response.data
       } else {
         const errorData = response.error as { detail?: string }
@@ -215,7 +215,7 @@ export const useGroupsStore = defineStore('groups', () => {
         body: { user_id: userId },
       })
 
-      if (response.response.ok && response.data) {
+      if (response.response?.ok && response.data) {
         return response.data
       } else {
         const errorData = response.error as { detail?: string }
@@ -234,7 +234,7 @@ export const useGroupsStore = defineStore('groups', () => {
         path: { group_id: groupId },
       })
 
-      if (response.response.ok) {
+      if (response.response?.ok) {
         // Invalidate cache to force refresh
         invalidateCache()
         await fetchAllGroups(true)
