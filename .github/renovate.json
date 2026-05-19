@@ -4,13 +4,9 @@
     "config:recommended",
     "group:allNonMajor"
   ],
-  "prConcurrentLimit": 2,
+  "prConcurrentLimit": 1,
   "automerge": false,
   "automergeType": "pr",
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["at any time"]
-  },
   "labels": ["dependencies"],
   "commitMessagePrefix": "chore(deps):",
   "packageRules": [
